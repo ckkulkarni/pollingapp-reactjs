@@ -1,0 +1,40 @@
+5f4e08e1dd7b6cc8703632e48ecdd7eb
+"use strict";
+
+var __assign = void 0 && (void 0).__assign || function () {
+  __assign = Object.assign || function (t) {
+    for (var s, i = 1, n = arguments.length; i < n; i++) {
+      s = arguments[i];
+      for (var p in s) if (Object.prototype.hasOwnProperty.call(s, p)) t[p] = s[p];
+    }
+    return t;
+  };
+  return __assign.apply(this, arguments);
+};
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+exports.flatten = void 0;
+var defaultOpts = {
+  xml: false,
+  decodeEntities: true
+};
+/** Cheerio default options. */
+exports.default = defaultOpts;
+var xmlModeDefault = {
+  _useHtmlParser2: true,
+  xmlMode: true
+};
+/**
+ * Flatten the options for Cheerio.
+ *
+ * This will set `_useHtmlParser2` to true if `xml` is set to true.
+ *
+ * @param options - The options to flatten.
+ * @returns The flattened options.
+ */
+function flatten(options) {
+  return (options === null || options === void 0 ? void 0 : options.xml) ? typeof options.xml === 'boolean' ? xmlModeDefault : __assign(__assign({}, xmlModeDefault), options.xml) : options !== null && options !== void 0 ? options : undefined;
+}
+exports.flatten = flatten;
+//# sourceMappingURL=data:application/json;charset=utf-8;base64,eyJ2ZXJzaW9uIjozLCJuYW1lcyI6WyJkZWZhdWx0T3B0cyIsInhtbCIsImRlY29kZUVudGl0aWVzIiwiZXhwb3J0cyIsImRlZmF1bHQiLCJ4bWxNb2RlRGVmYXVsdCIsIl91c2VIdG1sUGFyc2VyMiIsInhtbE1vZGUiLCJmbGF0dGVuIiwib3B0aW9ucyIsIl9fYXNzaWduIiwidW5kZWZpbmVkIl0sInNvdXJjZXMiOlsiaHR0cHM6Ly9yYXcuZ2l0aHVidXNlcmNvbnRlbnQuY29tL2NoZWVyaW9qcy9jaGVlcmlvL2QxY2JjNjZkNTMzOTJjZThiZjZjZDAwNjhmNjc1ODM2MzcyZDJiZjMvc3JjL29wdGlvbnMudHMiXSwic291cmNlc0NvbnRlbnQiOltudWxsXSwibWFwcGluZ3MiOiI7Ozs7Ozs7Ozs7Ozs7Ozs7QUFpRkEsSUFBTUEsV0FBVyxHQUFtQjtFQUNsQ0MsR0FBRyxFQUFFLEtBQUs7RUFDVkMsY0FBYyxFQUFFO0NBQ2pCO0FBRUQ7QUFDQUMsT0FBQSxDQUFBQyxPQUFBLEdBQWVKLFdBQVc7QUFFMUIsSUFBTUssY0FBYyxHQUFvQjtFQUN0Q0MsZUFBZSxFQUFFLElBQUk7RUFDckJDLE9BQU8sRUFBRTtDQUNWO0FBRUQ7Ozs7Ozs7O0FBUUEsU0FBZ0JDLE9BQU9BLENBQ3JCQyxPQUErQjtFQUUvQixPQUFPLENBQUFBLE9BQU8sYUFBUEEsT0FBTyx1QkFBUEEsT0FBTyxDQUFFUixHQUFHLElBQ2YsT0FBT1EsT0FBTyxDQUFDUixHQUFHLEtBQUssU0FBUyxHQUM5QkksY0FBYyxHQUNmSyxRQUFBLENBQUFBLFFBQUEsS0FBTUwsY0FBYyxHQUFLSSxPQUFPLENBQUNSLEdBQUcsQ0FBRSxHQUN2Q1EsT0FBTyxhQUFQQSxPQUFPLGNBQVBBLE9BQU8sR0FBSUUsU0FBUztBQUMxQjtBQVJBUixPQUFBLENBQUFLLE9BQUEsR0FBQUEsT0FBQSJ9

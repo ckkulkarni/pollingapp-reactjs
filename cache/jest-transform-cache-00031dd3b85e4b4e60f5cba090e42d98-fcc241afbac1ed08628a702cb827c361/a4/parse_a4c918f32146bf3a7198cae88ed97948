@@ -1,0 +1,80 @@
+a49c07a13ec4d9d6709e4424b8ccfdab
+"use strict";
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+exports.update = exports.getParse = void 0;
+var domutils_1 = require("domutils");
+var domhandler_1 = require("domhandler");
+/**
+ * Get the parse function with options.
+ *
+ * @param parser - The parser function.
+ * @returns The parse function with options.
+ */
+function getParse(parser) {
+  /**
+   * Parse a HTML string or a node.
+   *
+   * @param content - The HTML string or node.
+   * @param options - The parser options.
+   * @param isDocument - If `content` is a document.
+   * @param context - The context node in the DOM tree.
+   * @returns The parsed document node.
+   */
+  return function parse(content, options, isDocument, context) {
+    if (typeof Buffer !== 'undefined' && Buffer.isBuffer(content)) {
+      content = content.toString();
+    }
+    if (typeof content === 'string') {
+      return parser(content, options, isDocument, context);
+    }
+    var doc = content;
+    if (!Array.isArray(doc) && (0, domhandler_1.isDocument)(doc)) {
+      // If `doc` is already a root, just return it
+      return doc;
+    }
+    // Add conent to new root element
+    var root = new domhandler_1.Document([]);
+    // Update the DOM using the root
+    update(doc, root);
+    return root;
+  };
+}
+exports.getParse = getParse;
+/**
+ * Update the dom structure, for one changed layer.
+ *
+ * @param newChilds - The new children.
+ * @param parent - The new parent.
+ * @returns The parent node.
+ */
+function update(newChilds, parent) {
+  // Normalize
+  var arr = Array.isArray(newChilds) ? newChilds : [newChilds];
+  // Update parent
+  if (parent) {
+    parent.children = arr;
+  } else {
+    parent = null;
+  }
+  // Update neighbors
+  for (var i = 0; i < arr.length; i++) {
+    var node = arr[i];
+    // Cleanly remove existing nodes from their previous structures.
+    if (node.parent && node.parent.children !== arr) {
+      (0, domutils_1.removeElement)(node);
+    }
+    if (parent) {
+      node.prev = arr[i - 1] || null;
+      node.next = arr[i + 1] || null;
+    } else {
+      node.prev = node.next = null;
+    }
+    node.parent = parent;
+  }
+  return parent;
+}
+exports.update = update;
+//# sourceMappingURL=data:application/json;charset=utf-8;base64,eyJ2ZXJzaW9uIjozLCJuYW1lcyI6WyJkb211dGlsc18xIiwicmVxdWlyZSIsImRvbWhhbmRsZXJfMSIsImdldFBhcnNlIiwicGFyc2VyIiwicGFyc2UiLCJjb250ZW50Iiwib3B0aW9ucyIsImlzRG9jdW1lbnQiLCJjb250ZXh0IiwiQnVmZmVyIiwiaXNCdWZmZXIiLCJ0b1N0cmluZyIsImRvYyIsIkFycmF5IiwiaXNBcnJheSIsInJvb3QiLCJEb2N1bWVudCIsInVwZGF0ZSIsImV4cG9ydHMiLCJuZXdDaGlsZHMiLCJwYXJlbnQiLCJhcnIiLCJjaGlsZHJlbiIsImkiLCJsZW5ndGgiLCJub2RlIiwicmVtb3ZlRWxlbWVudCIsInByZXYiLCJuZXh0Il0sInNvdXJjZXMiOlsiaHR0cHM6Ly9yYXcuZ2l0aHVidXNlcmNvbnRlbnQuY29tL2NoZWVyaW9qcy9jaGVlcmlvL2QxY2JjNjZkNTMzOTJjZThiZjZjZDAwNjhmNjc1ODM2MzcyZDJiZjMvc3JjL3BhcnNlLnRzIl0sInNvdXJjZXNDb250ZW50IjpbbnVsbF0sIm1hcHBpbmdzIjoiOzs7Ozs7QUFBQSxJQUFBQSxVQUFBLEdBQUFDLE9BQUE7QUFDQSxJQUFBQyxZQUFBLEdBQUFELE9BQUE7QUFRQTs7Ozs7O0FBTUEsU0FBZ0JFLFFBQVFBLENBQ3RCQyxNQUthO0VBRWI7Ozs7Ozs7OztFQVNBLE9BQU8sU0FBU0MsS0FBS0EsQ0FDbkJDLE9BQXlELEVBQ3pEQyxPQUF3QixFQUN4QkMsVUFBbUIsRUFDbkJDLE9BQTBCO0lBRTFCLElBQUksT0FBT0MsTUFBTSxLQUFLLFdBQVcsSUFBSUEsTUFBTSxDQUFDQyxRQUFRLENBQUNMLE9BQU8sQ0FBQyxFQUFFO01BQzdEQSxPQUFPLEdBQUdBLE9BQU8sQ0FBQ00sUUFBUSxFQUFFOztJQUc5QixJQUFJLE9BQU9OLE9BQU8sS0FBSyxRQUFRLEVBQUU7TUFDL0IsT0FBT0YsTUFBTSxDQUFDRSxPQUFPLEVBQUVDLE9BQU8sRUFBRUMsVUFBVSxFQUFFQyxPQUFPLENBQUM7O0lBR3RELElBQU1JLEdBQUcsR0FBR1AsT0FBeUM7SUFFckQsSUFBSSxDQUFDUSxLQUFLLENBQUNDLE9BQU8sQ0FBQ0YsR0FBRyxDQUFDLElBQUksSUFBQVgsWUFBQSxDQUFBTSxVQUFlLEVBQUNLLEdBQUcsQ0FBQyxFQUFFO01BQy9DO01BQ0EsT0FBT0EsR0FBRzs7SUFHWjtJQUNBLElBQU1HLElBQUksR0FBRyxJQUFJZCxZQUFBLENBQUFlLFFBQVEsQ0FBQyxFQUFFLENBQUM7SUFFN0I7SUFDQUMsTUFBTSxDQUFDTCxHQUFHLEVBQUVHLElBQUksQ0FBQztJQUVqQixPQUFPQSxJQUFJO0VBQ2IsQ0FBQztBQUNIO0FBOUNBRyxPQUFBLENBQUFoQixRQUFBLEdBQUFBLFFBQUE7QUFnREE7Ozs7Ozs7QUFPQSxTQUFnQmUsTUFBTUEsQ0FDcEJFLFNBQThCLEVBQzlCQyxNQUF5QjtFQUV6QjtFQUNBLElBQU1DLEdBQUcsR0FBR1IsS0FBSyxDQUFDQyxPQUFPLENBQUNLLFNBQVMsQ0FBQyxHQUFHQSxTQUFTLEdBQUcsQ0FBQ0EsU0FBUyxDQUFDO0VBRTlEO0VBQ0EsSUFBSUMsTUFBTSxFQUFFO0lBQ1ZBLE1BQU0sQ0FBQ0UsUUFBUSxHQUFHRCxHQUFHO0dBQ3RCLE1BQU07SUFDTEQsTUFBTSxHQUFHLElBQUk7O0VBR2Y7RUFDQSxLQUFLLElBQUlHLENBQUMsR0FBRyxDQUFDLEVBQUVBLENBQUMsR0FBR0YsR0FBRyxDQUFDRyxNQUFNLEVBQUVELENBQUMsRUFBRSxFQUFFO0lBQ25DLElBQU1FLElBQUksR0FBR0osR0FBRyxDQUFDRSxDQUFDLENBQUM7SUFFbkI7SUFDQSxJQUFJRSxJQUFJLENBQUNMLE1BQU0sSUFBSUssSUFBSSxDQUFDTCxNQUFNLENBQUNFLFFBQVEsS0FBS0QsR0FBRyxFQUFFO01BQy9DLElBQUF0QixVQUFBLENBQUEyQixhQUFhLEVBQUNELElBQUksQ0FBQzs7SUFHckIsSUFBSUwsTUFBTSxFQUFFO01BQ1ZLLElBQUksQ0FBQ0UsSUFBSSxHQUFHTixHQUFHLENBQUNFLENBQUMsR0FBRyxDQUFDLENBQUMsSUFBSSxJQUFJO01BQzlCRSxJQUFJLENBQUNHLElBQUksR0FBR1AsR0FBRyxDQUFDRSxDQUFDLEdBQUcsQ0FBQyxDQUFDLElBQUksSUFBSTtLQUMvQixNQUFNO01BQ0xFLElBQUksQ0FBQ0UsSUFBSSxHQUFHRixJQUFJLENBQUNHLElBQUksR0FBRyxJQUFJOztJQUc5QkgsSUFBSSxDQUFDTCxNQUFNLEdBQUdBLE1BQU07O0VBR3RCLE9BQU9BLE1BQU07QUFDZjtBQWxDQUYsT0FBQSxDQUFBRCxNQUFBLEdBQUFBLE1BQUEifQ==

@@ -1,0 +1,69 @@
+5c0308f257f38fb710b5241e441102b8
+"use strict";
+
+var __spreadArray = void 0 && (void 0).__spreadArray || function (to, from, pack) {
+  if (pack || arguments.length === 2) for (var i = 0, l = from.length, ar; i < l; i++) {
+    if (ar || !(i in from)) {
+      if (!ar) ar = Array.prototype.slice.call(from, 0, i);
+      ar[i] = from[i];
+    }
+  }
+  return to.concat(ar || Array.prototype.slice.call(from));
+};
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+exports.renderWithParse5 = exports.parseWithParse5 = void 0;
+var domhandler_1 = require("domhandler");
+var parse5_1 = require("parse5");
+var parse5_htmlparser2_tree_adapter_1 = require("parse5-htmlparser2-tree-adapter");
+/**
+ * Parse the content with `parse5` in the context of the given `ParentNode`.
+ *
+ * @param content - The content to parse.
+ * @param options - A set of options to use to parse.
+ * @param isDocument - Whether to parse the content as a full HTML document.
+ * @param context - The context in which to parse the content.
+ * @returns The parsed content.
+ */
+function parseWithParse5(content, options, isDocument, context) {
+  var opts = {
+    scriptingEnabled: typeof options.scriptingEnabled === 'boolean' ? options.scriptingEnabled : true,
+    treeAdapter: parse5_htmlparser2_tree_adapter_1.adapter,
+    sourceCodeLocationInfo: options.sourceCodeLocationInfo
+  };
+  return isDocument ? (0, parse5_1.parse)(content, opts) : (0, parse5_1.parseFragment)(context, content, opts);
+}
+exports.parseWithParse5 = parseWithParse5;
+var renderOpts = {
+  treeAdapter: parse5_htmlparser2_tree_adapter_1.adapter
+};
+/**
+ * Renders the given DOM tree with `parse5` and returns the result as a string.
+ *
+ * @param dom - The DOM tree to render.
+ * @returns The rendered document.
+ */
+function renderWithParse5(dom) {
+  var _a;
+  /*
+   * `dom-serializer` passes over the special "root" node and renders the
+   * node's children in its place. To mimic this behavior with `parse5`, an
+   * equivalent operation must be applied to the input array.
+   */
+  var nodes = 'length' in dom ? dom : [dom];
+  for (var index = 0; index < nodes.length; index += 1) {
+    var node = nodes[index];
+    if ((0, domhandler_1.isDocument)(node)) {
+      (_a = Array.prototype.splice).call.apply(_a, __spreadArray([nodes, index, 1], node.children, false));
+    }
+  }
+  var result = '';
+  for (var index = 0; index < nodes.length; index += 1) {
+    var node = nodes[index];
+    result += (0, parse5_1.serializeOuter)(node, renderOpts);
+  }
+  return result;
+}
+exports.renderWithParse5 = renderWithParse5;
+//# sourceMappingURL=data:application/json;charset=utf-8;base64,eyJ2ZXJzaW9uIjozLCJuYW1lcyI6WyJkb21oYW5kbGVyXzEiLCJyZXF1aXJlIiwicGFyc2U1XzEiLCJwYXJzZTVfaHRtbHBhcnNlcjJfdHJlZV9hZGFwdGVyXzEiLCJwYXJzZVdpdGhQYXJzZTUiLCJjb250ZW50Iiwib3B0aW9ucyIsImlzRG9jdW1lbnQiLCJjb250ZXh0Iiwib3B0cyIsInNjcmlwdGluZ0VuYWJsZWQiLCJ0cmVlQWRhcHRlciIsImFkYXB0ZXIiLCJzb3VyY2VDb2RlTG9jYXRpb25JbmZvIiwicGFyc2UiLCJwYXJzZUZyYWdtZW50IiwiZXhwb3J0cyIsInJlbmRlck9wdHMiLCJyZW5kZXJXaXRoUGFyc2U1IiwiZG9tIiwibm9kZXMiLCJpbmRleCIsImxlbmd0aCIsIm5vZGUiLCJfYSIsIkFycmF5IiwicHJvdG90eXBlIiwic3BsaWNlIiwiY2FsbCIsImFwcGx5IiwiX19zcHJlYWRBcnJheSIsImNoaWxkcmVuIiwicmVzdWx0Iiwic2VyaWFsaXplT3V0ZXIiXSwic291cmNlcyI6WyJodHRwczovL3Jhdy5naXRodWJ1c2VyY29udGVudC5jb20vY2hlZXJpb2pzL2NoZWVyaW8vZDFjYmM2NmQ1MzM5MmNlOGJmNmNkMDA2OGY2NzU4MzYzNzJkMmJmMy9zcmMvcGFyc2Vycy9wYXJzZTUtYWRhcHRlci50cyJdLCJzb3VyY2VzQ29udGVudCI6W251bGxdLCJtYXBwaW5ncyI6Ijs7Ozs7Ozs7Ozs7Ozs7O0FBQUEsSUFBQUEsWUFBQSxHQUFBQyxPQUFBO0FBQ0EsSUFBQUMsUUFBQSxHQUFBRCxPQUFBO0FBQ0EsSUFBQUUsaUNBQUEsR0FBQUYsT0FBQTtBQUdBOzs7Ozs7Ozs7QUFTQSxTQUFnQkcsZUFBZUEsQ0FDN0JDLE9BQWUsRUFDZkMsT0FBd0IsRUFDeEJDLFVBQW1CLEVBQ25CQyxPQUEwQjtFQUUxQixJQUFNQyxJQUFJLEdBQUc7SUFDWEMsZ0JBQWdCLEVBQ2QsT0FBT0osT0FBTyxDQUFDSSxnQkFBZ0IsS0FBSyxTQUFTLEdBQ3pDSixPQUFPLENBQUNJLGdCQUFnQixHQUN4QixJQUFJO0lBQ1ZDLFdBQVcsRUFBRVIsaUNBQUEsQ0FBQVMsT0FBa0I7SUFDL0JDLHNCQUFzQixFQUFFUCxPQUFPLENBQUNPO0dBQ2pDO0VBRUQsT0FBT04sVUFBVSxHQUNiLElBQUFMLFFBQUEsQ0FBQVksS0FBYSxFQUFDVCxPQUFPLEVBQUVJLElBQUksQ0FBQyxHQUM1QixJQUFBUCxRQUFBLENBQUFhLGFBQWEsRUFBQ1AsT0FBTyxFQUFFSCxPQUFPLEVBQUVJLElBQUksQ0FBQztBQUMzQztBQWxCQU8sT0FBQSxDQUFBWixlQUFBLEdBQUFBLGVBQUE7QUFvQkEsSUFBTWEsVUFBVSxHQUFHO0VBQUVOLFdBQVcsRUFBRVIsaUNBQUEsQ0FBQVM7QUFBa0IsQ0FBRTtBQUV0RDs7Ozs7O0FBTUEsU0FBZ0JNLGdCQUFnQkEsQ0FBQ0MsR0FBaUM7O0VBQ2hFOzs7OztFQUtBLElBQU1DLEtBQUssR0FBRyxRQUFRLElBQUlELEdBQUcsR0FBR0EsR0FBRyxHQUFHLENBQUNBLEdBQUcsQ0FBQztFQUMzQyxLQUFLLElBQUlFLEtBQUssR0FBRyxDQUFDLEVBQUVBLEtBQUssR0FBR0QsS0FBSyxDQUFDRSxNQUFNLEVBQUVELEtBQUssSUFBSSxDQUFDLEVBQUU7SUFDcEQsSUFBTUUsSUFBSSxHQUFHSCxLQUFLLENBQUNDLEtBQUssQ0FBQztJQUN6QixJQUFJLElBQUFyQixZQUFBLENBQUFPLFVBQVUsRUFBQ2dCLElBQUksQ0FBQyxFQUFFO01BQ3BCLENBQUFDLEVBQUEsR0FBQUMsS0FBSyxDQUFDQyxTQUFTLENBQUNDLE1BQU0sRUFBQ0MsSUFBSSxDQUFBQyxLQUFBLENBQUFMLEVBQUEsRUFBQU0sYUFBQSxFQUFDVixLQUFLLEVBQUVDLEtBQUssRUFBRSxDQUFDLEdBQUtFLElBQUksQ0FBQ1EsUUFBUTs7O0VBSWpFLElBQUlDLE1BQU0sR0FBRyxFQUFFO0VBQ2YsS0FBSyxJQUFJWCxLQUFLLEdBQUcsQ0FBQyxFQUFFQSxLQUFLLEdBQUdELEtBQUssQ0FBQ0UsTUFBTSxFQUFFRCxLQUFLLElBQUksQ0FBQyxFQUFFO0lBQ3BELElBQU1FLElBQUksR0FBR0gsS0FBSyxDQUFDQyxLQUFLLENBQUM7SUFDekJXLE1BQU0sSUFBSSxJQUFBOUIsUUFBQSxDQUFBK0IsY0FBYyxFQUFDVixJQUFJLEVBQUVOLFVBQVUsQ0FBQzs7RUFHNUMsT0FBT2UsTUFBTTtBQUNmO0FBckJBaEIsT0FBQSxDQUFBRSxnQkFBQSxHQUFBQSxnQkFBQSJ9

@@ -1,0 +1,90 @@
+f90932c65a8900a521206fe509a0f711
+"use strict";
+
+var __importDefault = void 0 && (void 0).__importDefault || function (mod) {
+  return mod && mod.__esModule ? mod : {
+    "default": mod
+  };
+};
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+exports.innerText = exports.textContent = exports.getText = exports.getInnerHTML = exports.getOuterHTML = void 0;
+var domhandler_1 = require("domhandler");
+var dom_serializer_1 = __importDefault(require("dom-serializer"));
+var domelementtype_1 = require("domelementtype");
+/**
+ * @category Stringify
+ * @deprecated Use the `dom-serializer` module directly.
+ * @param node Node to get the outer HTML of.
+ * @param options Options for serialization.
+ * @returns `node`'s outer HTML.
+ */
+function getOuterHTML(node, options) {
+  return (0, dom_serializer_1.default)(node, options);
+}
+exports.getOuterHTML = getOuterHTML;
+/**
+ * @category Stringify
+ * @deprecated Use the `dom-serializer` module directly.
+ * @param node Node to get the inner HTML of.
+ * @param options Options for serialization.
+ * @returns `node`'s inner HTML.
+ */
+function getInnerHTML(node, options) {
+  return (0, domhandler_1.hasChildren)(node) ? node.children.map(function (node) {
+    return getOuterHTML(node, options);
+  }).join("") : "";
+}
+exports.getInnerHTML = getInnerHTML;
+/**
+ * Get a node's inner text. Same as `textContent`, but inserts newlines for `<br>` tags.
+ *
+ * @category Stringify
+ * @deprecated Use `textContent` instead.
+ * @param node Node to get the inner text of.
+ * @returns `node`'s inner text.
+ */
+function getText(node) {
+  if (Array.isArray(node)) return node.map(getText).join("");
+  if ((0, domhandler_1.isTag)(node)) return node.name === "br" ? "\n" : getText(node.children);
+  if ((0, domhandler_1.isCDATA)(node)) return getText(node.children);
+  if ((0, domhandler_1.isText)(node)) return node.data;
+  return "";
+}
+exports.getText = getText;
+/**
+ * Get a node's text content.
+ *
+ * @category Stringify
+ * @param node Node to get the text content of.
+ * @returns `node`'s text content.
+ * @see {@link https://developer.mozilla.org/en-US/docs/Web/API/Node/textContent}
+ */
+function textContent(node) {
+  if (Array.isArray(node)) return node.map(textContent).join("");
+  if ((0, domhandler_1.hasChildren)(node) && !(0, domhandler_1.isComment)(node)) {
+    return textContent(node.children);
+  }
+  if ((0, domhandler_1.isText)(node)) return node.data;
+  return "";
+}
+exports.textContent = textContent;
+/**
+ * Get a node's inner text.
+ *
+ * @category Stringify
+ * @param node Node to get the inner text of.
+ * @returns `node`'s inner text.
+ * @see {@link https://developer.mozilla.org/en-US/docs/Web/API/Node/innerText}
+ */
+function innerText(node) {
+  if (Array.isArray(node)) return node.map(innerText).join("");
+  if ((0, domhandler_1.hasChildren)(node) && (node.type === domelementtype_1.ElementType.Tag || (0, domhandler_1.isCDATA)(node))) {
+    return innerText(node.children);
+  }
+  if ((0, domhandler_1.isText)(node)) return node.data;
+  return "";
+}
+exports.innerText = innerText;
+//# sourceMappingURL=data:application/json;charset=utf-8;base64,eyJ2ZXJzaW9uIjozLCJuYW1lcyI6WyJkb21oYW5kbGVyXzEiLCJyZXF1aXJlIiwiZG9tX3NlcmlhbGl6ZXJfMSIsIl9faW1wb3J0RGVmYXVsdCIsImRvbWVsZW1lbnR0eXBlXzEiLCJnZXRPdXRlckhUTUwiLCJub2RlIiwib3B0aW9ucyIsImRlZmF1bHQiLCJleHBvcnRzIiwiZ2V0SW5uZXJIVE1MIiwiaGFzQ2hpbGRyZW4iLCJjaGlsZHJlbiIsIm1hcCIsImpvaW4iLCJnZXRUZXh0IiwiQXJyYXkiLCJpc0FycmF5IiwiaXNUYWciLCJuYW1lIiwiaXNDREFUQSIsImlzVGV4dCIsImRhdGEiLCJ0ZXh0Q29udGVudCIsImlzQ29tbWVudCIsImlubmVyVGV4dCIsInR5cGUiLCJFbGVtZW50VHlwZSIsIlRhZyJdLCJzb3VyY2VzIjpbImh0dHBzOi8vcmF3LmdpdGh1YnVzZXJjb250ZW50LmNvbS9mYjU1L2RvbXV0aWxzL2Y3ZTM1N2I1YzIxMGI2NzMxYzJhNjBlMGI3YjNjZmFhMWY5NmI3MDYvc3JjL3N0cmluZ2lmeS50cyJdLCJzb3VyY2VzQ29udGVudCI6W251bGxdLCJtYXBwaW5ncyI6Ijs7Ozs7Ozs7Ozs7QUFBQSxJQUFBQSxZQUFBLEdBQUFDLE9BQUE7QUFRQSxJQUFBQyxnQkFBQSxHQUFBQyxlQUFBLENBQUFGLE9BQUE7QUFDQSxJQUFBRyxnQkFBQSxHQUFBSCxPQUFBO0FBRUE7Ozs7Ozs7QUFPQSxTQUFnQkksWUFBWUEsQ0FDeEJDLElBQWtDLEVBQ2xDQyxPQUE4QjtFQUU5QixPQUFPLElBQUFMLGdCQUFBLENBQUFNLE9BQVUsRUFBQ0YsSUFBSSxFQUFFQyxPQUFPLENBQUM7QUFDcEM7QUFMQUUsT0FBQSxDQUFBSixZQUFBLEdBQUFBLFlBQUE7QUFPQTs7Ozs7OztBQU9BLFNBQWdCSyxZQUFZQSxDQUN4QkosSUFBYSxFQUNiQyxPQUE4QjtFQUU5QixPQUFPLElBQUFQLFlBQUEsQ0FBQVcsV0FBVyxFQUFDTCxJQUFJLENBQUMsR0FDbEJBLElBQUksQ0FBQ00sUUFBUSxDQUFDQyxHQUFHLENBQUMs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

@@ -1,0 +1,1827 @@
+457653e348e1664c6adbf9565cbf2a5a
+'use strict';
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol" ? function (obj) {
+  return typeof obj;
+} : function (obj) {
+  return obj && typeof Symbol === "function" && obj.constructor === Symbol && obj !== Symbol.prototype ? "symbol" : typeof obj;
+};
+var _createClass = function () {
+  function defineProperties(target, props) {
+    for (var i = 0; i < props.length; i++) {
+      var descriptor = props[i];
+      descriptor.enumerable = descriptor.enumerable || false;
+      descriptor.configurable = true;
+      if ("value" in descriptor) descriptor.writable = true;
+      Object.defineProperty(target, descriptor.key, descriptor);
+    }
+  }
+  return function (Constructor, protoProps, staticProps) {
+    if (protoProps) defineProperties(Constructor.prototype, protoProps);
+    if (staticProps) defineProperties(Constructor, staticProps);
+    return Constructor;
+  };
+}();
+var _object = require('object.assign');
+var _object2 = _interopRequireDefault(_object);
+var _arrayPrototype = require('array.prototype.flat');
+var _arrayPrototype2 = _interopRequireDefault(_arrayPrototype);
+var _has = require('has');
+var _has2 = _interopRequireDefault(_has);
+var _Utils = require('./Utils');
+var _getAdapter = require('./getAdapter');
+var _getAdapter2 = _interopRequireDefault(_getAdapter);
+var _Debug = require('./Debug');
+var _RSTTraversal = require('./RSTTraversal');
+var _selectors = require('./selectors');
+function _interopRequireDefault(obj) {
+  return obj && obj.__esModule ? obj : {
+    default: obj
+  };
+}
+function _defineProperty(obj, key, value) {
+  if (key in obj) {
+    Object.defineProperty(obj, key, {
+      value: value,
+      enumerable: true,
+      configurable: true,
+      writable: true
+    });
+  } else {
+    obj[key] = value;
+  }
+  return obj;
+}
+function _possibleConstructorReturn(self, call) {
+  if (!self) {
+    throw new ReferenceError("this hasn't been initialised - super() hasn't been called");
+  }
+  return call && (typeof call === "object" || typeof call === "function") ? call : self;
+}
+function _inherits(subClass, superClass) {
+  if (typeof superClass !== "function" && superClass !== null) {
+    throw new TypeError("Super expression must either be null or a function, not " + typeof superClass);
+  }
+  subClass.prototype = Object.create(superClass && superClass.prototype, {
+    constructor: {
+      value: subClass,
+      enumerable: false,
+      writable: true,
+      configurable: true
+    }
+  });
+  if (superClass) Object.setPrototypeOf ? Object.setPrototypeOf(subClass, superClass) : subClass.__proto__ = superClass;
+}
+function _classCallCheck(instance, Constructor) {
+  if (!(instance instanceof Constructor)) {
+    throw new TypeError("Cannot call a class as a function");
+  }
+}
+var NODE = (0, _Utils.sym)('__node__');
+var NODES = (0, _Utils.sym)('__nodes__');
+var RENDERER = (0, _Utils.sym)('__renderer__');
+var UNRENDERED = (0, _Utils.sym)('__unrendered__');
+var ROOT = (0, _Utils.sym)('__root__');
+var OPTIONS = (0, _Utils.sym)('__options__');
+var ROOT_NODES = (0, _Utils.sym)('__rootNodes__');
+var WRAPPING_COMPONENT = (0, _Utils.sym)('__wrappingComponent__');
+var LINKED_ROOTS = (0, _Utils.sym)('__linkedRoots__');
+var UPDATED_BY = (0, _Utils.sym)('__updatedBy__');
+
+/**
+ * Finds all nodes in the current wrapper nodes' render trees that match the provided predicate
+ * function.
+ *
+ * @param {ReactWrapper} wrapper
+ * @param {Function} predicate
+ * @param {Function} filter
+ * @returns {ReactWrapper}
+ */
+function findWhereUnwrapped(wrapper, predicate) {
+  var filter = arguments.length > 2 && arguments[2] !== undefined ? arguments[2] : _RSTTraversal.treeFilter;
+  return wrapper.flatMap(function (n) {
+    return filter(n.getNodeInternal(), predicate);
+  });
+}
+
+/**
+ * Returns a new wrapper instance with only the nodes of the current wrapper instance that match
+ * the provided predicate function.
+ *
+ * @param {ReactWrapper} wrapper
+ * @param {Function} predicate
+ * @returns {ReactWrapper}
+ */
+function filterWhereUnwrapped(wrapper, predicate) {
+  return wrapper.wrap(wrapper.getNodesInternal().filter(predicate).filter(Boolean));
+}
+function getRootNodeInternal(wrapper) {
+  if (wrapper[ROOT].length !== 1) {
+    throw new Error('getRootNodeInternal(wrapper) can only be called when wrapper wraps one node');
+  }
+  if (wrapper[ROOT] !== wrapper) {
+    return wrapper[ROOT_NODES][0];
+  }
+  return wrapper[ROOT][NODE];
+}
+function nodeParents(wrapper, node) {
+  return (0, _RSTTraversal.parentsOfNode)(node, getRootNodeInternal(wrapper));
+}
+function privateSetNodes(wrapper, nodes) {
+  if (!nodes) {
+    (0, _Utils.privateSet)(wrapper, NODE, null);
+    (0, _Utils.privateSet)(wrapper, NODES, []);
+  } else if (!Array.isArray(nodes)) {
+    (0, _Utils.privateSet)(wrapper, NODE, nodes);
+    (0, _Utils.privateSet)(wrapper, NODES, [nodes]);
+  } else {
+    (0, _Utils.privateSet)(wrapper, NODE, nodes[0]);
+    (0, _Utils.privateSet)(wrapper, NODES, nodes);
+  }
+  (0, _Utils.privateSet)(wrapper, 'length', wrapper[NODES].length);
+}
+
+/**
+ * @class ReactWrapper
+ */
+
+var ReactWrapper = function () {
+  function ReactWrapper(nodes, root) {
+    var passedOptions = arguments.length > 2 && arguments[2] !== undefined ? arguments[2] : {};
+    _classCallCheck(this, ReactWrapper);
+    if (!global.window && !global.document) {
+      throw new Error('It looks like you called `mount()` without a global document being loaded.');
+    }
+    var options = (0, _Utils.makeOptions)(passedOptions);
+    if (!root) {
+      var adapter = (0, _getAdapter2['default'])(options);
+      if (!adapter.isValidElement(nodes)) {
+        throw new TypeError('ReactWrapper can only wrap valid elements');
+      }
+      var renderer = adapter.createRenderer((0, _object2['default'])({
+        mode: 'mount'
+      }, options));
+      (0, _Utils.privateSet)(this, RENDERER, renderer);
+      renderer.render(nodes, options.context);
+      (0, _Utils.privateSet)(this, ROOT, this);
+      privateSetNodes(this, this[RENDERER].getNode());
+      (0, _Utils.privateSet)(this, OPTIONS, options);
+      (0, _Utils.privateSet)(this, LINKED_ROOTS, []);
+      if ((0, _Utils.isCustomComponent)(options.wrappingComponent, adapter)) {
+        if (typeof this[RENDERER].getWrappingComponentRenderer !== 'function') {
+          throw new TypeError('your adapter does not support `wrappingComponent`. Try upgrading it!');
+        }
+
+        // eslint-disable-next-line no-use-before-define
+        (0, _Utils.privateSet)(this, WRAPPING_COMPONENT, new WrappingComponentWrapper(this, this[RENDERER].getWrappingComponentRenderer()));
+        this[LINKED_ROOTS].push(this[WRAPPING_COMPONENT]);
+      }
+    } else {
+      (0, _Utils.privateSet)(this, RENDERER, root[RENDERER]);
+      (0, _Utils.privateSet)(this, ROOT, root);
+      privateSetNodes(this, nodes);
+      (0, _Utils.privateSet)(this, ROOT_NODES, root[NODES]);
+      (0, _Utils.privateSet)(this, OPTIONS, root[OPTIONS]);
+      (0, _Utils.privateSet)(this, LINKED_ROOTS, []);
+    }
+    (0, _Utils.privateSet)(this, UNRENDERED, nodes);
+    (0, _Utils.privateSet)(this, UPDATED_BY, null);
+  }
+
+  /**
+   * Returns the root wrapper
+   *
+   * @return {ReactWrapper}
+   */
+
+  _createClass(ReactWrapper, [{
+    key: 'root',
+    value: function () {
+      function root() {
+        return this[ROOT];
+      }
+      return root;
+    }()
+
+    /**
+     * Returns the wrapped component.
+     *
+     * @return {ReactComponent}
+     */
+  }, {
+    key: 'getNodeInternal',
+    value: function () {
+      function getNodeInternal() {
+        if (this.length !== 1) {
+          throw new Error('ReactWrapper::getNode() can only be called when wrapping one node');
+        }
+        return this[NODES][0];
+      }
+      return getNodeInternal;
+    }()
+
+    /**
+     * Returns the the wrapped components.
+     *
+     * @return {Array<ReactComponent>}
+     */
+  }, {
+    key: 'getNodesInternal',
+    value: function () {
+      function getNodesInternal() {
+        return this[NODES];
+      }
+      return getNodesInternal;
+    }()
+
+    /**
+     * Returns the wrapped ReactElement.
+     *
+     * @return {ReactElement}
+     */
+  }, {
+    key: 'getElement',
+    value: function () {
+      function getElement() {
+        var _this = this;
+        return this.single('getElement', function () {
+          return (0, _getAdapter2['default'])(_this[OPTIONS]).nodeToElement(_this[NODE]);
+        });
+      }
+      return getElement;
+    }()
+
+    /**
+     * Returns the wrapped ReactElements.
+     *
+     * @return {Array<ReactElement>}
+     */
+  }, {
+    key: 'getElements',
+    value: function () {
+      function getElements() {
+        var _this2 = this;
+        return this[NODES].map(function (n) {
+          return (0, _getAdapter2['default'])(_this2[OPTIONS]).nodeToElement(n);
+        });
+      }
+      return getElements;
+    }()
+
+    // eslint-disable-next-line class-methods-use-this
+  }, {
+    key: 'getNode',
+    value: function () {
+      function getNode() {
+        throw new Error('ReactWrapper::getNode() is no longer supported. Use ReactWrapper::instance() instead');
+      }
+      return getNode;
+    }()
+
+    // eslint-disable-next-line class-methods-use-this
+  }, {
+    key: 'getNodes',
+    value: function () {
+      function getNodes() {
+        throw new Error('ReactWrapper::getNodes() is no longer supported.');
+      }
+      return getNodes;
+    }()
+
+    /**
+     * Returns the outer most DOMComponent of the current wrapper.
+     *
+     * NOTE: can only be called on a wrapper of a single node.
+     *
+     * @returns {DOMComponent}
+     */
+  }, {
+    key: 'getDOMNode',
+    value: function () {
+      function getDOMNode() {
+        var adapter = (0, _getAdapter2['default'])(this[OPTIONS]);
+        return this.single('getDOMNode', function (n) {
+          return adapter.nodeToHostNode(n, true);
+        });
+      }
+      return getDOMNode;
+    }()
+
+    /**
+     * If the root component contained a ref, you can access it here and get the relevant
+     * react component instance or HTML element instance.
+     *
+     * NOTE: can only be called on a wrapper instance that is also the root instance.
+     *
+     * @param {String} refname
+     * @returns {ReactComponent | HTMLElement}
+     */
+  }, {
+    key: 'ref',
+    value: function () {
+      function ref(refname) {
+        if (this[ROOT] !== this) {
+          throw new Error('ReactWrapper::ref(refname) can only be called on the root');
+        }
+        return this.instance().refs[refname];
+      }
+      return ref;
+    }()
+
+    /**
+     * Returns the wrapper's underlying instance.
+     *
+     * Example:
+     * ```
+     * const wrapper = mount(<MyComponent />);
+     * const inst = wrapper.instance();
+     * expect(inst).to.be.instanceOf(MyComponent);
+     * ```
+     * @returns {ReactComponent|DOMComponent}
+     */
+  }, {
+    key: 'instance',
+    value: function () {
+      function instance() {
+        var _this3 = this;
+        return this.single('instance', function () {
+          return _this3[NODE].instance;
+        });
+      }
+      return instance;
+    }()
+
+    /**
+     * If a `wrappingComponent` was passed in `options`, this methods returns a `ReactWrapper` around
+     * the rendered `wrappingComponent`. This `ReactWrapper` can be used to update the
+     * `wrappingComponent`'s props, state, etc.
+     *
+     * @returns ReactWrapper
+     */
+  }, {
+    key: 'getWrappingComponent',
+    value: function () {
+      function getWrappingComponent() {
+        if (this[ROOT] !== this) {
+          throw new Error('ReactWrapper::getWrappingComponent() can only be called on the root');
+        }
+        if (!this[OPTIONS].wrappingComponent) {
+          throw new Error('ReactWrapper::getWrappingComponent() can only be called on a wrapper that was originally passed a `wrappingComponent` option');
+        }
+        return this[WRAPPING_COMPONENT];
+      }
+      return getWrappingComponent;
+    }()
+
+    /**
+     * Forces a re-render. Useful to run before checking the render output if something external
+     * may be updating the state of the component somewhere.
+     *
+     * NOTE: no matter what instance this is called on, it will always update the root.
+     *
+     * @returns {ReactWrapper}
+     */
+  }, {
+    key: 'update',
+    value: function () {
+      function update() {
+        var _this4 = this;
+        var root = this[ROOT];
+        if (this !== root) {
+          return root.update();
+        }
+        privateSetNodes(this, this[RENDERER].getNode());
+        this[LINKED_ROOTS].forEach(function (linkedRoot) {
+          if (linkedRoot !== _this4[UPDATED_BY]) {
+            /* eslint-disable no-param-reassign */
+            // Only update a linked it root if it is not the originator of our update().
+            // This is needed to prevent infinite recursion when there is a bi-directional
+            // link between two roots.
+            linkedRoot[UPDATED_BY] = _this4;
+            try {
+              linkedRoot.update();
+            } finally {
+              linkedRoot[UPDATED_BY] = null;
+            }
+          }
+        });
+        return this;
+      }
+      return update;
+    }()
+
+    /**
+     * A method that unmounts the component. This can be used to simulate a component going through
+     * and unmount/mount lifecycle.
+     *
+     * @returns {ReactWrapper}
+     */
+  }, {
+    key: 'unmount',
+    value: function () {
+      function unmount() {
+        var _this5 = this;
+        if (this[ROOT] !== this) {
+          throw new Error('ReactWrapper::unmount() can only be called on the root');
+        }
+        this.single('unmount', function () {
+          _this5[RENDERER].unmount();
+          _this5.update();
+        });
+        return this;
+      }
+      return unmount;
+    }()
+
+    /**
+     * A method that re-mounts the component, if it is not currently mounted.
+     * This can be used to simulate a component going through
+     * an unmount/mount lifecycle.
+     *
+     * @returns {ReactWrapper}
+     */
+  }, {
+    key: 'mount',
+    value: function () {
+      function mount() {
+        var _this6 = this;
+        if (this[ROOT] !== this) {
+          throw new Error('ReactWrapper::mount() can only be called on the root');
+        }
+        this[RENDERER].render(this[UNRENDERED], this[OPTIONS].context, function () {
+          return _this6.update();
+        });
+        return this;
+      }
+      return mount;
+    }()
+
+    /**
+     * A method that sets the props of the root component, and re-renders. Useful for when you are
+     * wanting to test how the component behaves over time with changing props. Calling this, for
+     * instance, will call the `componentWillReceiveProps` lifecycle method.
+     *
+     * Similar to `setState`, this method accepts a props object and will merge it in with the already
+     * existing props.
+     *
+     * NOTE: can only be called on a wrapper instance that is also the root instance.
+     *
+     * @param {Object} props object
+     * @param {Function} cb - callback function
+     * @returns {ReactWrapper}
+     */
+  }, {
+    key: 'setProps',
+    value: function () {
+      function setProps(props) {
+        var _this7 = this;
+        var callback = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : undefined;
+        if (this[ROOT] !== this) {
+          throw new Error('ReactWrapper::setProps() can only be called on the root');
+        }
+        if (arguments.length > 1 && typeof callback !== 'function') {
+          throw new TypeError('ReactWrapper::setProps() expects a function as its second argument');
+        }
+        var adapter = (0, _getAdapter2['default'])(this[OPTIONS]);
+        this[UNRENDERED] = (0, _Utils.cloneElement)(adapter, this[UNRENDERED], props);
+        this[RENDERER].render(this[UNRENDERED], null, function () {
+          _this7.update();
+          if (callback) {
+            callback();
+          }
+        });
+        return this;
+      }
+      return setProps;
+    }()
+
+    /**
+     * A method to invoke `setState` on the root component instance similar to how you might in the
+     * definition of the component, and re-renders.  This method is useful for testing your component
+     * in hard to achieve states, however should be used sparingly. If possible, you should utilize
+     * your component's external API in order to get it into whatever state you want to test, in order
+     * to be as accurate of a test as possible. This is not always practical, however.
+     *
+     * NOTE: can only be called on a wrapper instance that is also the root instance.
+     *
+     * @param {Object} state to merge
+     * @param {Function} cb - callback function
+     * @returns {ReactWrapper}
+     */
+  }, {
+    key: 'setState',
+    value: function () {
+      function setState(state) {
+        var _this8 = this;
+        var callback = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : undefined;
+        if (this.instance() === null || this.getNodeInternal().nodeType !== 'class') {
+          throw new Error('ReactWrapper::setState() can only be called on class components');
+        }
+        if (arguments.length > 1 && typeof callback !== 'function') {
+          throw new TypeError('ReactWrapper::setState() expects a function as its second argument');
+        }
+        this.instance().setState(state, function () {
+          _this8.update();
+          if (callback) {
+            var adapter = (0, _getAdapter2['default'])(_this8[OPTIONS]);
+            var instance = _this8.instance();
+            if (adapter.invokeSetStateCallback) {
+              adapter.invokeSetStateCallback(instance, callback);
+            } else {
+              callback.call(instance);
+            }
+          }
+        });
+        return this;
+      }
+      return setState;
+    }()
+
+    /**
+     * A method that sets the context of the root component, and re-renders. Useful for when you are
+     * wanting to test how the component behaves over time with changing contexts.
+     *
+     * NOTE: can only be called on a wrapper instance that is also the root instance.
+     *
+     * @param {Object} context object
+     * @returns {ReactWrapper}
+     */
+  }, {
+    key: 'setContext',
+    value: function () {
+      function setContext(context) {
+        var _this9 = this;
+        if (this[ROOT] !== this) {
+          throw new Error('ReactWrapper::setContext() can only be called on the root');
+        }
+        if (!this[OPTIONS].context) {
+          throw new Error('ReactWrapper::setContext() can only be called on a wrapper that was originally passed a context option');
+        }
+        this[RENDERER].render(this[UNRENDERED], context, function () {
+          return _this9.update();
+        });
+        return this;
+      }
+      return setContext;
+    }()
+
+    /**
+     * Whether or not a given react element exists in the mount render tree.
+     *
+     * Example:
+     * ```
+     * const wrapper = mount(<MyComponent />);
+     * expect(wrapper.contains(<div className="foo bar" />)).to.equal(true);
+     * ```
+     *
+     * @param {ReactElement|Array<ReactElement>} nodeOrNodes
+     * @returns {Boolean}
+     */
+  }, {
+    key: 'contains',
+    value: function () {
+      function contains(nodeOrNodes) {
+        var adapter = (0, _getAdapter2['default'])(this[OPTIONS]);
+        var predicate = Array.isArray(nodeOrNodes) ? function (other) {
+          return (0, _Utils.containsChildrenSubArray)(_Utils.nodeEqual, other, nodeOrNodes.map(function (node) {
+            return adapter.elementToNode(node);
+          }));
+        } : function (other) {
+          return (0, _Utils.nodeEqual)(adapter.elementToNode(nodeOrNodes), other);
+        };
+        return findWhereUnwrapped(this, predicate).length > 0;
+      }
+      return contains;
+    }()
+
+    /**
+     * Whether or not a given react element exists in the current render tree.
+     * It will determine if one of the wrappers element "looks like" the expected
+     * element by checking if all props of the expected element are present
+     * on the wrappers element and equals to each other.
+     *
+     * Example:
+     * ```
+     * // MyComponent outputs <div><div class="foo">Hello</div></div>
+     * const wrapper = mount(<MyComponent />);
+     * expect(wrapper.containsMatchingElement(<div>Hello</div>)).to.equal(true);
+     * ```
+     *
+     * @param {ReactElement} node
+     * @returns {Boolean}
+     */
+  }, {
+    key: 'containsMatchingElement',
+    value: function () {
+      function containsMatchingElement(node) {
+        var rstNode = (0, _getAdapter2['default'])(this[OPTIONS]).elementToNode(node);
+        var predicate = function () {
+          function predicate(other) {
+            return (0, _Utils.nodeMatches)(rstNode, other, function (a, b) {
+              return a <= b;
+            });
+          }
+          return predicate;
+        }();
+        return findWhereUnwrapped(this, predicate).length > 0;
+      }
+      return containsMatchingElement;
+    }()
+
+    /**
+     * Whether or not all the given react elements exist in the current render tree.
+     * It will determine if one of the wrappers element "looks like" the expected
+     * element by checking if all props of the expected element are present
+     * on the wrappers element and equals to each other.
+     *
+     * Example:
+     * ```
+     * const wrapper = mount(<MyComponent />);
+     * expect(wrapper.containsAllMatchingElements([
+     *   <div>Hello</div>,
+     *   <div>Goodbye</div>,
+     * ])).to.equal(true);
+     * ```
+     *
+     * @param {Array<ReactElement>} nodes
+     * @returns {Boolean}
+     */
+  }, {
+    key: 'containsAllMatchingElements',
+    value: function () {
+      function containsAllMatchingElements(nodes) {
+        var _this10 = this;
+        if (!Array.isArray(nodes)) {
+          throw new TypeError('nodes should be an Array');
+        }
+        return nodes.every(function (node) {
+          return _this10.containsMatchingElement(node);
+        });
+      }
+      return containsAllMatchingElements;
+    }()
+
+    /**
+     * Whether or not one of the given react elements exists in the current render tree.
+     * It will determine if one of the wrappers element "looks like" the expected
+     * element by checking if all props of the expected element are present
+     * on the wrappers element and equals to each other.
+     *
+     * Example:
+     * ```
+     * const wrapper = mount(<MyComponent />);
+     * expect(wrapper.containsAnyMatchingElements([
+     *   <div>Hello</div>,
+     *   <div>Goodbye</div>,
+     * ])).to.equal(true);
+     * ```
+     *
+     * @param {Array<ReactElement>} nodes
+     * @returns {Boolean}
+     */
+  }, {
+    key: 'containsAnyMatchingElements',
+    value: function () {
+      function containsAnyMatchingElements(nodes) {
+        var _this11 = this;
+        return Array.isArray(nodes) && nodes.some(function (node) {
+          return _this11.containsMatchingElement(node);
+        });
+      }
+      return containsAnyMatchingElements;
+    }()
+
+    /**
+     * Whether or not a given react element exists in the render tree.
+     *
+     * Example:
+     * ```
+     * const wrapper = mount(<MyComponent />);
+     * expect(wrapper.contains(<div className="foo bar" />)).to.equal(true);
+     * ```
+     *
+     * @param {ReactElement} node
+     * @returns {Boolean}
+     */
+  }, {
+    key: 'equals',
+    value: function () {
+      function equals(node) {
+        var _this12 = this;
+        return this.single('equals', function () {
+          return (0, _Utils.nodeEqual)(_this12.getNodeInternal(), node);
+        });
+      }
+      return equals;
+    }()
+
+    /**
+     * Whether or not a given react element matches the render tree.
+     * Match is based on the expected element and not on wrapper root node.
+     * It will determine if the wrapper root node "looks like" the expected
+     * element by checking if all props of the expected element are present
+     * on the wrapper root node and equals to each other.
+     *
+     * Example:
+     * ```
+     * // MyComponent outputs <div class="foo">Hello</div>
+     * const wrapper = mount(<MyComponent />);
+     * expect(wrapper.matchesElement(<div>Hello</div>)).to.equal(true);
+     * ```
+     *
+     * @param {ReactElement} node
+     * @returns {Boolean}
+     */
+  }, {
+    key: 'matchesElement',
+    value: function () {
+      function matchesElement(node) {
+        var _this13 = this;
+        return this.single('matchesElement', function () {
+          var adapter = (0, _getAdapter2['default'])(_this13[OPTIONS]);
+          var rstNode = adapter.elementToNode(node);
+          return (0, _Utils.nodeMatches)(rstNode, _this13.getNodeInternal(), function (a, b) {
+            return a <= b;
+          });
+        });
+      }
+      return matchesElement;
+    }()
+
+    /**
+     * Finds every node in the render tree of the current wrapper that matches the provided selector.
+     *
+     * @param {EnzymeSelector} selector
+     * @returns {ReactWrapper}
+     */
+  }, {
+    key: 'find',
+    value: function () {
+      function find(selector) {
+        return this.wrap((0, _selectors.reduceTreesBySelector)(selector, this.getNodesInternal()));
+      }
+      return find;
+    }()
+
+    /**
+     * Returns whether or not current node matches a provided selector.
+     *
+     * NOTE: can only be called on a wrapper of a single node.
+     *
+     * @param {EnzymeSelector} selector
+     * @returns {boolean}
+     */
+  }, {
+    key: 'is',
+    value: function () {
+      function is(selector) {
+        var predicate = (0, _selectors.buildPredicate)(selector);
+        return this.single('is', function (n) {
+          return predicate(n);
+        });
+      }
+      return is;
+    }()
+
+    /**
+     * Returns true if the component rendered nothing, i.e., null or false.
+     *
+     * @returns {boolean}
+     */
+  }, {
+    key: 'isEmptyRender',
+    value: function () {
+      function isEmptyRender() {
+        var nodes = this.getNodeInternal();
+        return (0, _Utils.renderedDive)(nodes);
+      }
+      return isEmptyRender;
+    }()
+
+    /**
+     * Returns a new wrapper instance with only the nodes of the current wrapper instance that match
+     * the provided predicate function.
+     *
+     * @param {Function} predicate
+     * @returns {ReactWrapper}
+     */
+  }, {
+    key: 'filterWhere',
+    value: function () {
+      function filterWhere(predicate) {
+        var _this14 = this;
+        return filterWhereUnwrapped(this, function (n) {
+          return predicate(_this14.wrap(n));
+        });
+      }
+      return filterWhere;
+    }()
+
+    /**
+     * Returns a new wrapper instance with only the nodes of the current wrapper instance that match
+     * the provided selector.
+     *
+     * @param {EnzymeSelector} selector
+     * @returns {ReactWrapper}
+     */
+  }, {
+    key: 'filter',
+    value: function () {
+      function filter(selector) {
+        var predicate = (0, _selectors.buildPredicate)(selector);
+        return filterWhereUnwrapped(this, predicate);
+      }
+      return filter;
+    }()
+
+    /**
+     * Returns a new wrapper instance with only the nodes of the current wrapper that did not match
+     * the provided selector. Essentially the inverse of `filter`.
+     *
+     * @param {EnzymeSelector} selector
+     * @returns {ReactWrapper}
+     */
+  }, {
+    key: 'not',
+    value: function () {
+      function not(selector) {
+        var predicate = (0, _selectors.buildPredicate)(selector);
+        return filterWhereUnwrapped(this, function (n) {
+          return !predicate(n);
+        });
+      }
+      return not;
+    }()
+
+    /**
+     * Returns a string of the rendered text of the current render tree.  This function should be
+     * looked at with skepticism if being used to test what the actual HTML output of the component
+     * will be. If that is what you would like to test, use enzyme's `render` function instead.
+     *
+     * NOTE: can only be called on a wrapper of a single node.
+     *
+     * @returns {String}
+     */
+  }, {
+    key: 'text',
+    value: function () {
+      function text() {
+        var adapter = (0, _getAdapter2['default'])(this[OPTIONS]);
+        return this.single('text', function (n) {
+          return (0, _RSTTraversal.getTextFromHostNodes)(n, adapter);
+        });
+      }
+      return text;
+    }()
+
+    /**
+     * Returns the HTML of the node.
+     *
+     * NOTE: can only be called on a wrapper of a single node.
+     *
+     * @returns {String}
+     */
+  }, {
+    key: 'html',
+    value: function () {
+      function html() {
+        var adapter = (0, _getAdapter2['default'])(this[OPTIONS]);
+        return this.single('html', function (n) {
+          return (0, _RSTTraversal.getHTMLFromHostNodes)(n, adapter);
+        });
+      }
+      return html;
+    }()
+
+    /**
+     * Returns the current node rendered to HTML and wrapped in a CheerioWrapper.
+     *
+     * NOTE: can only be called on a wrapper of a single node.
+     *
+     * @returns {CheerioWrapper}
+     */
+  }, {
+    key: 'render',
+    value: function () {
+      function render() {
+        var html = this.html();
+        return (0, _Utils.loadCheerioRoot)(html);
+      }
+      return render;
+    }()
+
+    /**
+     * Used to simulate events. Pass an eventname and (optionally) event arguments. This method of
+     * testing events should be met with some skepticism.
+     *
+     * @param {String} event
+     * @param {Object} mock (optional)
+     * @returns {ReactWrapper}
+     */
+  }, {
+    key: 'simulate',
+    value: function () {
+      function simulate(event) {
+        var _this15 = this;
+        var mock = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : {};
+        return this.single('simulate', function (n) {
+          _this15[RENDERER].simulateEvent(n, event, mock);
+          _this15[ROOT].update();
+          return _this15;
+        });
+      }
+      return simulate;
+    }()
+
+    /**
+     * Used to simulate throwing a rendering error. Pass an error to throw.
+     *
+     * @param {String} error
+     * @returns {ReactWrapper}
+     */
+  }, {
+    key: 'simulateError',
+    value: function () {
+      function simulateError(error) {
+        var _this16 = this;
+        if (this[ROOT] === this) {
+          throw new Error('ReactWrapper::simulateError() may not be called on the root');
+        }
+        return this.single('simulateError', function (thisNode) {
+          if (thisNode.nodeType === 'host') {
+            throw new Error('ReactWrapper::simulateError() can only be called on custom components');
+          }
+          var renderer = _this16[RENDERER];
+          if (typeof renderer.simulateError !== 'function') {
+            throw new TypeError('your adapter does not support `simulateError`. Try upgrading it!');
+          }
+          var rootNode = getRootNodeInternal(_this16);
+          var nodeHierarchy = [thisNode].concat(nodeParents(_this16, thisNode));
+          renderer.simulateError(nodeHierarchy, rootNode, error);
+          _this16[ROOT].update();
+          return _this16;
+        });
+      }
+      return simulateError;
+    }()
+
+    /**
+     * Returns the props hash for the root node of the wrapper.
+     *
+     * NOTE: can only be called on a wrapper of a single node.
+     *
+     * @returns {Object}
+     */
+  }, {
+    key: 'props',
+    value: function () {
+      function props() {
+        return this.single('props', _RSTTraversal.propsOfNode);
+      }
+      return props;
+    }()
+
+    /**
+     * Returns the state hash for the root node of the wrapper. Optionally pass in a prop name and it
+     * will return just that value.
+     *
+     * NOTE: can only be called on a wrapper of a single node.
+     *
+     * @param {String} name (optional)
+     * @returns {*}
+     */
+  }, {
+    key: 'state',
+    value: function () {
+      function state(name) {
+        var _this17 = this;
+        var thisNode = this[ROOT] === this ? this[RENDERER].getNode() : this.getNodeInternal();
+        if (this.instance() === null || thisNode.nodeType !== 'class') {
+          throw new Error('ReactWrapper::state() can only be called on class components');
+        }
+        var _state = this.single('state', function () {
+          return _this17.instance().state;
+        });
+        if (typeof name !== 'undefined') {
+          if (_state == null) {
+            throw new TypeError('ReactWrapper::state("' + String(name) + '") requires that `state` not be `null` or `undefined`');
+          }
+          return _state[name];
+        }
+        return _state;
+      }
+      return state;
+    }()
+
+    /**
+     * Returns the context hash for the root node of the wrapper.
+     * Optionally pass in a prop name and it will return just that value.
+     *
+     * NOTE: can only be called on a wrapper of a single node.
+     *
+     * @param {String} name (optional)
+     * @returns {*}
+     */
+  }, {
+    key: 'context',
+    value: function () {
+      function context(name) {
+        var _this18 = this;
+        if (this[ROOT] !== this) {
+          throw new Error('ReactWrapper::context() can only be called on the root');
+        }
+        var instance = this.single('context', function () {
+          return _this18.instance();
+        });
+        if (instance === null) {
+          throw new Error('ReactWrapper::context() can only be called on components with instances');
+        }
+        var _context = instance.context;
+        if (typeof name !== 'undefined') {
+          return _context[name];
+        }
+        return _context;
+      }
+      return context;
+    }()
+
+    /**
+     * Returns a new wrapper with all of the children of the current wrapper.
+     *
+     * @param {EnzymeSelector} [selector]
+     * @returns {ReactWrapper}
+     */
+  }, {
+    key: 'children',
+    value: function () {
+      function children(selector) {
+        var allChildren = this.flatMap(function (n) {
+          return (0, _RSTTraversal.childrenOfNode)(n.getNodeInternal());
+        });
+        return selector ? allChildren.filter(selector) : allChildren;
+      }
+      return children;
+    }()
+
+    /**
+     * Returns a new wrapper with a specific child
+     *
+     * @param {Number} [index]
+     * @returns {ReactWrapper}
+     */
+  }, {
+    key: 'childAt',
+    value: function () {
+      function childAt(index) {
+        var _this19 = this;
+        return this.single('childAt', function () {
+          return _this19.children().at(index);
+        });
+      }
+      return childAt;
+    }()
+
+    /**
+     * Returns a wrapper around all of the parents/ancestors of the wrapper. Does not include the node
+     * in the current wrapper.
+     *
+     * NOTE: can only be called on a wrapper of a single node.
+     *
+     * @param {EnzymeSelector} [selector]
+     * @returns {ReactWrapper}
+     */
+  }, {
+    key: 'parents',
+    value: function () {
+      function parents(selector) {
+        var _this20 = this;
+        return this.single('parents', function (n) {
+          var allParents = _this20.wrap(nodeParents(_this20, n));
+          return selector ? allParents.filter(selector) : allParents;
+        });
+      }
+      return parents;
+    }()
+
+    /**
+     * Returns a wrapper around the immediate parent of the current node.
+     *
+     * @returns {ReactWrapper}
+     */
+  }, {
+    key: 'parent',
+    value: function () {
+      function parent() {
+        return this.flatMap(function (n) {
+          return [n.parents().get(0)];
+        });
+      }
+      return parent;
+    }()
+
+    /**
+     *
+     * @param {EnzymeSelector} selector
+     * @returns {ReactWrapper}
+     */
+  }, {
+    key: 'closest',
+    value: function () {
+      function closest(selector) {
+        if (this.is(selector)) {
+          return this;
+        }
+        var matchingAncestors = this.parents().filter(selector);
+        return matchingAncestors.length > 0 ? matchingAncestors.first() : this.findWhere(function () {
+          return false;
+        });
+      }
+      return closest;
+    }()
+
+    /**
+     * Returns the value of  prop with the given name of the root node.
+     *
+     * @param {String} propName
+     * @returns {*}
+     */
+  }, {
+    key: 'prop',
+    value: function () {
+      function prop(propName) {
+        return this.props()[propName];
+      }
+      return prop;
+    }()
+
+    /**
+     * Used to invoke a function prop.
+     * Will invoke an function prop and return its value.
+     *
+     * @param {String} propName
+     * @returns {Any}
+     */
+  }, {
+    key: 'invoke',
+    value: function () {
+      function invoke(propName) {
+        var _this21 = this;
+        return this.single('invoke', function () {
+          var handler = _this21.prop(propName);
+          if (typeof handler !== 'function') {
+            throw new TypeError('ReactWrapper::invoke() requires the name of a prop whose value is a function');
+          }
+          return function () {
+            for (var _len = arguments.length, args = Array(_len), _key = 0; _key < _len; _key++) {
+              args[_key] = arguments[_key];
+            }
+            var response = typeof _this21[RENDERER].wrapInvoke === 'function' ? _this21[RENDERER].wrapInvoke(function () {
+              return handler.apply(undefined, args);
+            }) : handler.apply(undefined, args);
+            _this21[ROOT].update();
+            return response;
+          };
+        });
+      }
+      return invoke;
+    }()
+
+    /**
+     * Returns a wrapper of the node rendered by the provided render prop.
+     *
+     * @param {String} propName
+     * @returns {Function}
+     */
+  }, {
+    key: 'renderProp',
+    value: function () {
+      function renderProp(propName) {
+        var _this22 = this;
+        var adapter = (0, _getAdapter2['default'])(this[OPTIONS]);
+        if (typeof adapter.wrap !== 'function') {
+          throw new RangeError('your adapter does not support `wrap`. Try upgrading it!');
+        }
+        return this.single('renderProp', function (n) {
+          if (n.nodeType === 'host') {
+            throw new TypeError('ReactWrapper::renderProp() can only be called on custom components');
+          }
+          if (typeof propName !== 'string') {
+            throw new TypeError('ReactWrapper::renderProp(): `propName` must be a string');
+          }
+          var props = _this22.props();
+          if (!(0, _has2['default'])(props, propName)) {
+            throw new Error('ReactWrapper::renderProp(): no prop called \u201C' + String(propName) + '\u201C found');
+          }
+          var propValue = props[propName];
+          if (typeof propValue !== 'function') {
+            throw new TypeError('ReactWrapper::renderProp(): expected prop \u201C' + String(propName) + '\u201C to contain a function, but it holds \u201C' + (typeof propValue === 'undefined' ? 'undefined' : _typeof(propValue)) + '\u201C');
+          }
+          return function () {
+            var element = propValue.apply(undefined, arguments);
+            var wrapped = adapter.wrap(element);
+            return _this22.wrap(wrapped, null, _this22[OPTIONS]);
+          };
+        });
+      }
+      return renderProp;
+    }()
+
+    /**
+     * Returns the key assigned to the current node.
+     *
+     * @returns {String}
+     */
+  }, {
+    key: 'key',
+    value: function () {
+      function key() {
+        return this.single('key', function (n) {
+          return n.key === undefined ? null : n.key;
+        });
+      }
+      return key;
+    }()
+
+    /**
+     * Returns the type of the root node of this wrapper. If it's a composite component, this will be
+     * the component constructor. If it's native DOM node, it will be a string.
+     *
+     * @returns {String|Function}
+     */
+  }, {
+    key: 'type',
+    value: function () {
+      function type() {
+        return this.single('type', function (n) {
+          return (0, _Utils.typeOfNode)(n);
+        });
+      }
+      return type;
+    }()
+
+    /**
+     * Returns the name of the root node of this wrapper.
+     *
+     * In order of precedence => type.displayName -> type.name -> type.
+     *
+     * @returns {String}
+     */
+  }, {
+    key: 'name',
+    value: function () {
+      function name() {
+        var adapter = (0, _getAdapter2['default'])(this[OPTIONS]);
+        return this.single('name', function (n) {
+          return adapter.displayNameOfNode ? adapter.displayNameOfNode(n) : (0, _Utils.displayNameOfNode)(n);
+        });
+      }
+      return name;
+    }()
+
+    /**
+     * Returns whether or not the current root node has the given class name or not.
+     *
+     * NOTE: can only be called on a wrapper of a single node.
+     *
+     * @param {String} className
+     * @returns {Boolean}
+     */
+  }, {
+    key: 'hasClass',
+    value: function () {
+      function hasClass(className) {
+        if (typeof className === 'string' && className.indexOf('.') !== -1) {
+          // eslint-disable-next-line no-console
+          console.warn('It looks like you\'re calling `ReactWrapper::hasClass()` with a CSS selector. hasClass() expects a class name, not a CSS selector.');
+        }
+        return this.single('hasClass', function (n) {
+          return (0, _RSTTraversal.hasClassName)(n, className);
+        });
+      }
+      return hasClass;
+    }()
+
+    /**
+     * Iterates through each node of the current wrapper and executes the provided function with a
+     * wrapper around the corresponding node passed in as the first argument.
+     *
+     * @param {Function} fn
+     * @returns {ReactWrapper}
+     */
+  }, {
+    key: 'forEach',
+    value: function () {
+      function forEach(fn) {
+        var _this23 = this;
+        this.getNodesInternal().forEach(function (n, i) {
+          return fn.call(_this23, _this23.wrap(n), i);
+        });
+        return this;
+      }
+      return forEach;
+    }()
+
+    /**
+     * Maps the current array of nodes to another array. Each node is passed in as a `ReactWrapper`
+     * to the map function.
+     *
+     * @param {Function} fn
+     * @returns {Array}
+     */
+  }, {
+    key: 'map',
+    value: function () {
+      function map(fn) {
+        var _this24 = this;
+        return this.getNodesInternal().map(function (n, i) {
+          return fn.call(_this24, _this24.wrap(n), i);
+        });
+      }
+      return map;
+    }()
+
+    /**
+     * Reduces the current array of nodes to another array.
+     * Each node is passed in as a `ShallowWrapper` to the reducer function.
+     *
+     * @param {Function} fn - the reducer function
+     * @param {*} initialValue - the initial value
+     * @returns {*}
+     */
+  }, {
+    key: 'reduce',
+    value: function () {
+      function reduce(fn) {
+        var _this25 = this;
+        var initialValue = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : undefined;
+        if (arguments.length > 1) {
+          return this.getNodesInternal().reduce(function (accum, n, i) {
+            return fn.call(_this25, accum, _this25.wrap(n), i);
+          }, initialValue);
+        }
+        return this.getNodesInternal().reduce(function (accum, n, i) {
+          return fn.call(_this25, i === 1 ? _this25.wrap(accum) : accum, _this25.wrap(n), i);
+        });
+      }
+      return reduce;
+    }()
+
+    /**
+     * Reduces the current array of nodes to another array, from right to left. Each node is passed
+     * in as a `ShallowWrapper` to the reducer function.
+     *
+     * @param {Function} fn - the reducer function
+     * @param {*} initialValue - the initial value
+     * @returns {*}
+     */
+  }, {
+    key: 'reduceRight',
+    value: function () {
+      function reduceRight(fn) {
+        var _this26 = this;
+        var initialValue = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : undefined;
+        if (arguments.length > 1) {
+          return this.getNodesInternal().reduceRight(function (accum, n, i) {
+            return fn.call(_this26, accum, _this26.wrap(n), i);
+          }, initialValue);
+        }
+        return this.getNodesInternal().reduceRight(function (accum, n, i) {
+          return fn.call(_this26, i === 1 ? _this26.wrap(accum) : accum, _this26.wrap(n), i);
+        });
+      }
+      return reduceRight;
+    }()
+
+    /**
+     * Returns a new wrapper with a subset of the nodes of the original wrapper, according to the
+     * rules of `Array#slice`.
+     *
+     * @param {Number} begin
+     * @param {Number} end
+     * @returns {ShallowWrapper}
+     */
+  }, {
+    key: 'slice',
+    value: function () {
+      function slice(begin, end) {
+        return this.wrap(this.getNodesInternal().slice(begin, end));
+      }
+      return slice;
+    }()
+
+    /**
+     * Returns whether or not any of the nodes in the wrapper match the provided selector.
+     *
+     * @param {EnzymeSelector} selector
+     * @returns {Boolean}
+     */
+  }, {
+    key: 'some',
+    value: function () {
+      function some(selector) {
+        if (this[ROOT] === this) {
+          throw new Error('ReactWrapper::some() can not be called on the root');
+        }
+        var predicate = (0, _selectors.buildPredicate)(selector);
+        return this.getNodesInternal().some(predicate);
+      }
+      return some;
+    }()
+
+    /**
+     * Returns whether or not any of the nodes in the wrapper pass the provided predicate function.
+     *
+     * @param {Function} predicate
+     * @returns {Boolean}
+     */
+  }, {
+    key: 'someWhere',
+    value: function () {
+      function someWhere(predicate) {
+        var _this27 = this;
+        return this.getNodesInternal().some(function (n, i) {
+          return predicate.call(_this27, _this27.wrap(n), i);
+        });
+      }
+      return someWhere;
+    }()
+
+    /**
+     * Returns whether or not all of the nodes in the wrapper match the provided selector.
+     *
+     * @param {EnzymeSelector} selector
+     * @returns {Boolean}
+     */
+  }, {
+    key: 'every',
+    value: function () {
+      function every(selector) {
+        var predicate = (0, _selectors.buildPredicate)(selector);
+        return this.getNodesInternal().every(predicate);
+      }
+      return every;
+    }()
+
+    /**
+     * Returns whether or not any of the nodes in the wrapper pass the provided predicate function.
+     *
+     * @param {Function} predicate
+     * @returns {Boolean}
+     */
+  }, {
+    key: 'everyWhere',
+    value: function () {
+      function everyWhere(predicate) {
+        var _this28 = this;
+        return this.getNodesInternal().every(function (n, i) {
+          return predicate.call(_this28, _this28.wrap(n), i);
+        });
+      }
+      return everyWhere;
+    }()
+
+    /**
+     * Utility method used to create new wrappers with a mapping function that returns an array of
+     * nodes in response to a single node wrapper. The returned wrapper is a single wrapper around
+     * all of the mapped nodes flattened (and de-duplicated).
+     *
+     * @param {Function} fn
+     * @returns {ReactWrapper}
+     */
+  }, {
+    key: 'flatMap',
+    value: function () {
+      function flatMap(fn) {
+        var _this29 = this;
+        var nodes = this.getNodesInternal().map(function (n, i) {
+          return fn.call(_this29, _this29.wrap(n), i);
+        });
+        var flattened = (0, _arrayPrototype2['default'])(nodes, 1);
+        return this.wrap(flattened.filter(Boolean));
+      }
+      return flatMap;
+    }()
+
+    /**
+     * Finds all nodes in the current wrapper nodes' render trees that match the provided predicate
+     * function.
+     *
+     * @param {Function} predicate
+     * @returns {ReactWrapper}
+     */
+  }, {
+    key: 'findWhere',
+    value: function () {
+      function findWhere(predicate) {
+        var _this30 = this;
+        return findWhereUnwrapped(this, function (n) {
+          var node = _this30.wrap(n);
+          return node.length > 0 && predicate(node);
+        });
+      }
+      return findWhere;
+    }()
+
+    /**
+     * Returns the node at a given index of the current wrapper.
+     *
+     * @param {Number} index
+     * @returns {ReactElement}
+     */
+  }, {
+    key: 'get',
+    value: function () {
+      function get(index) {
+        return this.getElements()[index];
+      }
+      return get;
+    }()
+
+    /**
+     * Returns a wrapper around the node at a given index of the current wrapper.
+     *
+     * @param {Number} index
+     * @returns {ReactWrapper}
+     */
+  }, {
+    key: 'at',
+    value: function () {
+      function at(index) {
+        var nodes = this.getNodesInternal();
+        if (index < nodes.length) {
+          return this.wrap(nodes[index]);
+        }
+        return this.wrap([]);
+      }
+      return at;
+    }()
+
+    /**
+     * Returns a wrapper around the first node of the current wrapper.
+     *
+     * @returns {ReactWrapper}
+     */
+  }, {
+    key: 'first',
+    value: function () {
+      function first() {
+        return this.at(0);
+      }
+      return first;
+    }()
+
+    /**
+     * Returns a wrapper around the last node of the current wrapper.
+     *
+     * @returns {ReactWrapper}
+     */
+  }, {
+    key: 'last',
+    value: function () {
+      function last() {
+        return this.at(this.length - 1);
+      }
+      return last;
+    }()
+
+    /**
+     * Delegates to exists()
+     *
+     * @returns {boolean}
+     */
+  }, {
+    key: 'isEmpty',
+    value: function () {
+      function isEmpty() {
+        // eslint-disable-next-line no-console
+        console.warn('Enzyme::Deprecated method isEmpty() called, use exists() instead.');
+        return !this.exists();
+      }
+      return isEmpty;
+    }()
+
+    /**
+     * Returns true if the current wrapper has nodes. False otherwise.
+     * If called with a selector it returns `.find(selector).exists()` instead.
+     *
+     * @param {EnzymeSelector} selector (optional)
+     * @returns {boolean}
+     */
+  }, {
+    key: 'exists',
+    value: function () {
+      function exists() {
+        var selector = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : null;
+        return arguments.length > 0 ? this.find(selector).exists() : this.length > 0;
+      }
+      return exists;
+    }()
+
+    /**
+     * Utility method that throws an error if the current instance has a length other than one.
+     * This is primarily used to enforce that certain methods are only run on a wrapper when it is
+     * wrapping a single node.
+     *
+     * @param {Function} fn
+     * @returns {*}
+     */
+  }, {
+    key: 'single',
+    value: function () {
+      function single(name, fn) {
+        var fnName = typeof name === 'string' ? name : 'unknown';
+        var callback = typeof fn === 'function' ? fn : name;
+        if (this.length !== 1) {
+          throw new Error('Method \u201C' + fnName + '\u201D is meant to be run on 1 node. ' + String(this.length) + ' found instead.');
+        }
+        return callback.call(this, this.getNodeInternal());
+      }
+      return single;
+    }()
+
+    /**
+     * Helpful utility method to create a new wrapper with the same root as the current wrapper, with
+     * any nodes passed in as the first parameter automatically wrapped.
+     *
+     * @param {ReactWrapper|ReactElement|Array<ReactElement>} node
+     * @returns {ReactWrapper}
+     */
+  }, {
+    key: 'wrap',
+    value: function () {
+      function wrap(node) {
+        var root = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : this[ROOT];
+        if (node instanceof ReactWrapper) {
+          return node;
+        }
+        for (var _len2 = arguments.length, args = Array(_len2 > 2 ? _len2 - 2 : 0), _key2 = 2; _key2 < _len2; _key2++) {
+          args[_key2 - 2] = arguments[_key2];
+        }
+        return new (Function.prototype.bind.apply(ReactWrapper, [null].concat([node, root], args)))();
+      }
+      return wrap;
+    }()
+
+    /**
+     * Returns an HTML-like string of the shallow render for debugging purposes.
+     *
+     * @param {Object} [options] - Property bag of additional options.
+     * @param {boolean} [options.ignoreProps] - if true, props are omitted from the string.
+     * @param {boolean} [options.verbose] - if true, arrays and objects to be verbosely printed.
+     * @returns {String}
+     */
+  }, {
+    key: 'debug',
+    value: function () {
+      function debug() {
+        var options = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : {};
+        return (0, _Debug.debugNodes)(this.getNodesInternal(), options);
+      }
+      return debug;
+    }()
+
+    /**
+     * Invokes intercepter and returns itself. intercepter is called with itself.
+     * This is helpful when debugging nodes in method chains.
+     * @param fn
+     * @returns {ReactWrapper}
+     */
+  }, {
+    key: 'tap',
+    value: function () {
+      function tap(intercepter) {
+        intercepter(this);
+        return this;
+      }
+      return tap;
+    }()
+
+    /**
+     * Detaches the react tree from the DOM. Runs `ReactDOM.unmountComponentAtNode()` under the hood.
+     *
+     * This method will most commonly be used as a "cleanup" method if you decide to use the
+     * `attachTo` option in `mount(node, options)`.
+     *
+     * The method is intentionally not "fluent" (in that it doesn't return `this`) because you should
+     * not be doing anything with this wrapper after this method is called.
+     */
+  }, {
+    key: 'detach',
+    value: function () {
+      function detach() {
+        if (this[ROOT] !== this) {
+          throw new Error('ReactWrapper::detach() can only be called on the root');
+        }
+        if (!this[OPTIONS].attachTo) {
+          throw new Error('ReactWrapper::detach() can only be called on when the `attachTo` option was passed into `mount()`.');
+        }
+        this[RENDERER].unmount();
+      }
+      return detach;
+    }()
+
+    /**
+     * Strips out all the not host-nodes from the list of nodes
+     *
+     * This method is useful if you want to check for the presence of host nodes
+     * (actually rendered HTML elements) ignoring the React nodes.
+     */
+  }, {
+    key: 'hostNodes',
+    value: function () {
+      function hostNodes() {
+        return this.filterWhere(function (n) {
+          return typeof n.type() === 'string';
+        });
+      }
+      return hostNodes;
+    }()
+  }]);
+  return ReactWrapper;
+}();
+
+/**
+ * A *special* "root" wrapper that represents the component passed as `wrappingComponent`.
+ * It is linked to the primary root such that updates to it will update the primary,
+ * and vice versa.
+ *
+ * @class WrappingComponentWrapper
+ */
+
+var WrappingComponentWrapper = function (_ReactWrapper) {
+  _inherits(WrappingComponentWrapper, _ReactWrapper);
+
+  /* eslint-disable class-methods-use-this */
+  function WrappingComponentWrapper(root, renderer) {
+    _classCallCheck(this, WrappingComponentWrapper);
+    var _this31 = _possibleConstructorReturn(this, (WrappingComponentWrapper.__proto__ || Object.getPrototypeOf(WrappingComponentWrapper)).call(this, renderer.getNode(), root));
+    (0, _Utils.privateSet)(_this31, ROOT, _this31);
+    (0, _Utils.privateSet)(_this31, RENDERER, renderer);
+    _this31[LINKED_ROOTS].push(root);
+    return _this31;
+  }
+  _createClass(WrappingComponentWrapper, [{
+    key: 'getWrappingComponent',
+    value: function () {
+      function getWrappingComponent() {
+        throw new TypeError('ReactWrapper::getWrappingComponent() can only be called on the root');
+      }
+      return getWrappingComponent;
+    }()
+  }]);
+  return WrappingComponentWrapper;
+}(ReactWrapper);
+if (_Utils.ITERATOR_SYMBOL) {
+  Object.defineProperty(ReactWrapper.prototype, _Utils.ITERATOR_SYMBOL, {
+    configurable: true,
+    value: function () {
+      function iterator() {
+        var _ref;
+        var iter = this[NODES][_Utils.ITERATOR_SYMBOL]();
+        var adapter = (0, _getAdapter2['default'])(this[OPTIONS]);
+        return _ref = {}, _defineProperty(_ref, _Utils.ITERATOR_SYMBOL, function () {
+          return this;
+        }), _defineProperty(_ref, 'next', function () {
+          function next() {
+            var next = iter.next();
+            if (next.done) {
+              return {
+                done: true
+              };
+            }
+            return {
+              done: false,
+              value: adapter.nodeToElement(next.value)
+            };
+          }
+          return next;
+        }()), _ref;
+      }
+      return iterator;
+    }()
+  });
+}
+function privateWarning(prop, extraMessage) {
+  Object.defineProperty(ReactWrapper.prototype, prop, {
+    get: function () {
+      function get() {
+        throw new Error('\n        Attempted to access ReactWrapper::' + String(prop) + ', which was previously a private property on\n        Enzyme ReactWrapper instances, but is no longer and should not be relied upon.\n        ' + String(extraMessage) + '\n      ');
+      }
+      return get;
+    }(),
+    enumerable: false,
+    configurable: false
+  });
+}
+privateWarning('node', 'Consider using the getElement() method instead.');
+privateWarning('nodes', 'Consider using the getElements() method instead.');
+privateWarning('renderer', '');
+privateWarning('options', '');
+privateWarning('complexSelector', '');
+exports['default'] = ReactWrapper;
+
+//# sourceMappingURL=ReactWrapper.js.map
+//# sourceMappingURL=data:application/json;charset=utf-8;base64,eyJ2ZXJzaW9uIjozLCJuYW1lcyI6WyJfYXJyYXlQcm90b3R5cGUiLCJyZXF1aXJlIiwiX2hhcyIsIl9VdGlscyIsIl9nZXRBZGFwdGVyIiwiX0RlYnVnIiwiX1JTVFRyYXZlcnNhbCIsIl9zZWxlY3RvcnMiLCJOT0RFIiwic3ltIiwiTk9ERVMiLCJSRU5ERVJFUiIsIlVOUkVOREVSRUQiLCJST09UIiwiT1BUSU9OUyIsIlJPT1RfTk9ERVMiLCJXUkFQUElOR19DT01QT05FTlQiLCJMSU5LRURfUk9PVFMiLCJVUERBVEVEX0JZIiwiZmluZFdoZXJlVW53cmFwcGVkIiwid3JhcHBlciIsInByZWRpY2F0ZSIsImZpbHRlciIsImFyZ3VtZW50cyIsImxlbmd0aCIsInVuZGVmaW5lZCIsInRyZWVGaWx0ZXIiLCJmbGF0TWFwIiwibiIsImdldE5vZGVJbnRlcm5hbCIsImZpbHRlcldoZXJlVW53cmFwcGVkIiwid3JhcCIsImdldE5vZGVzSW50ZXJuYWwiLCJCb29sZWFuIiwiZ2V0Um9vdE5vZGVJbnRlcm5hbCIsIkVycm9yIiwibm9kZVBhcmVudHMiLCJub2RlIiwicGFyZW50c09mTm9kZSIsInByaXZhdGVTZXROb2RlcyIsIm5vZGVzIiwicHJpdmF0ZVNldCIsIkFycmF5IiwiaXNBcnJheSIsIlJlYWN0V3JhcHBlciIsInJvb3QiLCJwYXNzZWRPcHRpb25zIiwiX2NsYXNzQ2FsbENoZWNrIiwiZ2xvYmFsIiwid2luZG93IiwiZG9jdW1lbnQiLCJvcHRpb25zIiwibWFrZU9wdGlvbnMiLCJhZGFwdGVyIiwiX2dldEFkYXB0ZXIyIiwiaXNWYWxpZEVsZW1lbnQiLCJUeXBlRXJyb3IiLCJyZW5kZXJlciIsImNyZWF0ZVJlbmRlcmVyIiwiX29iamVjdDIiLCJtb2RlIiwicmVuZGVyIiwiY29udGV4dCIsImdldE5vZGUiLCJpc0N1c3RvbUNvbXBvbmVudCIsIndyYXBwaW5nQ29tcG9uZW50IiwiZ2V0V3JhcHBpbmdDb21wb25lbnRSZW5kZXJlciIsIldyYXBwaW5nQ29tcG9uZW50V3JhcHBlciIsInB1c2giLCJfdGhpcyIsInNpbmdsZSIsIm5vZGVUb0VsZW1lbnQiLCJfdGhpczIiLCJtYXAiLCJub2RlVG9Ib3N0Tm9kZSIsInJlZm5hbWUiLCJpbnN0YW5jZSIsInJlZnMiLCJfdGhpczMiLCJfdGhpczQiLCJ1cGRhdGUiLCJmb3JFYWNoIiwibGlua2VkUm9vdCIsIl90aGlzNSIsInVubW91bnQiLCJfdGhpczYiLCJwcm9wcyIsIl90aGlzNyIsImNhbGxiYWNrIiwiY2xvbmVFbGVtZW50Iiwic3RhdGUiLCJfdGhpczgiLCJub2RlVHlwZSIsInNldFN0YXRlIiwiaW52b2tlU2V0U3RhdGVDYWxsYmFjayIsImNhbGwiLCJfdGhpczkiLCJub2RlT3JOb2RlcyIsIm90aGVyIiwiY29udGFpbnNDaGlsZHJlblN1YkFycmF5Iiwibm9kZUVxdWFsIiwiZWxlbWVudFRvTm9kZSIsInJzdE5vZGUiLCJub2RlTWF0Y2hlcyIsImEiLCJiIiwiX3RoaXMxMCIsImV2ZXJ5IiwiY29udGFpbnNNYXRjaGluZ0VsZW1lbnQiLCJfdGhpczExIiwic29tZSIsIl90aGlzMTIiLCJfdGhpczEzIiwic2VsZWN0b3IiLCJyZWR1Y2VUcmVlc0J5U2VsZWN0b3IiLCJidWlsZFByZWRpY2F0ZSIsInJlbmRlcmVkRGl2ZSIsIl90aGlzMTQiLCJnZXRUZXh0RnJvbUhvc3ROb2RlcyIsImdldEhUTUxGcm9tSG9zdE5vZGVzIiwiaHRtbCIsImxvYWRDaGVlcmlvUm9vdCIsImV2ZW50IiwiX3RoaXMxNSIsIm1vY2siLCJzaW11bGF0ZUV2ZW50IiwiZXJyb3IiLCJfdGhpczE2IiwidGhpc05vZGUiLCJzaW11bGF0ZUVycm9yIiwicm9vdE5vZGUiLCJub2RlSGllcmFyY2h5IiwiY29uY2F0IiwicHJvcHNPZk5vZGUiLCJuYW1lIiwiX3RoaXMxNyIsIl9zdGF0ZSIsIlN0cmluZyIsIl90aGlzMTgiLCJfY29udGV4dCIsImFsbENoaWxkcmVuIiwiY2hpbGRyZW5PZk5vZGUiLCJpbmRleCIsIl90aGlzMTkiLCJjaGlsZHJlbiIsImF0IiwiX3RoaXMyMCIsImFsbFBhcmVudHMiLCJwYXJlbnRzIiwiZ2V0IiwiaXMiLCJtYXRjaGluZ0FuY2VzdG9ycyIsImZpcnN0IiwiZmluZFdoZXJlIiwicHJvcE5hbWUiLCJfdGhpczIxIiwiaGFuZGxlciIsInByb3AiLCJfbGVuIiwiYXJncyIsIl9rZXkiLCJyZXNwb25zZSIsIndyYXBJbnZva2UiLCJhcHBseSIsIl90aGlzMjIiLCJSYW5nZUVycm9yIiwiX2hhczIiLCJwcm9wVmFsdWUiLCJfdHlwZW9mIiwiZWxlbWVudCIsIndyYXBwZWQiLCJrZXkiLCJ0eXBlT2ZOb2RlIiwiZGlzcGxheU5hbWVPZk5vZGUiLCJjbGFzc05hbWUiLCJpbmRleE9mIiwiY29uc29sZSIsIndhcm4iLCJoYXNDbGFzc05hbWUiLCJmbiIsIl90aGlzMjMiLCJpIiwiX3RoaXMyNCIsIl90aGlzMjUiLCJpbml0aWFsVmFsdWUiLCJyZWR1Y2UiLCJhY2N1bSIsIl90aGlzMjYiLCJyZWR1Y2VSaWdodCIsImJlZ2luIiwiZW5kIiwic2xpY2UiLCJfdGhpczI3IiwiX3RoaXMyOCIsIl90aGlzMjkiLCJmbGF0dGVuZWQiLCJfYXJyYXlQcm90b3R5cGUyIiwiX3RoaXMzMCIsImdldEVsZW1lbnRzIiwiZXhpc3RzIiwiZmluZCIsImZuTmFtZSIsIl9sZW4yIiwiX2tleTIiLCJGdW5jdGlvbiIsInByb3RvdHlwZSIsImJpbmQiLCJkZWJ1Z05vZGVzIiwiaW50ZXJjZXB0ZXIiLCJhdHRhY2hUbyIsImZpbHRlcldoZXJlIiwidHlwZSIsIl90aGlzMzEiLCJfcG9zc2libGVDb25zdHJ1Y3RvclJldHVybiIsIl9fcHJvdG9fXyIsIk9iamVjdCIsImdldFByb3RvdHlwZU9mIiwiSVRFUkFUT1JfU1lNQk9MIiwiZGVmaW5lUHJvcGVydHkiLCJjb25maWd1cmFibGUiLCJ2YWx1ZSIsIml0ZXJhdG9yIiwiX3JlZiIsIml0ZXIiLCJfZGVmaW5lUHJvcGVydHkiLCJuZXh0IiwiZG9uZSIsInByaXZhdGVXYXJuaW5nIiwiZXh0cmFNZXNzYWdlIiwiZW51bWVyYWJsZSJdLCJzb3VyY2VzIjpbIi4uL3NyYy9SZWFjdFdyYXBwZXIuanMiXSwic291cmNlc0NvbnRlbnQiOlsiaW1wb3J0IGZsYXQgZnJvbSAnYXJyYXkucHJvdG90eXBlLmZsYXQnO1xuaW1wb3J0IGhhcyBmcm9tICdoYXMnO1xuXG5pbXBvcnQge1xuICBjb250YWluc0NoaWxkcmVuU3ViQXJyYXksXG4gIHR5cGVPZk5vZGUsXG4gIGRpc3BsYXlOYW1lT2ZOb2RlLFxuICBJVEVSQVRPUl9TWU1CT0wsXG4gIG5vZGVFcXVhbCxcbiAgbm9kZU1hdGNoZXMsXG4gIG1ha2VPcHRpb25zLFxuICBzeW0sXG4gIHByaXZhdGVTZXQsXG4gIGNsb25lRWxlbWVudCxcbiAgcmVuZGVyZWREaXZlLFxuICBpc0N1c3RvbUNvbXBvbmVudCxcbiAgbG9hZENoZWVyaW9Sb290LFxufSBmcm9tICcuL1V0aWxzJztcbmltcG9ydCBnZXRBZGFwdGVyIGZyb20gJy4vZ2V0QWRhcHRlcic7XG5pbXBvcnQgeyBkZWJ1Z05vZGVzIH0gZnJvbSAnLi9EZWJ1Zyc7XG5pbXBvcnQge1xuICBwcm9wc09mTm9kZSxcbiAgaGFzQ2xhc3NOYW1lLFxuICBjaGlsZHJlbk9mTm9kZSxcbiAgcGFyZW50c09mTm9kZSxcbiAgdHJlZUZpbHRlcixcbiAgZ2V0VGV4dEZyb21Ib3N0Tm9kZXMsXG4gIGdldEhUTUxGcm9tSG9zdE5vZGVzLFxufSBmcm9tICcuL1JTVFRyYXZlcnNhbCc7XG5cbmltcG9ydCB7IGJ1aWxkUHJlZGljYXRlLCByZWR1Y2VUcmVlc0J5U2VsZWN0b3IgfSBmcm9tICcuL3NlbGVjdG9ycyc7XG5cbmNvbnN0IE5PREUgPSBzeW0oJ19fbm9kZV9fJyk7XG5jb25zdCBOT0RFUyA9IHN5bSgnX19ub2Rlc19fJyk7XG5jb25zdCBSRU5ERVJFUiA9IHN5bSgnX19yZW5kZXJlcl9fJyk7XG5jb25zdCBVTlJFTkRFUkVEID0gc3ltKCdfX3VucmVuZGVyZWRfXycpO1xuY29uc3QgUk9PVCA9IHN5bSgnX19yb290X18nKTtcbmNvbnN0IE9QVElPTlMgPSBzeW0oJ19fb3B0aW9uc19fJyk7XG5jb25zdCBST09UX05PREVTID0gc3ltKCdfX3Jvb3ROb2Rlc19fJyk7XG5jb25zdCBXUkFQUElOR19DT01QT05FTlQgPSBzeW0oJ19fd3JhcHBpbmdDb21wb25lbnRfXycpO1xuY29uc3QgTElOS0VEX1JPT1RTID0gc3ltKCdfX2xpbmtlZFJvb3RzX18nKTtcbmNvbnN0IFVQREFURURfQlkgPSBzeW0oJ19fdXBkYXRlZEJ5X18nKTtcblxuLyoqXG4gKiBGaW5kcyBhbGwgbm9kZXMgaW4gdGhlIGN1cnJlbnQgd3JhcHBlciBub2RlcycgcmVuZGVyIHRyZWVzIHRoYXQgbWF0Y2ggdGhlIHByb3ZpZGVkIHByZWRpY2F0ZVxuICogZnVuY3Rpb24uXG4gKlxuICogQHBhcmFtIHtSZWFjdFdyYXBwZXJ9IHdyYXBwZXJcbiAqIEBwYXJhbSB7RnVuY3Rpb259IHByZWRpY2F0ZVxuICogQHBhcmFtIHtGdW5jdGlvbn0gZmlsdGVyXG4gKiBAcmV0dXJucyB7UmVhY3RXcmFwcGVyfVxuICovXG5mdW5jdGlvbiBmaW5kV2hlcmVVbndyYXBwZWQod3JhcHBlciwgcHJlZGljYXRlLCBmaWx0ZXIgPSB0cmVlRmlsdGVyKSB7XG4gIHJldHVybiB3cmFwcGVyLmZsYXRNYXAoKG4pID0+IGZpbHRlcihuLmdldE5vZGVJbnRlcm5hbCgpLCBwcmVkaWNhdGUpKTtcbn1cblxuLyoqXG4gKiBSZXR1cm5zIGEgbmV3IHdyYXBwZXIgaW5zdGFuY2Ugd2l0aCBvbmx5IHRoZSBub2RlcyBvZiB0aGUgY3VycmVudCB3cmFwcGVyIGluc3RhbmNlIHRoYXQgbWF0Y2hcbiAqIHRoZSBwcm92aWRlZCBwcmVkaWNhdGUgZnVuY3Rpb24uXG4gKlxuICogQHBhcmFtIHtSZWFjdFdyYXBwZXJ9IHdyYXBwZXJcbiAqIEBwYXJhbSB7RnVuY3Rpb259IHByZWRpY2F0ZVxuICogQHJldHVybnMge1JlYWN0V3JhcHBlcn1cbiAqL1xuZnVuY3Rpb24gZmlsdGVyV2hlcmVVbndyYXBwZWQod3JhcHBlciwgcHJlZGljYXRlKSB7XG4gIHJldHVybiB3cmFwcGVyLndyYXAod3JhcHBlci5nZXROb2Rlc0ludGVybmFsKCkuZmlsdGVyKHByZWRpY2F0ZSkuZmlsdGVyKEJvb2xlYW4pKTtcbn1cblxuZnVuY3Rpb24gZ2V0Um9vdE5vZGVJbnRlcm5hbCh3cmFwcGVyKSB7XG4gIGlmICh3cmFwcGVyW1JPT1RdLmxlbmd0aCAhPT0gMSkge1xuICAgIHRocm93IG5ldyBFcnJvcignZ2V0Um9vdE5vZGVJbnRlcm5hbCh3cmFwcGVyKSBjYW4gb25seSBiZSBjYWxsZWQgd2hlbiB3cmFwcGVyIHdyYXBzIG9uZSBub2RlJyk7XG4gIH1cbiAgaWYgKHdyYXBwZXJbUk9PVF0gIT09IHdyYXBwZXIpIHtcbiAgICByZXR1cm4gd3JhcHBlcltST09UX05PREVTXVswXTtcbiAgfVxuICByZXR1cm4gd3JhcHBlcltST09UXVtOT0RFXTtcbn1cblxuZnVuY3Rpb24gbm9kZVBhcmVudHMod3JhcHBlciwgbm9kZSkge1xuICByZXR1cm4gcGFyZW50c09mTm9kZShub2RlLCBnZXRSb290Tm9kZUludGVybmFsKHdyYXBwZXIpKTtcbn1cblxuZnVuY3Rpb24gcHJpdmF0ZVNldE5vZGVzKHdyYXBwZXIsIG5vZGVzKSB7XG4gIGlmICghbm9kZXMpIHtcbiAgICBwcml2YXRlU2V0KHdyYXBwZXIsIE5PREUsIG51bGwpO1xuICAgIHByaXZhdGVTZXQod3JhcHBlciwgTk9ERVMsIFtdKTtcbiAgfSBlbHNlIGlmICghQXJyYXkuaXNBcnJheShub2RlcykpIHtcbiAgICBwcml2YXRlU2V0KHdyYXBwZXIsIE5PREUsIG5vZGVzKTtcbiAgICBwcml2YXRlU2V0KHdyYXBwZXIsIE5PREVTLCBbbm9kZXNdKTtcbiAgfSBlbHNlIHtcbiAgICBwcml2YXRlU2V0KHdyYXBwZXIsIE5PREUsIG5vZGVzWzBdKTtcbiAgICBwcml2YXRlU2V0KHdyYXBwZXIsIE5PREVTLCBub2Rlcyk7XG4gIH1cbiAgcHJpdmF0ZVNldCh3cmFwcGVyLCAnbGVuZ3RoJywgd3JhcHBlcltOT0RFU10ubGVuZ3RoKTtcbn1cblxuLyoqXG4gKiBAY2xhc3MgUmVhY3RXcmFwcGVyXG4gKi9cbmNsYXNzIFJlYWN0V3JhcHBlciB7XG4gIGNvbnN0cnVjdG9yKG5vZGVzLCByb290LCBwYXNzZWRPcHRpb25zID0ge30pIHtcbiAgICBpZiAoIWdsb2JhbC53aW5kb3cgJiYgIWdsb2JhbC5kb2N1bWVudCkge1xuICAgICAgdGhyb3cgbmV3IEVycm9yKCdJdCBsb29rcyBsaWtlIHlvdSBjYWxsZWQgYG1vdW50KClgIHdpdGhvdXQgYSBnbG9iYWwgZG9jdW1lbnQgYmVpbmcgbG9hZGVkLicpO1xuICAgIH1cbiAgICBjb25zdCBvcHRpb25zID0gbWFrZU9wdGlvbnMocGFzc2VkT3B0aW9ucyk7XG5cbiAgICBpZiAoIXJvb3QpIHtcbiAgICAgIGNvbnN0IGFkYXB0ZXIgPSBnZXRBZGFwdGVyKG9wdGlvbnMpO1xuICAgICAgaWYgKCFhZGFwdGVyLmlzVmFsaWRFbGVtZW50KG5vZGVzKSkge1xuICAgICAgICB0aHJvdyBuZXcgVHlwZUVycm9yKCdSZWFjdFdyYXBwZXIgY2FuIG9ubHkgd3JhcCB2YWxpZCBlbGVtZW50cycpO1xuICAgICAgfVxuXG4gICAgICBjb25zdCByZW5kZXJlciA9IGFkYXB0ZXIuY3JlYXRlUmVuZGVyZXIoeyBtb2RlOiAnbW91bnQnLCAuLi5vcHRpb25zIH0pO1xuICAgICAgcHJpdmF0ZVNldCh0aGlzLCBSRU5ERVJFUiwgcmVuZGVyZXIpO1xuICAgICAgcmVuZGVyZXIucmVuZGVyKG5vZGVzLCBvcHRpb25zLmNvbnRleHQpO1xuICAgICAgcHJpdmF0ZVNldCh0aGlzLCBST09ULCB0aGlzKTtcbiAgICAgIHByaXZhdGVTZXROb2Rlcyh0aGlzLCB0aGlzW1JFTkRFUkVSXS5nZXROb2RlKCkpO1xuICAgICAgcHJpdmF0ZVNldCh0aGlzLCBPUFRJT05TLCBvcHRpb25zKTtcbiAgICAgIHByaXZhdGVTZXQodGhpcywgTElOS0VEX1JPT1RTLCBbXSk7XG5cbiAgICAgIGlmIChpc0N1c3RvbUNvbXBvbmVudChvcHRpb25zLndyYXBwaW5nQ29tcG9uZW50LCBhZGFwdGVyKSkge1xuICAgICAgICBpZiAodHlwZW9mIHRoaXNbUkVOREVSRVJdLmdldFdyYXBwaW5nQ29tcG9uZW50UmVuZGVyZXIgIT09ICdmdW5jdGlvbicpIHtcbiAgICAgICAgICB0aHJvdyBuZXcgVHlwZUVycm9yKCd5b3VyIGFkYXB0ZXIgZG9lcyBub3Qgc3VwcG9ydCBgd3JhcHBpbmdDb21wb25lbnRgLiBUcnkgdXBncmFkaW5nIGl0IScpO1xuICAgICAgICB9XG5cbiAgICAgICAgLy8gZXNsaW50LWRpc2FibGUtbmV4dC1saW5lIG5vLXVzZS1iZWZvcmUtZGVmaW5lXG4gICAgICAgIHByaXZhdGVTZXQodGhpcywgV1JBUFBJTkdfQ09NUE9ORU5ULCBuZXcgV3JhcHBpbmdDb21wb25lbnRXcmFwcGVyKFxuICAgICAgICAgIHRoaXMsIHRoaXNbUkVOREVSRVJdLmdldFdyYXBwaW5nQ29tcG9uZW50UmVuZGVyZXIoKSxcbiAgICAgICAgKSk7XG4gICAgICAgIHRoaXNbTElOS0VEX1JPT1RTXS5wdXNoKHRoaXNbV1JBUFBJTkdfQ09NUE9ORU5UXSk7XG4gICAgICB9XG4gICAgfSBlbHNlIHtcbiAgICAgIHByaXZhdGVTZXQodGhpcywgUkVOREVSRVIsIHJvb3RbUkVOREVSRVJdKTtcbiAgICAgIHByaXZhdGVTZXQodGhpcywgUk9PVCwgcm9vdCk7XG4gICAgICBwcml2YXRlU2V0Tm9kZXModGhpcywgbm9kZXMpO1xuICAgICAgcHJpdmF0ZVNldCh0aGlzLCBST09UX05PREVTLCByb290W05PREVTXSk7XG4gICAgICBwcml2YXRlU2V0KHRoaXMsIE9QVElPTlMsIHJvb3RbT1BUSU9OU10pO1xuICAgICAgcHJpdmF0ZVNldCh0aGlzLCBMSU5LRURfUk9PVFMsIFtdKTtcbiAgICB9XG4gICAgcHJpdmF0ZVNldCh0aGlzLCBVTlJFTkRFUkVELCBub2Rlcyk7XG4gICAgcHJpdmF0ZVNldCh0aGlzLCBVUERBVEVEX0JZLCBudWxsKTtcbiAgfVxuXG4gIC8qKlxuICAgKiBSZXR1cm5zIHRoZSByb290IHdyYXBwZXJcbiAgICpcbiAgICogQHJldHVybiB7UmVhY3RXcmFwcGVyfVxuICAgKi9cbiAgcm9vdCgpIHtcbiAgICByZXR1cm4gdGhpc1tST09UXTtcbiAgfVxuXG4gIC8qKlxuICAgKiBSZXR1cm5zIHRoZSB3cmFwcGVkIGNvbXBvbmVudC5cbiAgICpcbiAgICogQHJldHVybiB7UmVhY3RDb21wb25lbnR9XG4gICAqL1xuICBnZXROb2RlSW50ZXJuYWwoKSB7XG4gICAgaWYgKHRoaXMubGVuZ3RoICE9PSAxKSB7XG4gICAgICB0aHJvdyBuZXcgRXJyb3IoJ1JlYWN0V3JhcHBlcjo6Z2V0Tm9kZSgpIGNhbiBvbmx5IGJlIGNhbGxlZCB3aGVuIHdyYXBwaW5nIG9uZSBub2RlJyk7XG4gICAgfVxuICAgIHJldHVybiB0aGlzW05PREVTXVswXTtcbiAgfVxuXG4gIC8qKlxuICAgKiBSZXR1cm5zIHRoZSB0aGUgd3JhcHBlZCBjb21wb25lbnRzLlxuICAgKlxuICAgKiBAcmV0dXJuIHtBcnJheTxSZWFjdENvbXBvbmVudD59XG4gICAqL1xuICBnZXROb2Rlc0ludGVybmFsKCkge1xuICAgIHJldHVybiB0aGlzW05PREVTXTtcbiAgfVxuXG4gIC8qKlxuICAgKiBSZXR1cm5zIHRoZSB3cmFwcGVkIFJlYWN0RWxlbWVudC5cbiAgICpcbiAgICogQHJldHVybiB7UmVhY3RFbGVtZW50fVxuICAgKi9cbiAgZ2V0RWxlbWVudCgpIHtcbiAgICByZXR1cm4gdGhpcy5zaW5nbGUoJ2dldEVsZW1lbnQnLCAoKSA9PiBnZXRBZGFwdGVyKHRoaXNbT1BUSU9OU10pLm5vZGVUb0VsZW1lbnQodGhpc1tOT0RFXSkpO1xuICB9XG5cbiAgLyoqXG4gICAqIFJldHVybnMgdGhlIHdyYXBwZWQgUmVhY3RFbGVtZW50cy5cbiAgICpcbiAgICogQHJldHVybiB7QXJyYXk8UmVhY3RFbGVtZW50Pn1cbiAgICovXG4gIGdldEVsZW1lbnRzKCkge1xuICAgIHJldHVybiB0aGlzW05PREVTXS5tYXAoKG4pID0+IGdldEFkYXB0ZXIodGhpc1tPUFRJT05TXSkubm9kZVRvRWxlbWVudChuKSk7XG4gIH1cblxuICAvLyBlc2xpbnQtZGlzYWJsZS1uZXh0LWxpbmUgY2xhc3MtbWV0aG9kcy11c2UtdGhpc1xuICBnZXROb2RlKCkge1xuICAgIHRocm93IG5ldyBFcnJvcignUmVhY3RXcmFwcGVyOjpnZXROb2RlKCkgaXMgbm8gbG9uZ2VyIHN1cHBvcnRlZC4gVXNlIFJlYWN0V3JhcHBlcjo6aW5zdGFuY2UoKSBpbnN0ZWFkJyk7XG4gIH1cblxuICAvLyBlc2xpbnQtZGlzYWJsZS1uZXh0LWxpbmUgY2xhc3MtbWV0aG9kcy11c2UtdGhpc1xuICBnZXROb2RlcygpIHtcbiAgICB0aHJvdyBuZXcgRXJyb3IoJ1JlYWN0V3JhcHBlcjo6Z2V0Tm9kZXMoKSBpcyBubyBsb25nZXIgc3VwcG9ydGVkLicpO1xuICB9XG5cbiAgLyoqXG4gICAqIFJldHVybnMgdGhlIG91dGVyIG1vc3QgRE9NQ29tcG9uZW50IG9mIHRoZSBjdXJyZW50IHdyYXBwZXIuXG4gICAqXG4gICAqIE5PVEU6IGNhbiBvbmx5IGJlIGNhbGxlZCBvbiBhIHdyYXBwZXIgb2YgYSBzaW5nbGUgbm9kZS5cbiAgICpcbiAgICogQHJldHVybnMge0RPTUNvbXBvbmVudH1cbiAgICovXG4gIGdldERPTU5vZGUoKSB7XG4gICAgY29uc3QgYWRhcHRlciA9IGdldEFkYXB0ZXIodGhpc1tPUFRJT05TXSk7XG4gICAgcmV0dXJuIHRoaXMuc2luZ2xlKCdnZXRET01Ob2RlJywgKG4pID0+IGFkYXB0ZXIubm9kZVRvSG9zdE5vZGUobiwgdHJ1ZSkpO1xuICB9XG5cbiAgLyoqXG4gICAqIElmIHRoZSByb290IGNvbXBvbmVudCBjb250YWluZWQgYSByZWYsIHlvdSBjYW4gYWNjZXNzIGl0IGhlcmUgYW5kIGdldCB0aGUgcmVsZXZhbnRcbiAgICogcmVhY3QgY29tcG9uZW50IGluc3RhbmNlIG9yIEhUTUwgZWxlbWVudCBpbnN0YW5jZS5cbiAgICpcbiAgICogTk9URTogY2FuIG9ubHkgYmUgY2FsbGVkIG9uIGEgd3JhcHBlciBpbnN0YW5jZSB0aGF0IGlzIGFsc28gdGhlIHJvb3QgaW5zdGFuY2UuXG4gICAqXG4gICAqIEBwYXJhbSB7U3RyaW5nfSByZWZuYW1lXG4gICAqIEByZXR1cm5zIHtSZWFjdENvbXBvbmVudCB8IEhUTUxFbGVtZW50fVxuICAgKi9cbiAgcmVmKHJlZm5hbWUpIHtcbiAgICBpZiAodGhpc1tST09UXSAhPT0gdGhpcykge1xuICAgICAgdGhyb3cgbmV3IEVycm9yKCdSZWFjdFdyYXBwZXI6OnJlZihyZWZuYW1lKSBjYW4gb25seSBiZSBjYWxsZWQgb24gdGhlIHJvb3QnKTtcbiAgICB9XG4gICAgcmV0dXJuIHRoaXMuaW5zdGFuY2UoKS5yZWZzW3JlZm5hbWVdO1xuICB9XG5cbiAgLyoqXG4gICAqIFJldHVybnMgdGhlIHdyYXBwZXIncyB1bmRlcmx5aW5nIGluc3RhbmNlLlxuICAgKlxuICAgKiBFeGFtcGxlOlxuICAgKiBgYGBcbiAgICogY29uc3Qgd3JhcHBlciA9IG1vdW50KDxNeUNvbXBvbmVudCAvPik7XG4gICAqIGNvbnN0IGluc3QgPSB3cmFwcGVyLmluc3RhbmNlKCk7XG4gICAqIGV4cGVjdChpbnN0KS50by5iZS5pbnN0YW5jZU9mKE15Q29tcG9uZW50KTtcbiAgICogYGBgXG4gICAqIEByZXR1cm5zIHtSZWFjdENvbXBvbmVudHxET01Db21wb25lbnR9XG4gICAqL1xuICBpbnN0YW5jZSgpIHtcbiAgICByZXR1cm4gdGhpcy5zaW5nbGUoJ2luc3RhbmNlJywgKCkgPT4gdGhpc1tOT0RFXS5pbnN0YW5jZSk7XG4gIH1cblxuICAvKipcbiAgICogSWYgYSBgd3JhcHBpbmdDb21wb25lbnRgIHdhcyBwYXNzZWQgaW4gYG9wdGlvbnNgLCB0aGlzIG1ldGhvZHMgcmV0dXJucyBhIGBSZWFjdFdyYXBwZXJgIGFyb3VuZFxuICAgKiB0aGUgcmVuZGVyZWQgYHdyYXBwaW5nQ29tcG9uZW50YC4gVGhpcyBgUmVhY3RXcmFwcGVyYCBjYW4gYmUgdXNlZCB0byB1cGRhdGUgdGhlXG4gICAqIGB3cmFwcGluZ0NvbXBvbmVudGAncyBwcm9wcywgc3RhdGUsIGV0Yy5cbiAgICpcbiAgICogQHJldHVybnMgUmVhY3RXcmFwcGVyXG4gICAqL1xuICBnZXRXcmFwcGluZ0NvbXBvbmVudCgpIHtcbiAgICBpZiAodGhpc1tST09UXSAhPT0gdGhpcykge1xuICAgICAgdGhyb3cgbmV3IEVycm9yKCdSZWFjdFdyYXBwZXI6OmdldFdyYXBwaW5nQ29tcG9uZW50KCkgY2FuIG9ubHkgYmUgY2FsbGVkIG9uIHRoZSByb290Jyk7XG4gICAgfVxuICAgIGlmICghdGhpc1tPUFRJT05TXS53cmFwcGluZ0NvbXBvbmVudCkge1xuICAgICAgdGhyb3cgbmV3IEVycm9yKCdSZWFjdFdyYXBwZXI6OmdldFdyYXBwaW5nQ29tcG9uZW50KCkgY2FuIG9ubHkgYmUgY2FsbGVkIG9uIGEgd3JhcHBlciB0aGF0IHdhcyBvcmlnaW5hbGx5IHBhc3NlZCBhIGB3cmFwcGluZ0NvbXBvbmVudGAgb3B0aW9uJyk7XG4gICAgfVxuICAgIHJldHVybiB0aGlzW1dSQVBQSU5HX0NPTVBPTkVOVF07XG4gIH1cblxuICAvKipcbiAgICogRm9yY2VzIGEgcmUtcmVuZGVyLiBVc2VmdWwgdG8gcnVuIGJlZm9yZSBjaGVja2luZyB0aGUgcmVuZGVyIG91dHB1dCBpZiBzb21ldGhpbmcgZXh0ZXJuYWxcbiAgICogbWF5IGJlIHVwZGF0aW5nIHRoZSBzdGF0ZSBvZiB0aGUgY29tcG9uZW50IHNvbWV3aGVyZS5cbiAgICpcbiAgICogTk9URTogbm8gbWF0dGVyIHdoYXQgaW5zdGFuY2UgdGhpcyBpcyBjYWxsZWQgb24sIGl0IHdpbGwgYWx3YXlzIHVwZGF0ZSB0aGUgcm9vdC5cbiAgICpcbiAgICogQHJldHVybnMge1JlYWN0V3JhcHBlcn1cbiAgICovXG4gIHVwZGF0ZSgpIHtcbiAgICBjb25zdCByb290ID0gdGhpc1tST09UXTtcbiAgICBpZiAodGhpcyAhPT0gcm9vdCkge1xuICAgICAgcmV0dXJuIHJvb3QudXBkYXRlKCk7XG4gICAgfVxuICAgIHByaXZhdGVTZXROb2Rlcyh0aGlzLCB0aGlzW1JFTkRFUkVSXS5nZXROb2RlKCkpO1xuICAgIHRoaXNbTElOS0VEX1JPT1RTXS5mb3JFYWNoKChsaW5rZWRSb290KSA9PiB7XG4gICAgICBpZiAobGlua2VkUm9vdCAhPT0gdGhpc1tVUERBVEVEX0JZXSkge1xuICAgICAgICAvKiBlc2xpbnQtZGlzYWJsZSBuby1wYXJhbS1yZWFzc2lnbiAqL1xuICAgICAgICAvLyBPbmx5IHVwZGF0ZSBhIGxpbmtlZCBpdCByb290IGlmIGl0IGlzIG5vdCB0aGUgb3JpZ2luYXRvciBvZiBvdXIgdXBkYXRlKCkuXG4gICAgICAgIC8vIFRoaXMgaXMgbmVlZGVkIHRvIHByZXZlbnQgaW5maW5pdGUgcmVjdXJzaW9uIHdoZW4gdGhlcmUgaXMgYSBiaS1kaXJlY3Rpb25hbFxuICAgICAgICAvLyBsaW5rIGJldHdlZW4gdHdvIHJvb3RzLlxuICAgICAgICBsaW5rZWRSb290W1VQREFURURfQlldID0gdGhpcztcbiAgICAgICAgdHJ5IHtcbiAgICAgICAgICBsaW5rZWRSb290LnVwZGF0ZSgpO1xuICAgICAgICB9IGZpbmFsbHkge1xuICAgICAgICAgIGxpbmtlZFJvb3RbVVBEQVRFRF9CWV0gPSBudWxsO1xuICAgICAgICB9XG4gICAgICB9XG4gICAgfSk7XG4gICAgcmV0dXJuIHRoaXM7XG4gIH1cblxuICAvKipcbiAgICogQSBtZXRob2QgdGhhdCB1bm1vdW50cyB0aGUgY29tcG9uZW50LiBUaGlzIGNhbiBiZSB1c2VkIHRvIHNpbXVsYXRlIGEgY29tcG9uZW50IGdvaW5nIHRocm91Z2hcbiAgICogYW5kIHVubW91bnQvbW91bnQgbGlmZWN5Y2xlLlxuICAgKlxuICAgKiBAcmV0dXJucyB7UmVhY3RXcmFwcGVyfVxuICAgKi9cbiAgdW5tb3VudCgpIHtcbiAgICBpZiAodGhpc1tST09UXSAhPT0gdGhpcykge1xuICAgICAgdGhyb3cgbmV3IEVycm9yKCdSZWFjdFdyYXBwZXI6OnVubW91bnQoKSBjYW4gb25seSBiZSBjYWxsZWQgb24gdGhlIHJvb3QnKTtcbiAgICB9XG4gICAgdGhpcy5zaW5nbGUoJ3VubW91bnQnLCAoKSA9PiB7XG4gICAgICB0aGlzW1JFTkRFUkVSXS51bm1vdW50KCk7XG4gICAgICB0aGlzLnVwZGF0ZSgpO1xuICAgIH0pO1xuICAgIHJldHVybiB0aGlzO1xuICB9XG5cbiAgLyoqXG4gICAqIEEgbWV0aG9kIHRoYXQgcmUtbW91bnRzIHRoZSBjb21wb25lbnQsIGlmIGl0IGlzIG5vdCBjdXJyZW50bHkgbW91bnRlZC5cbiAgICogVGhpcyBjYW4gYmUgdXNlZCB0byBzaW11bGF0ZSBhIGNvbXBvbmVudCBnb2luZyB0aHJvdWdoXG4gICAqIGFuIHVubW91bnQvbW91bnQgbGlmZWN5Y2xlLlxuICAgKlxuICAgKiBAcmV0dXJucyB7UmVhY3RXcmFwcGVyfVxuICAgKi9cbiAgbW91bnQoKSB7XG4gICAgaWYgKHRoaXNbUk9PVF0gIT09IHRoaXMpIHtcbiAgICAgIHRocm93IG5ldyBFcnJvcignUmVhY3RXcmFwcGVyOjptb3VudCgpIGNhbiBvbmx5IGJlIGNhbGxlZCBvbiB0aGUgcm9vdCcpO1xuICAgIH1cbiAgICB0aGlzW1JFTkRFUkVSXS5yZW5kZXIodGhpc1tVTlJFTkRFUkVEXSwgdGhpc1tPUFRJT05TXS5jb250ZXh0LCAoKSA9PiB0aGlzLnVwZGF0ZSgpKTtcbiAgICByZXR1cm4gdGhpcztcbiAgfVxuXG4gIC8qKlxuICAgKiBBIG1ldGhvZCB0aGF0IHNldHMgdGhlIHByb3BzIG9mIHRoZSByb290IGNvbXBvbmVudCwgYW5kIHJlLXJlbmRlcnMuIFVzZWZ1bCBmb3Igd2hlbiB5b3UgYXJlXG4gICAqIHdhbnRpbmcgdG8gdGVzdCBob3cgdGhlIGNvbXBvbmVudCBiZWhhdmVzIG92ZXIgdGltZSB3aXRoIGNoYW5naW5nIHByb3BzLiBDYWxsaW5nIHRoaXMsIGZvclxuICAgKiBpbnN0YW5jZSwgd2lsbCBjYWxsIHRoZSBgY29tcG9uZW50V2lsbFJlY2VpdmVQcm9wc2AgbGlmZWN5Y2xlIG1ldGhvZC5cbiAgICpcbiAgICogU2ltaWxhciB0byBgc2V0U3RhdGVgLCB0aGlzIG1ldGhvZCBhY2NlcHRzIGEgcHJvcHMgb2JqZWN0IGFuZCB3aWxsIG1lcmdlIGl0IGluIHdpdGggdGhlIGFscmVhZHlcbiAgICogZXhpc3RpbmcgcHJvcHMuXG4gICAqXG4gICAqIE5PVEU6IGNhbiBvbmx5IGJlIGNhbGxlZCBvbiBhIHdyYXBwZXIgaW5zdGFuY2UgdGhhdCBpcyBhbHNvIHRoZSByb290IGluc3RhbmNlLlxuICAgKlxuICAgKiBAcGFyYW0ge09iamVjdH0gcHJvcHMgb2JqZWN0XG4gICAqIEBwYXJhbSB7RnVuY3Rpb259IGNiIC0gY2FsbGJhY2sgZnVuY3Rpb25cbiAgICogQHJldHVybnMge1JlYWN0V3JhcHBlcn1cbiAgICovXG4gIHNldFByb3BzKHByb3BzLCBjYWxsYmFjayA9IHVuZGVmaW5lZCkge1xuICAgIGlmICh0aGlzW1JPT1RdICE9PSB0aGlzKSB7XG4gICAgICB0aHJvdyBuZXcgRXJyb3IoJ1JlYWN0V3JhcHBlcjo6c2V0UHJvcHMoKSBjYW4gb25seSBiZSBjYWxsZWQgb24gdGhlIHJvb3QnKTtcbiAgICB9XG4gICAgaWYgKGFyZ3VtZW50cy5sZW5ndGggPiAxICYmIHR5cGVvZiBjYWxsYmFjayAhPT0gJ2Z1bmN0aW9uJykge1xuICAgICAgdGhyb3cgbmV3IFR5cGVFcnJvcignUmVhY3RXcmFwcGVyOjpzZXRQcm9wcygpIGV4cGVjdHMgYSBmdW5jdGlvbiBhcyBpdHMgc2Vjb25kIGFyZ3VtZW50Jyk7XG4gICAgfVxuICAgIGNvbnN0IGFkYXB0ZXIgPSBnZXRBZGFwdGVyKHRoaXNbT1BUSU9OU10pO1xuICAgIHRoaXNbVU5SRU5ERVJFRF0gPSBjbG9uZUVsZW1lbnQoYWRhcHRlciwgdGhpc1tVTlJFTkRFUkVEXSwgcHJvcHMpO1xuICAgIHRoaXNbUkVOREVSRVJdLnJlbmRlcih0aGlzW1VOUkVOREVSRURdLCBudWxsLCAoKSA9PiB7XG4gICAgICB0aGlzLnVwZGF0ZSgpO1xuICAgICAgaWYgKGNhbGxiYWNrKSB7XG4gICAgICAgIGNhbGxiYWNrKCk7XG4gICAgICB9XG4gICAgfSk7XG4gICAgcmV0dXJuIHRoaXM7XG4gIH1cblxuICAvKipcbiAgICogQSBtZXRob2QgdG8gaW52b2tlIGBzZXRTdGF0ZWAgb24gdGhlIHJvb3QgY29tcG9uZW50IGluc3RhbmNlIHNpbWlsYXIgdG8gaG93IHlvdSBtaWdodCBpbiB0aGVcbiAgICogZGVmaW5pdGlvbiBvZiB0aGUgY29tcG9uZW50LCBhbmQgcmUtcmVuZGVycy4gIFRoaXMgbWV0aG9kIGlzIHVzZWZ1bCBmb3IgdGVzdGluZyB5b3VyIGNvbXBvbmVudFxuICAgKiBpbiBoYXJkIHRvIGFjaGlldmUgc3RhdGVzLCBob3dldmVyIHNob3VsZCBiZSB1c2VkIHNwYXJpbmdseS4gSWYgcG9zc2libGUsIHlvdSBzaG91bGQgdXRpbGl6ZVxuICAgKiB5b3VyIGNvbXBvbmVudCdzIGV4dGVybmFsIEFQSSBpbiBvcmRlciB0byBnZXQgaXQgaW50byB3aGF0ZXZlciBzdGF0ZSB5b3Ugd2FudCB0byB0ZXN0LCBpbiBvcmRlclxuICAgKiB0byBiZSBhcyBhY2N1cmF0ZSBvZiBhIHRlc3QgYXMgcG9zc2libGUuIFRoaXMgaXMgbm90IGFsd2F5cyBwcmFjdGljYWwsIGhvd2V2ZXIuXG4gICAqXG4gICAqIE5PVEU6IGNhbiBvbmx5IGJlIGNhbGxlZCBvbiBhIHdyYXBwZXIgaW5zdGFuY2UgdGhhdCBpcyBhbHNvIHRoZSByb290IGluc3RhbmNlLlxuICAgKlxuICAgKiBAcGFyYW0ge09iamVjdH0gc3RhdGUgdG8gbWVyZ2VcbiAgICogQHBhcmFtIHtGdW5jdGlvbn0gY2IgLSBjYWxsYmFjayBmdW5jdGlvblxuICAgKiBAcmV0dXJucyB7UmVhY3RXcmFwcGVyfVxuICAgKi9cbiAgc2V0U3RhdGUoc3RhdGUsIGNhbGxiYWNrID0gdW5kZWZpbmVkKSB7XG4gICAgaWYgKHRoaXMuaW5zdGFuY2UoKSA9PT0gbnVsbCB8fCB0aGlzLmdldE5vZGVJbnRlcm5hbCgpLm5vZGVUeXBlICE9PSAnY2xhc3MnKSB7XG4gICAgICB0aHJvdyBuZXcgRXJyb3IoJ1JlYWN0V3JhcHBlcjo6c2V0U3RhdGUoKSBjYW4gb25seSBiZSBjYWxsZWQgb24gY2xhc3MgY29tcG9uZW50cycpO1xuICAgIH1cbiAgICBpZiAoYXJndW1lbnRzLmxlbmd0aCA+IDEgJiYgdHlwZW9mIGNhbGxiYWNrICE9PSAnZnVuY3Rpb24nKSB7XG4gICAgICB0aHJvdyBuZXcgVHlwZUVycm9yKCdSZWFjdFdyYXBwZXI6OnNldFN0YXRlKCkgZXhwZWN0cyBhIGZ1bmN0aW9uIGFzIGl0cyBzZWNvbmQgYXJndW1lbnQnKTtcbiAgICB9XG4gICAgdGhpcy5pbnN0YW5jZSgpLnNldFN0YXRlKHN0YXRlLCAoKSA9PiB7XG4gICAgICB0aGlzLnVwZGF0ZSgpO1xuICAgICAgaWYgKGNhbGxiYWNrKSB7XG4gICAgICAgIGNvbnN0IGFkYXB0ZXIgPSBnZXRBZGFwdGVyKHRoaXNbT1BUSU9OU10pO1xuICAgICAgICBjb25zdCBpbnN0YW5jZSA9IHRoaXMuaW5zdGFuY2UoKTtcbiAgICAgICAgaWYgKGFkYXB0ZXIuaW52b2tlU2V0U3RhdGVDYWxsYmFjaykge1xuICAgICAgICAgIGFkYXB0ZXIuaW52b2tlU2V0U3RhdGVDYWxsYmFjayhpbnN0YW5jZSwgY2FsbGJhY2spO1xuICAgICAgICB9IGVsc2Uge1xuICAgICAgICAgIGNhbGxiYWNrLmNhbGwoaW5zdGFuY2UpO1xuICAgICAgICB9XG4gICAgICB9XG4gICAgfSk7XG4gICAgcmV0dXJuIHRoaXM7XG4gIH1cblxuICAvKipcbiAgICogQSBtZXRob2QgdGhhdCBzZXRzIHRoZSBjb250ZXh0IG9mIHRoZSByb290IGNvbXBvbmVudCwgYW5kIHJlLXJlbmRlcnMuIFVzZWZ1bCBmb3Igd2hlbiB5b3UgYXJlXG4gICAqIHdhbnRpbmcgdG8gdGVzdCBob3cgdGhlIGNvbXBvbmVudCBiZWhhdmVzIG92ZXIgdGltZSB3aXRoIGNoYW5naW5nIGNvbnRleHRzLlxuICAgKlxuICAgKiBOT1RFOiBjYW4gb25seSBiZSBjYWxsZWQgb24gYSB3cmFwcGVyIGluc3RhbmNlIHRoYXQgaXMgYWxzbyB0aGUgcm9vdCBpbnN0YW5jZS5cbiAgICpcbiAgICogQHBhcmFtIHtPYmplY3R9IGNvbnRleHQgb2JqZWN0XG4gICAqIEByZXR1cm5zIHtSZWFjdFdyYXBwZXJ9XG4gICAqL1xuICBzZXRDb250ZXh0KGNvbnRleHQpIHtcbiAgICBpZiAodGhpc1tST09UXSAhPT0gdGhpcykge1xuICAgICAgdGhyb3cgbmV3IEVycm9yKCdSZWFjdFdyYXBwZXI6OnNldENvbnRleHQoKSBjYW4gb25seSBiZSBjYWxsZWQgb24gdGhlIHJvb3QnKTtcbiAgICB9XG4gICAgaWYgKCF0aGlzW09QVElPTlNdLmNvbnRleHQpIHtcbiAgICAgIHRocm93IG5ldyBFcnJvcignUmVhY3RXcmFwcGVyOjpzZXRDb250ZXh0KCkgY2FuIG9ubHkgYmUgY2FsbGVkIG9uIGEgd3JhcHBlciB0aGF0IHdhcyBvcmlnaW5hbGx5IHBhc3NlZCBhIGNvbnRleHQgb3B0aW9uJyk7XG4gICAgfVxuICAgIHRoaXNbUkVOREVSRVJdLnJlbmRlcih0aGlzW1VOUkVOREVSRURdLCBjb250ZXh0LCAoKSA9PiB0aGlzLnVwZGF0ZSgpKTtcbiAgICByZXR1cm4gdGhpcztcbiAgfVxuXG4gIC8qKlxuICAgKiBXaGV0aGVyIG9yIG5vdCBhIGdpdmVuIHJlYWN0IGVsZW1lbnQgZXhpc3RzIGluIHRoZSBtb3VudCByZW5kZXIgdHJlZS5cbiAgICpcbiAgICogRXhhbXBsZTpcbiAgICogYGBgXG4gICAqIGNvbnN0IHdyYXBwZXIgPSBtb3VudCg8TXlDb21wb25lbnQgLz4pO1xuICAgKiBleHBlY3Qod3JhcHBlci5jb250YWlucyg8ZGl2IGNsYXNzTmFtZT1cImZvbyBiYXJcIiAvPikpLnRvLmVxdWFsKHRydWUpO1xuICAgKiBgYGBcbiAgICpcbiAgICogQHBhcmFtIHtSZWFjdEVsZW1lbnR8QXJyYXk8UmVhY3RFbGVtZW50Pn0gbm9kZU9yTm9kZXNcbiAgICogQHJldHVybnMge0Jvb2xlYW59XG4gICAqL1xuICBjb250YWlucyhub2RlT3JOb2Rlcykge1xuICAgIGNvbnN0IGFkYXB0ZXIgPSBnZXRBZGFwdGVyKHRoaXNbT1BUSU9OU10pO1xuXG4gICAgY29uc3QgcHJlZGljYXRlID0gQXJyYXkuaXNBcnJheShub2RlT3JOb2RlcylcbiAgICAgID8gKG90aGVyKSA9PiBjb250YWluc0NoaWxkcmVuU3ViQXJyYXkoXG4gICAgICAgIG5vZGVFcXVhbCxcbiAgICAgICAgb3RoZXIsXG4gICAgICAgIG5vZGVPck5vZGVzLm1hcCgobm9kZSkgPT4gYWRhcHRlci5lbGVtZW50VG9Ob2RlKG5vZGUpKSxcbiAgICAgIClcbiAgICAgIDogKG90aGVyKSA9PiBub2RlRXF1YWwoYWRhcHRlci5lbGVtZW50VG9Ob2RlKG5vZGVPck5vZGVzKSwgb3RoZXIpO1xuXG4gICAgcmV0dXJuIGZpbmRXaGVyZVVud3JhcHBlZCh0aGlzLCBwcmVkaWNhdGUpLmxlbmd0aCA+IDA7XG4gIH1cblxuICAvKipcbiAgICogV2hldGhlciBvciBub3QgYSBnaXZlbiByZWFjdCBlbGVtZW50IGV4aXN0cyBpbiB0aGUgY3VycmVudCByZW5kZXIgdHJlZS5cbiAgICogSXQgd2lsbCBkZXRlcm1pbmUgaWYgb25lIG9mIHRoZSB3cmFwcGVycyBlbGVtZW50IFwibG9va3MgbGlrZVwiIHRoZSBleHBlY3RlZFxuICAgKiBlbGVtZW50IGJ5IGNoZWNraW5nIGlmIGFsbCBwcm9wcyBvZiB0aGUgZXhwZWN0ZWQgZWxlbWVudCBhcmUgcHJlc2VudFxuICAgKiBvbiB0aGUgd3JhcHBlcnMgZWxlbWVudCBhbmQgZXF1YWxzIHRvIGVhY2ggb3RoZXIuXG4gICAqXG4gICAqIEV4YW1wbGU6XG4gICAqIGBgYFxuICAgKiAvLyBNeUNvbXBvbmVudCBvdXRwdXRzIDxkaXY+PGRpdiBjbGFzcz1cImZvb1wiPkhlbGxvPC9kaXY+PC9kaXY+XG4gICAqIGNvbnN0IHdyYXBwZXIgPSBtb3VudCg8TXlDb21wb25lbnQgLz4pO1xuICAgKiBleHBlY3Qod3JhcHBlci5jb250YWluc01hdGNoaW5nRWxlbWVudCg8ZGl2PkhlbGxvPC9kaXY+KSkudG8uZXF1YWwodHJ1ZSk7XG4gICAqIGBgYFxuICAgKlxuICAgKiBAcGFyYW0ge1JlYWN0RWxlbWVudH0gbm9kZVxuICAgKiBAcmV0dXJucyB7Qm9vbGVhbn1cbiAgICovXG4gIGNvbnRhaW5zTWF0Y2hpbmdFbGVtZW50KG5vZGUpIHtcbiAgICBjb25zdCByc3ROb2RlID0gZ2V0QWRhcHRlcih0aGlzW09QVElPTlNdKS5lbGVtZW50VG9Ob2RlKG5vZGUpO1xuICAgIGNvbnN0IHByZWRpY2F0ZSA9IChvdGhlcikgPT4gbm9kZU1hdGNoZXMocnN0Tm9kZSwgb3RoZXIsIChhLCBiKSA9PiBhIDw9IGIpO1xuICAgIHJldHVybiBmaW5kV2hlcmVVbndyYXBwZWQodGhpcywgcHJlZGljYXRlKS5sZW5ndGggPiAwO1xuICB9XG5cbiAgLyoqXG4gICAqIFdoZXRoZXIgb3Igbm90IGFsbCB0aGUgZ2l2ZW4gcmVhY3QgZWxlbWVudHMgZXhpc3QgaW4gdGhlIGN1cnJlbnQgcmVuZGVyIHRyZWUuXG4gICAqIEl0IHdpbGwgZGV0ZXJtaW5lIGlmIG9uZSBvZiB0aGUgd3JhcHBlcnMgZWxlbWVudCBcImxvb2tzIGxpa2VcIiB0aGUgZXhwZWN0ZWRcbiAgICogZWxlbWVudCBieSBjaGVja2luZyBpZiBhbGwgcHJvcHMgb2YgdGhlIGV4cGVjdGVkIGVsZW1lbnQgYXJlIHByZXNlbnRcbiAgICogb24gdGhlIHdyYXBwZXJzIGVsZW1lbnQgYW5kIGVxdWFscyB0byBlYWNoIG90aGVyLlxuICAgKlxuICAgKiBFeGFtcGxlOlxuICAgKiBgYGBcbiAgICogY29uc3Qgd3JhcHBlciA9IG1vdW50KDxNeUNvbXBvbmVudCAvPik7XG4gICAqIGV4cGVjdCh3cmFwcGVyLmNvbnRhaW5zQWxsTWF0Y2hpbmdFbGVtZW50cyhbXG4gICAqICAgPGRpdj5IZWxsbzwvZGl2PixcbiAgICogICA8ZGl2Pkdvb2RieWU8L2Rpdj4sXG4gICAqIF0pKS50by5lcXVhbCh0cnVlKTtcbiAgICogYGBgXG4gICAqXG4gICAqIEBwYXJhbSB7QXJyYXk8UmVhY3RFbGVtZW50Pn0gbm9kZXNcbiAgICogQHJldHVybnMge0Jvb2xlYW59XG4gICAqL1xuICBjb250YWluc0FsbE1hdGNoaW5nRWxlbWVudHMobm9kZXMpIHtcbiAgICBpZiAoIUFycmF5LmlzQXJyYXkobm9kZXMpKSB7XG4gICAgICB0aHJvdyBuZXcgVHlwZUVycm9yKCdub2RlcyBzaG91bGQgYmUgYW4gQXJyYXknKTtcbiAgICB9XG5cbiAgICByZXR1cm4gbm9kZXMuZXZlcnkoKG5vZGUpID0+IHRoaXMuY29udGFpbnNNYXRjaGluZ0VsZW1lbnQobm9kZSkpO1xuICB9XG5cbiAgLyoqXG4gICAqIFdoZXRoZXIgb3Igbm90IG9uZSBvZiB0aGUgZ2l2ZW4gcmVhY3QgZWxlbWVudHMgZXhpc3RzIGluIHRoZSBjdXJyZW50IHJlbmRlciB0cmVlLlxuICAgKiBJdCB3aWxsIGRldGVybWluZSBpZiBvbmUgb2YgdGhlIHdyYXBwZXJzIGVsZW1lbnQgXCJsb29rcyBsaWtlXCIgdGhlIGV4cGVjdGVkXG4gICAqIGVsZW1lbnQgYnkgY2hlY2tpbmcgaWYgYWxsIHByb3BzIG9mIHRoZSBleHBlY3RlZCBlbGVtZW50IGFyZSBwcmVzZW50XG4gICAqIG9uIHRoZSB3cmFwcGVycyBlbGVtZW50IGFuZCBlcXVhbHMgdG8gZWFjaCBvdGhlci5cbiAgICpcbiAgICogRXhhbXBsZTpcbiAgICogYGBgXG4gICAqIGNvbnN0IHdyYXBwZXIgPSBtb3VudCg8TXlDb21wb25lbnQgLz4pO1xuICAgKiBleHBlY3Qod3JhcHBlci5jb250YWluc0FueU1hdGNoaW5nRWxlbWVudHMoW1xuICAgKiAgIDxkaXY+SGVsbG88L2Rpdj4sXG4gICAqICAgPGRpdj5Hb29kYnllPC9kaXY+LFxuICAgKiBdKSkudG8uZXF1YWwodHJ1ZSk7XG4gICAqIGBgYFxuICAgKlxuICAgKiBAcGFyYW0ge0FycmF5PFJlYWN0RWxlbWVudD59IG5vZGVzXG4gICAqIEByZXR1cm5zIHtCb29sZWFufVxuICAgKi9cbiAgY29udGFpbnNBbnlNYXRjaGluZ0VsZW1lbnRzKG5vZGVzKSB7XG4gICAgcmV0dXJuIEFycmF5LmlzQXJyYXkobm9kZXMpICYmIG5vZGVzLnNvbWUoKG5vZGUpID0+IHRoaXMuY29udGFpbnNNYXRjaGluZ0VsZW1lbnQobm9kZSkpO1xuICB9XG5cbiAgLyoqXG4gICAqIFdoZXRoZXIgb3Igbm90IGEgZ2l2ZW4gcmVhY3QgZWxlbWVudCBleGlzdHMgaW4gdGhlIHJlbmRlciB0cmVlLlxuICAgKlxuICAgKiBFeGFtcGxlOlxuICAgKiBgYGBcbiAgICogY29uc3Qgd3JhcHBlciA9IG1vdW50KDxNeUNvbXBvbmVudCAvPik7XG4gICAqIGV4cGVjdCh3cmFwcGVyLmNvbnRhaW5zKDxkaXYgY2xhc3NOYW1lPVwiZm9vIGJhclwiIC8+KSkudG8uZXF1YWwodHJ1ZSk7XG4gICAqIGBgYFxuICAgKlxuICAgKiBAcGFyYW0ge1JlYWN0RWxlbWVudH0gbm9kZVxuICAgKiBAcmV0dXJucyB7Qm9vbGVhbn1cbiAgICovXG4gIGVxdWFscyhub2RlKSB7XG4gICAgcmV0dXJuIHRoaXMuc2luZ2xlKCdlcXVhbHMnLCAoKSA9PiBub2RlRXF1YWwodGhpcy5nZXROb2RlSW50ZXJuYWwoKSwgbm9kZSkpO1xuICB9XG5cbiAgLyoqXG4gICAqIFdoZXRoZXIgb3Igbm90IGEgZ2l2ZW4gcmVhY3QgZWxlbWVudCBtYXRjaGVzIHRoZSByZW5kZXIgdHJlZS5cbiAgICogTWF0Y2ggaXMgYmFzZWQgb24gdGhlIGV4cGVjdGVkIGVsZW1lbnQgYW5kIG5vdCBvbiB3cmFwcGVyIHJvb3Qgbm9kZS5cbiAgICogSXQgd2lsbCBkZXRlcm1pbmUgaWYgdGhlIHdyYXBwZXIgcm9vdCBub2RlIFwibG9va3MgbGlrZVwiIHRoZSBleHBlY3RlZFxuICAgKiBlbGVtZW50IGJ5IGNoZWNraW5nIGlmIGFsbCBwcm9wcyBvZiB0aGUgZXhwZWN0ZWQgZWxlbWVudCBhcmUgcHJlc2VudFxuICAgKiBvbiB0aGUgd3JhcHBlciByb290IG5vZGUgYW5kIGVxdWFscyB0byBlYWNoIG90aGVyLlxuICAgKlxuICAgKiBFeGFtcGxlOlxuICAgKiBgYGBcbiAgICogLy8gTXlDb21wb25lbnQgb3V0cHV0cyA8ZGl2IGNsYXNzPVwiZm9vXCI+SGVsbG88L2Rpdj5cbiAgICogY29uc3Qgd3JhcHBlciA9IG1vdW50KDxNeUNvbXBvbmVudCAvPik7XG4gICAqIGV4cGVjdCh3cmFwcGVyLm1hdGNoZXNFbGVtZW50KDxkaXY+SGVsbG88L2Rpdj4pKS50by5lcXVhbCh0cnVlKTtcbiAgICogYGBgXG4gICAqXG4gICAqIEBwYXJhbSB7UmVhY3RFbGVtZW50fSBub2RlXG4gICAqIEByZXR1cm5zIHtCb29sZWFufVxuICAgKi9cbiAgbWF0Y2hlc0VsZW1lbnQobm9kZSkge1xuICAgIHJldHVybiB0aGlzLnNpbmdsZSgnbWF0Y2hlc0VsZW1lbnQnLCAoKSA9PiB7XG4gICAgICBjb25zdCBhZGFwdGVyID0gZ2V0QWRhcHRlcih0aGlzW09QVElPTlNdKTtcbiAgICAgIGNvbnN0IHJzdE5vZGUgPSBhZGFwdGVyLmVsZW1lbnRUb05vZGUobm9kZSk7XG4gICAgICByZXR1cm4gbm9kZU1hdGNoZXMocnN0Tm9kZSwgdGhpcy5nZXROb2RlSW50ZXJuYWwoKSwgKGEsIGIpID0+IGEgPD0gYik7XG4gICAgfSk7XG4gIH1cblxuICAvKipcbiAgICogRmluZHMgZXZlcnkgbm9kZSBpbiB0aGUgcmVuZGVyIHRyZWUgb2YgdGhlIGN1cnJlbnQgd3JhcHBlciB0aGF0IG1hdGNoZXMgdGhlIHByb3ZpZGVkIHNlbGVjdG9yLlxuICAgKlxuICAgKiBAcGFyYW0ge0VuenltZVNlbGVjdG9yfSBzZWxlY3RvclxuICAgKiBAcmV0dXJucyB7UmVhY3RXcmFwcGVyfVxuICAgKi9cbiAgZmluZChzZWxlY3Rvcikge1xuICAgIHJldHVybiB0aGlzLndyYXAocmVkdWNlVHJlZXNCeVNlbGVjdG9yKHNlbGVjdG9yLCB0aGlzLmdldE5vZGVzSW50ZXJuYWwoKSkpO1xuICB9XG5cbiAgLyoqXG4gICAqIFJldHVybnMgd2hldGhlciBvciBub3QgY3VycmVudCBub2RlIG1hdGNoZXMgYSBwcm92aWRlZCBzZWxlY3Rvci5cbiAgICpcbiAgICogTk9URTogY2FuIG9ubHkgYmUgY2FsbGVkIG9uIGEgd3JhcHBlciBvZiBhIHNpbmdsZSBub2RlLlxuICAgKlxuICAgKiBAcGFyYW0ge0VuenltZVNlbGVjdG9yfSBzZWxlY3RvclxuICAgKiBAcmV0dXJucyB7Ym9vbGVhbn1cbiAgICovXG4gIGlzKHNlbGVjdG9yKSB7XG4gICAgY29uc3QgcHJlZGljYXRlID0gYnVpbGRQcmVkaWNhdGUoc2VsZWN0b3IpO1xuICAgIHJldHVybiB0aGlzLnNpbmdsZSgnaXMnLCAobikgPT4gcHJlZGljYXRlKG4pKTtcbiAgfVxuXG4gIC8qKlxuICAgKiBSZXR1cm5zIHRydWUgaWYgdGhlIGNvbXBvbmVudCByZW5kZXJlZCBub3RoaW5nLCBpLmUuLCBudWxsIG9yIGZhbHNlLlxuICAgKlxuICAgKiBAcmV0dXJucyB7Ym9vbGVhbn1cbiAgICovXG4gIGlzRW1wdHlSZW5kZXIoKSB7XG4gICAgY29uc3Qgbm9kZXMgPSB0aGlzLmdldE5vZGVJbnRlcm5hbCgpO1xuXG4gICAgcmV0dXJuIHJlbmRlcmVkRGl2ZShub2Rlcyk7XG4gIH1cblxuICAvKipcbiAgICogUmV0dXJucyBhIG5ldyB3cmFwcGVyIGluc3RhbmNlIHdpdGggb25seSB0aGUgbm9kZXMgb2YgdGhlIGN1cnJlbnQgd3JhcHBlciBpbnN0YW5jZSB0aGF0IG1hdGNoXG4gICAqIHRoZSBwcm92aWRlZCBwcmVkaWNhdGUgZnVuY3Rpb24uXG4gICAqXG4gICAqIEBwYXJhbSB7RnVuY3Rpb259IHByZWRpY2F0ZVxuICAgKiBAcmV0dXJucyB7UmVhY3RXcmFwcGVyfVxuICAgKi9cbiAgZmlsdGVyV2hlcmUocHJlZGljYXRlKSB7XG4gICAgcmV0dXJuIGZpbHRlcldoZXJlVW53cmFwcGVkKHRoaXMsIChuKSA9PiBwcmVkaWNhdGUodGhpcy53cmFwKG4pKSk7XG4gIH1cblxuICAvKipcbiAgICogUmV0dXJucyBhIG5ldyB3cmFwcGVyIGluc3RhbmNlIHdpdGggb25seSB0aGUgbm9kZXMgb2YgdGhlIGN1cnJlbnQgd3JhcHBlciBpbnN0YW5jZSB0aGF0IG1hdGNoXG4gICAqIHRoZSBwcm92aWRlZCBzZWxlY3Rvci5cbiAgICpcbiAgICogQHBhcmFtIHtFbnp5bWVTZWxlY3Rvcn0gc2VsZWN0b3JcbiAgICogQHJldHVybnMge1JlYWN0V3JhcHBlcn1cbiAgICovXG4gIGZpbHRlcihzZWxlY3Rvcikge1xuICAgIGNvbnN0IHByZWRpY2F0ZSA9IGJ1aWxkUHJlZGljYXRlKHNlbGVjdG9yKTtcbiAgICByZXR1cm4gZmlsdGVyV2hlcmVVbndyYXBwZWQodGhpcywgcHJlZGljYXRlKTtcbiAgfVxuXG4gIC8qKlxuICAgKiBSZXR1cm5zIGEgbmV3IHdyYXBwZXIgaW5zdGFuY2Ugd2l0aCBvbmx5IHRoZSBub2RlcyBvZiB0aGUgY3VycmVudCB3cmFwcGVyIHRoYXQgZGlkIG5vdCBtYXRjaFxuICAgKiB0aGUgcHJvdmlkZWQgc2VsZWN0b3IuIEVzc2VudGlhbGx5IHRoZSBpbnZlcnNlIG9mIGBmaWx0ZXJgLlxuICAgKlxuICAgKiBAcGFyYW0ge0VuenltZVNlbGVjdG9yfSBzZWxlY3RvclxuICAgKiBAcmV0dXJucyB7UmVhY3RXcmFwcGVyfVxuICAgKi9cbiAgbm90KHNlbGVjdG9yKSB7XG4gICAgY29uc3QgcHJlZGljYXRlID0gYnVpbGRQcmVkaWNhdGUoc2VsZWN0b3IpO1xuICAgIHJldHVybiBmaWx0ZXJXaGVyZVVud3JhcHBlZCh0aGlzLCAobikgPT4gIXByZWRpY2F0ZShuKSk7XG4gIH1cblxuICAvKipcbiAgICogUmV0dXJucyBhIHN0cmluZyBvZiB0aGUgcmVuZGVyZWQgdGV4dCBvZiB0aGUgY3VycmVudCByZW5kZXIgdHJlZS4gIFRoaXMgZnVuY3Rpb24gc2hvdWxkIGJlXG4gICAqIGxvb2tlZCBhdCB3aXRoIHNrZXB0aWNpc20gaWYgYmVpbmcgdXNlZCB0byB0ZXN0IHdoYXQgdGhlIGFjdHVhbCBIVE1MIG91dHB1dCBvZiB0aGUgY29tcG9uZW50XG4gICAqIHdpbGwgYmUuIElmIHRoYXQgaXMgd2hhdCB5b3Ugd291bGQgbGlrZSB0byB0ZXN0LCB1c2UgZW56eW1lJ3MgYHJlbmRlcmAgZnVuY3Rpb24gaW5zdGVhZC5cbiAgICpcbiAgICogTk9URTogY2FuIG9ubHkgYmUgY2FsbGVkIG9uIGEgd3JhcHBlciBvZiBhIHNpbmdsZSBub2RlLlxuICAgKlxuICAgKiBAcmV0dXJucyB7U3RyaW5nfVxuICAgKi9cbiAgdGV4dCgpIHtcbiAgICBjb25zdCBhZGFwdGVyID0gZ2V0QWRhcHRlcih0aGlzW09QVElPTlNdKTtcbiAgICByZXR1cm4gdGhpcy5zaW5nbGUoJ3RleHQnLCAobikgPT4gZ2V0VGV4dEZyb21Ib3N0Tm9kZXMobiwgYWRhcHRlcikpO1xuICB9XG5cbiAgLyoqXG4gICAqIFJldHVybnMgdGhlIEhUTUwgb2YgdGhlIG5vZGUuXG4gICAqXG4gICAqIE5PVEU6IGNhbiBvbmx5IGJlIGNhbGxlZCBvbiBhIHdyYXBwZXIgb2YgYSBzaW5nbGUgbm9kZS5cbiAgICpcbiAgICogQHJldHVybnMge1N0cmluZ31cbiAgICovXG4gIGh0bWwoKSB7XG4gICAgY29uc3QgYWRhcHRlciA9IGdldEFkYXB0ZXIodGhpc1tPUFRJT05TXSk7XG4gICAgcmV0dXJuIHRoaXMuc2luZ2xlKCdodG1sJywgKG4pID0+IGdldEhUTUxGcm9tSG9zdE5vZGVzKG4sIGFkYXB0ZXIpKTtcbiAgfVxuXG4gIC8qKlxuICAgKiBSZXR1cm5zIHRoZSBjdXJyZW50IG5vZGUgcmVuZGVyZWQgdG8gSFRNTCBhbmQgd3JhcHBlZCBpbiBhIENoZWVyaW9XcmFwcGVyLlxuICAgKlxuICAgKiBOT1RFOiBjYW4gb25seSBiZSBjYWxsZWQgb24gYSB3cmFwcGVyIG9mIGEgc2luZ2xlIG5vZGUuXG4gICAqXG4gICAqIEByZXR1cm5zIHtDaGVlcmlvV3JhcHBlcn1cbiAgICovXG4gIHJlbmRlcigpIHtcbiAgICBjb25zdCBodG1sID0gdGhpcy5odG1sKCk7XG4gICAgcmV0dXJuIGxvYWRDaGVlcmlvUm9vdChodG1sKTtcbiAgfVxuXG4gIC8qKlxuICAgKiBVc2VkIHRvIHNpbXVsYXRlIGV2ZW50cy4gUGFzcyBhbiBldmVudG5hbWUgYW5kIChvcHRpb25hbGx5KSBldmVudCBhcmd1bWVudHMuIFRoaXMgbWV0aG9kIG9mXG4gICAqIHRlc3RpbmcgZXZlbnRzIHNob3VsZCBiZSBtZXQgd2l0aCBzb21lIHNrZXB0aWNpc20uXG4gICAqXG4gICAqIEBwYXJhbSB7U3RyaW5nfSBldmVudFxuICAgKiBAcGFyYW0ge09iamVjdH0gbW9jayAob3B0aW9uYWwpXG4gICAqIEByZXR1cm5zIHtSZWFjdFdyYXBwZXJ9XG4gICAqL1xuICBzaW11bGF0ZShldmVudCwgbW9jayA9IHt9KSB7XG4gICAgcmV0dXJuIHRoaXMuc2luZ2xlKCdzaW11bGF0ZScsIChuKSA9PiB7XG4gICAgICB0aGlzW1JFTkRFUkVSXS5zaW11bGF0ZUV2ZW50KG4sIGV2ZW50LCBtb2NrKTtcbiAgICAgIHRoaXNbUk9PVF0udXBkYXRlKCk7XG4gICAgICByZXR1cm4gdGhpcztcbiAgICB9KTtcbiAgfVxuXG4gIC8qKlxuICAgKiBVc2VkIHRvIHNpbXVsYXRlIHRocm93aW5nIGEgcmVuZGVyaW5nIGVycm9yLiBQYXNzIGFuIGVycm9yIHRvIHRocm93LlxuICAgKlxuICAgKiBAcGFyYW0ge1N0cmluZ30gZXJyb3JcbiAgICogQHJldHVybnMge1JlYWN0V3JhcHBlcn1cbiAgICovXG4gIHNpbXVsYXRlRXJyb3IoZXJyb3IpIHtcbiAgICBpZiAodGhpc1tST09UXSA9PT0gdGhpcykge1xuICAgICAgdGhyb3cgbmV3IEVycm9yKCdSZWFjdFdyYXBwZXI6OnNpbXVsYXRlRXJyb3IoKSBtYXkgbm90IGJlIGNhbGxlZCBvbiB0aGUgcm9vdCcpO1xuICAgIH1cblxuICAgIHJldHVybiB0aGlzLnNpbmdsZSgnc2ltdWxhdGVFcnJvcicsICh0aGlzTm9kZSkgPT4ge1xuICAgICAgaWYgKHRoaXNOb2RlLm5vZGVUeXBlID09PSAnaG9zdCcpIHtcbiAgICAgICAgdGhyb3cgbmV3IEVycm9yKCdSZWFjdFdyYXBwZXI6OnNpbXVsYXRlRXJyb3IoKSBjYW4gb25seSBiZSBjYWxsZWQgb24gY3VzdG9tIGNvbXBvbmVudHMnKTtcbiAgICAgIH1cblxuICAgICAgY29uc3QgcmVuZGVyZXIgPSB0aGlzW1JFTkRFUkVSXTtcbiAgICAgIGlmICh0eXBlb2YgcmVuZGVyZXIuc2ltdWxhdGVFcnJvciAhPT0gJ2Z1bmN0aW9uJykge1xuICAgICAgICB0aHJvdyBuZXcgVHlwZUVycm9yKCd5b3VyIGFkYXB0ZXIgZG9lcyBub3Qgc3VwcG9ydCBgc2ltdWxhdGVFcnJvcmAuIFRyeSB1cGdyYWRpbmcgaXQhJyk7XG4gICAgICB9XG5cbiAgICAgIGNvbnN0IHJvb3ROb2RlID0gZ2V0Um9vdE5vZGVJbnRlcm5hbCh0aGlzKTtcbiAgICAgIGNvbnN0IG5vZGVIaWVyYXJjaHkgPSBbdGhpc05vZGVdLmNvbmNhdChub2RlUGFyZW50cyh0aGlzLCB0aGlzTm9kZSkpO1xuICAgICAgcmVuZGVyZXIuc2ltdWxhdGVFcnJvcihub2RlSGllcmFyY2h5LCByb290Tm9kZSwgZXJyb3IpO1xuXG4gICAgICB0aGlzW1JPT1RdLnVwZGF0ZSgpO1xuICAgICAgcmV0dXJuIHRoaXM7XG4gICAgfSk7XG4gIH1cblxuICAvKipcbiAgICogUmV0dXJucyB0aGUgcHJvcHMgaGFzaCBmb3IgdGhlIHJvb3Qgbm9kZSBvZiB0aGUgd3JhcHBlci5cbiAgICpcbiAgICogTk9URTogY2FuIG9ubHkgYmUgY2FsbGVkIG9uIGEgd3JhcHBlciBvZiBhIHNpbmdsZSBub2RlLlxuICAgKlxuICAgKiBAcmV0dXJucyB7T2JqZWN0fVxuICAgKi9cbiAgcHJvcHMoKSB7XG4gICAgcmV0dXJuIHRoaXMuc2luZ2xlKCdwcm9wcycsIHByb3BzT2ZOb2RlKTtcbiAgfVxuXG4gIC8qKlxuICAgKiBSZXR1cm5zIHRoZSBzdGF0ZSBoYXNoIGZvciB0aGUgcm9vdCBub2RlIG9mIHRoZSB3cmFwcGVyLiBPcHRpb25hbGx5IHBhc3MgaW4gYSBwcm9wIG5hbWUgYW5kIGl0XG4gICAqIHdpbGwgcmV0dXJuIGp1c3QgdGhhdCB2YWx1ZS5cbiAgICpcbiAgICogTk9URTogY2FuIG9ubHkgYmUgY2FsbGVkIG9uIGEgd3JhcHBlciBvZiBhIHNpbmdsZSBub2RlLlxuICAgKlxuICAgKiBAcGFyYW0ge1N0cmluZ30gbmFtZSAob3B0aW9uYWwpXG4gICAqIEByZXR1cm5zIHsqfVxuICAgKi9cbiAgc3RhdGUobmFtZSkge1xuICAgIGNvbnN0IHRoaXNOb2RlID0gdGhpc1tST09UXSA9PT0gdGhpcyA/IHRoaXNbUkVOREVSRVJdLmdldE5vZGUoKSA6IHRoaXMuZ2V0Tm9kZUludGVybmFsKCk7XG4gICAgaWYgKHRoaXMuaW5zdGFuY2UoKSA9PT0gbnVsbCB8fCB0aGlzTm9kZS5ub2RlVHlwZSAhPT0gJ2NsYXNzJykge1xuICAgICAgdGhyb3cgbmV3IEVycm9yKCdSZWFjdFdyYXBwZXI6OnN0YXRlKCkgY2FuIG9ubHkgYmUgY2FsbGVkIG9uIGNsYXNzIGNvbXBvbmVudHMnKTtcbiAgICB9XG4gICAgY29uc3QgX3N0YXRlID0gdGhpcy5zaW5nbGUoJ3N0YXRlJywgKCkgPT4gdGhpcy5pbnN0YW5jZSgpLnN0YXRlKTtcbiAgICBpZiAodHlwZW9mIG5hbWUgIT09ICd1bmRlZmluZWQnKSB7XG4gICAgICBpZiAoX3N0YXRlID09IG51bGwpIHtcbiAgICAgICAgdGhyb3cgbmV3IFR5cGVFcnJvcihgUmVhY3RXcmFwcGVyOjpzdGF0ZShcIiR7bmFtZX1cIikgcmVxdWlyZXMgdGhhdCBcXGBzdGF0ZVxcYCBub3QgYmUgXFxgbnVsbFxcYCBvciBcXGB1bmRlZmluZWRcXGBgKTtcbiAgICAgIH1cbiAgICAgIHJldHVybiBfc3RhdGVbbmFtZV07XG4gICAgfVxuICAgIHJldHVybiBfc3RhdGU7XG4gIH1cblxuICAvKipcbiAgICogUmV0dXJucyB0aGUgY29udGV4dCBoYXNoIGZvciB0aGUgcm9vdCBub2RlIG9mIHRoZSB3cmFwcGVyLlxuICAgKiBPcHRpb25hbGx5IHBhc3MgaW4gYSBwcm9wIG5hbWUgYW5kIGl0IHdpbGwgcmV0dXJuIGp1c3QgdGhhdCB2YWx1ZS5cbiAgICpcbiAgICogTk9URTogY2FuIG9ubHkgYmUgY2FsbGVkIG9uIGEgd3JhcHBlciBvZiBhIHNpbmdsZSBub2RlLlxuICAgKlxuICAgKiBAcGFyYW0ge1N0cmluZ30gbmFtZSAob3B0aW9uYWwpXG4gICAqIEByZXR1cm5zIHsqfVxuICAgKi9cbiAgY29udGV4dChuYW1lKSB7XG4gICAgaWYgKHRoaXNbUk9PVF0gIT09IHRoaXMpIHtcbiAgICAgIHRocm93IG5ldyBFcnJvcignUmVhY3RXcmFwcGVyOjpjb250ZXh0KCkgY2FuIG9ubHkgYmUgY2FsbGVkIG9uIHRoZSByb290Jyk7XG4gICAgfVxuICAgIGNvbnN0IGluc3RhbmNlID0gdGhpcy5zaW5nbGUoJ2NvbnRleHQnLCAoKSA9PiB0aGlzLmluc3RhbmNlKCkpO1xuICAgIGlmIChpbnN0YW5jZSA9PT0gbnVsbCkge1xuICAgICAgdGhyb3cgbmV3IEVycm9yKCdSZWFjdFdyYXBwZXI6OmNvbnRleHQoKSBjYW4gb25seSBiZSBjYWxsZWQgb24gY29tcG9uZW50cyB3aXRoIGluc3RhbmNlcycpO1xuICAgIH1cbiAgICBjb25zdCBfY29udGV4dCA9IGluc3RhbmNlLmNvbnRleHQ7XG4gICAgaWYgKHR5cGVvZiBuYW1lICE9PSAndW5kZWZpbmVkJykge1xuICAgICAgcmV0dXJuIF9jb250ZXh0W25hbWVdO1xuICAgIH1cbiAgICByZXR1cm4gX2NvbnRleHQ7XG4gIH1cblxuICAvKipcbiAgICogUmV0dXJucyBhIG5ldyB3cmFwcGVyIHdpdGggYWxsIG9mIHRoZSBjaGlsZHJlbiBvZiB0aGUgY3VycmVudCB3cmFwcGVyLlxuICAgKlxuICAgKiBAcGFyYW0ge0VuenltZVNlbGVjdG9yfSBbc2VsZWN0b3JdXG4gICAqIEByZXR1cm5zIHtSZWFjdFdyYXBwZXJ9XG4gICAqL1xuICBjaGlsZHJlbihzZWxlY3Rvcikge1xuICAgIGNvbnN0IGFsbENoaWxkcmVuID0gdGhpcy5mbGF0TWFwKChuKSA9PiBjaGlsZHJlbk9mTm9kZShuLmdldE5vZGVJbnRlcm5hbCgpKSk7XG4gICAgcmV0dXJuIHNlbGVjdG9yID8gYWxsQ2hpbGRyZW4uZmlsdGVyKHNlbGVjdG9yKSA6IGFsbENoaWxkcmVuO1xuICB9XG5cbiAgLyoqXG4gICAqIFJldHVybnMgYSBuZXcgd3JhcHBlciB3aXRoIGEgc3BlY2lmaWMgY2hpbGRcbiAgICpcbiAgICogQHBhcmFtIHtOdW1iZXJ9IFtpbmRleF1cbiAgICogQHJldHVybnMge1JlYWN0V3JhcHBlcn1cbiAgICovXG4gIGNoaWxkQXQoaW5kZXgpIHtcbiAgICByZXR1cm4gdGhpcy5zaW5nbGUoJ2NoaWxkQXQnLCAoKSA9PiB0aGlzLmNoaWxkcmVuKCkuYXQoaW5kZXgpKTtcbiAgfVxuXG4gIC8qKlxuICAgKiBSZXR1cm5zIGEgd3JhcHBlciBhcm91bmQgYWxsIG9mIHRoZSBwYXJlbnRzL2FuY2VzdG9ycyBvZiB0aGUgd3JhcHBlci4gRG9lcyBub3QgaW5jbHVkZSB0aGUgbm9kZVxuICAgKiBpbiB0aGUgY3VycmVudCB3cmFwcGVyLlxuICAgKlxuICAgKiBOT1RFOiBjYW4gb25seSBiZSBjYWxsZWQgb24gYSB3cmFwcGVyIG9mIGEgc2luZ2xlIG5vZGUuXG4gICAqXG4gICAqIEBwYXJhbSB7RW56eW1lU2VsZWN0b3J9IFtzZWxlY3Rvcl1cbiAgICogQHJldHVybnMge1JlYWN0V3JhcHBlcn1cbiAgICovXG4gIHBhcmVudHMoc2VsZWN0b3IpIHtcbiAgICByZXR1cm4gdGhpcy5zaW5nbGUoJ3BhcmVudHMnLCAobikgPT4ge1xuICAgICAgY29uc3QgYWxsUGFyZW50cyA9IHRoaXMud3JhcChub2RlUGFyZW50cyh0aGlzLCBuKSk7XG4gICAgICByZXR1cm4gc2VsZWN0b3IgPyBhbGxQYXJlbnRzLmZpbHRlcihzZWxlY3RvcikgOiBhbGxQYXJlbnRzO1xuICAgIH0pO1xuICB9XG5cbiAgLyoqXG4gICAqIFJldHVybnMgYSB3cmFwcGVyIGFyb3VuZCB0aGUgaW1tZWRpYXRlIHBhcmVudCBvZiB0aGUgY3VycmVudCBub2RlLlxuICAgKlxuICAgKiBAcmV0dXJucyB7UmVhY3RXcmFwcGVyfVxuICAgKi9cbiAgcGFyZW50KCkge1xuICAgIHJldHVybiB0aGlzLmZsYXRNYXAoKG4pID0+IFtuLnBhcmVudHMoKS5nZXQoMCldKTtcbiAgfVxuXG4gIC8qKlxuICAgKlxuICAgKiBAcGFyYW0ge0VuenltZVNlbGVjdG9yfSBzZWxlY3RvclxuICAgKiBAcmV0dXJucyB7UmVhY3RXcmFwcGVyfVxuICAgKi9cbiAgY2xvc2VzdChzZWxlY3Rvcikge1xuICAgIGlmICh0aGlzLmlzKHNlbGVjdG9yKSkge1xuICAgICAgcmV0dXJuIHRoaXM7XG4gICAgfVxuICAgIGNvbnN0IG1hdGNoaW5nQW5jZXN0b3JzID0gdGhpcy5wYXJlbnRzKCkuZmlsdGVyKHNlbGVjdG9yKTtcbiAgICByZXR1cm4gbWF0Y2hpbmdBbmNlc3RvcnMubGVuZ3RoID4gMCA/IG1hdGNoaW5nQW5jZXN0b3JzLmZpcnN0KCkgOiB0aGlzLmZpbmRXaGVyZSgoKSA9PiBmYWxzZSk7XG4gIH1cblxuICAvKipcbiAgICogUmV0dXJucyB0aGUgdmFsdWUgb2YgIHByb3Agd2l0aCB0aGUgZ2l2ZW4gbmFtZSBvZiB0aGUgcm9vdCBub2RlLlxuICAgKlxuICAgKiBAcGFyYW0ge1N0cmluZ30gcHJvcE5hbWVcbiAgICogQHJldHVybnMgeyp9XG4gICAqL1xuICBwcm9wKHByb3BOYW1lKSB7XG4gICAgcmV0dXJuIHRoaXMucHJvcHMoKVtwcm9wTmFtZV07XG4gIH1cblxuICAvKipcbiAgICogVXNlZCB0byBpbnZva2UgYSBmdW5jdGlvbiBwcm9wLlxuICAgKiBXaWxsIGludm9rZSBhbiBmdW5jdGlvbiBwcm9wIGFuZCByZXR1cm4gaXRzIHZhbHVlLlxuICAgKlxuICAgKiBAcGFyYW0ge1N0cmluZ30gcHJvcE5hbWVcbiAgICogQHJldHVybnMge0FueX1cbiAgICovXG4gIGludm9rZShwcm9wTmFtZSkge1xuICAgIHJldHVybiB0aGlzLnNpbmdsZSgnaW52b2tlJywgKCkgPT4ge1xuICAgICAgY29uc3QgaGFuZGxlciA9IHRoaXMucHJvcChwcm9wTmFtZSk7XG4gICAgICBpZiAodHlwZW9mIGhhbmRsZXIgIT09ICdmdW5jdGlvbicpIHtcbiAgICAgICAgdGhyb3cgbmV3IFR5cGVFcnJvcignUmVhY3RXcmFwcGVyOjppbnZva2UoKSByZXF1aXJlcyB0aGUgbmFtZSBvZiBhIHByb3Agd2hvc2UgdmFsdWUgaXMgYSBmdW5jdGlvbicpO1xuICAgICAgfVxuICAgICAgcmV0dXJuICguLi5hcmdzKSA9PiB7XG4gICAgICAgIGNvbnN0IHJlc3BvbnNlID0gdHlwZW9mIHRoaXNbUkVOREVSRVJdLndyYXBJbnZva2UgPT09ICdmdW5jdGlvbidcbiAgICAgICAgICA/IHRoaXNbUkVOREVSRVJdLndyYXBJbnZva2UoKCkgPT4gaGFuZGxlciguLi5hcmdzKSlcbiAgICAgICAgICA6IGhhbmRsZXIoLi4uYXJncyk7XG4gICAgICAgIHRoaXNbUk9PVF0udXBkYXRlKCk7XG4gICAgICAgIHJldHVybiByZXNwb25zZTtcbiAgICAgIH07XG4gICAgfSk7XG4gIH1cblxuICAvKipcbiAgICogUmV0dXJucyBhIHdyYXBwZXIgb2YgdGhlIG5vZGUgcmVuZGVyZWQgYnkgdGhlIHByb3ZpZGVkIHJlbmRlciBwcm9wLlxuICAgKlxuICAgKiBAcGFyYW0ge1N0cmluZ30gcHJvcE5hbWVcbiAgICogQHJldHVybnMge0Z1bmN0aW9ufVxuICAgKi9cbiAgcmVuZGVyUHJvcChwcm9wTmFtZSkge1xuICAgIGNvbnN0IGFkYXB0ZXIgPSBnZXRBZGFwdGVyKHRoaXNbT1BUSU9OU10pO1xuICAgIGlmICh0eXBlb2YgYWRhcHRlci53cmFwICE9PSAnZnVuY3Rpb24nKSB7XG4gICAgICB0aHJvdyBuZXcgUmFuZ2VFcnJvcigneW91ciBhZGFwdGVyIGRvZXMgbm90IHN1cHBvcnQgYHdyYXBgLiBUcnkgdXBncmFkaW5nIGl0IScpO1xuICAgIH1cblxuICAgIHJldHVybiB0aGlzLnNpbmdsZSgncmVuZGVyUHJvcCcsIChuKSA9PiB7XG4gICAgICBpZiAobi5ub2RlVHlwZSA9PT0gJ2hvc3QnKSB7XG4gICAgICAgIHRocm93IG5ldyBUeXBlRXJyb3IoJ1JlYWN0V3JhcHBlcjo6cmVuZGVyUHJvcCgpIGNhbiBvbmx5IGJlIGNhbGxlZCBvbiBjdXN0b20gY29tcG9uZW50cycpO1xuICAgICAgfVxuICAgICAgaWYgKHR5cGVvZiBwcm9wTmFtZSAhPT0gJ3N0cmluZycpIHtcbiAgICAgICAgdGhyb3cgbmV3IFR5cGVFcnJvcignUmVhY3RXcmFwcGVyOjpyZW5kZXJQcm9wKCk6IGBwcm9wTmFtZWAgbXVzdCBiZSBhIHN0cmluZycpO1xuICAgICAgfVxuICAgICAgY29uc3QgcHJvcHMgPSB0aGlzLnByb3BzKCk7XG4gICAgICBpZiAoIWhhcyhwcm9wcywgcHJvcE5hbWUpKSB7XG4gICAgICAgIHRocm93IG5ldyBFcnJvcihgUmVhY3RXcmFwcGVyOjpyZW5kZXJQcm9wKCk6IG5vIHByb3AgY2FsbGVkIOKAnCR7cHJvcE5hbWV94oCcIGZvdW5kYCk7XG4gICAgICB9XG4gICAgICBjb25zdCBwcm9wVmFsdWUgPSBwcm9wc1twcm9wTmFtZV07XG4gICAgICBpZiAodHlwZW9mIHByb3BWYWx1ZSAhPT0gJ2Z1bmN0aW9uJykge1xuICAgICAgICB0aHJvdyBuZXcgVHlwZUVycm9yKGBSZWFjdFdyYXBwZXI6OnJlbmRlclByb3AoKTogZXhwZWN0ZWQgcHJvcCDigJwke3Byb3BOYW1lfeKAnCB0byBjb250YWluIGEgZnVuY3Rpb24sIGJ1dCBpdCBob2xkcyDigJwke3R5cGVvZiBwcm9wVmFsdWV94oCcYCk7XG4gICAgICB9XG5cbiAgICAgIHJldHVybiAoLi4uYXJncykgPT4ge1xuICAgICAgICBjb25zdCBlbGVtZW50ID0gcHJvcFZhbHVlKC4uLmFyZ3MpO1xuICAgICAgICBjb25zdCB3cmFwcGVkID0gYWRhcHRlci53cmFwKGVsZW1lbnQpO1xuICAgICAgICByZXR1cm4gdGhpcy53cmFwKHdyYXBwZWQsIG51bGwsIHRoaXNbT1BUSU9OU10pO1xuICAgICAgfTtcbiAgICB9KTtcbiAgfVxuXG4gIC8qKlxuICAgKiBSZXR1cm5zIHRoZSBrZXkgYXNzaWduZWQgdG8gdGhlIGN1cnJlbnQgbm9kZS5cbiAgICpcbiAgICogQHJldHVybnMge1N0cmluZ31cbiAgICovXG4gIGtleSgpIHtcbiAgICByZXR1cm4gdGhpcy5zaW5nbGUoJ2tleScsIChuKSA9PiAobi5rZXkgPT09IHVuZGVmaW5lZCA/IG51bGwgOiBuLmtleSkpO1xuICB9XG5cbiAgLyoqXG4gICAqIFJldHVybnMgdGhlIHR5cGUgb2YgdGhlIHJvb3Qgbm9kZSBvZiB0aGlzIHdyYXBwZXIuIElmIGl0J3MgYSBjb21wb3NpdGUgY29tcG9uZW50LCB0aGlzIHdpbGwgYmVcbiAgICogdGhlIGNvbXBvbmVudCBjb25zdHJ1Y3Rvci4gSWYgaXQncyBuYXRpdmUgRE9NIG5vZGUsIGl0IHdpbGwgYmUgYSBzdHJpbmcuXG4gICAqXG4gICAqIEByZXR1cm5zIHtTdHJpbmd8RnVuY3Rpb259XG4gICAqL1xuICB0eXBlKCkge1xuICAgIHJldHVybiB0aGlzLnNpbmdsZSgndHlwZScsIChuKSA9PiB0eXBlT2ZOb2RlKG4pKTtcbiAgfVxuXG4gIC8qKlxuICAgKiBSZXR1cm5zIHRoZSBuYW1lIG9mIHRoZSByb290IG5vZGUgb2YgdGhpcyB3cmFwcGVyLlxuICAgKlxuICAgKiBJbiBvcmRlciBvZiBwcmVjZWRlbmNlID0+IHR5cGUuZGlzcGxheU5hbWUgLT4gdHlwZS5uYW1lIC0+IHR5cGUuXG4gICAqXG4gICAqIEByZXR1cm5zIHtTdHJpbmd9XG4gICAqL1xuICBuYW1lKCkge1xuICAgIGNvbnN0IGFkYXB0ZXIgPSBnZXRBZGFwdGVyKHRoaXNbT1BUSU9OU10pO1xuICAgIHJldHVybiB0aGlzLnNpbmdsZSgnbmFtZScsIChuKSA9PiAoXG4gICAgICBhZGFwdGVyLmRpc3BsYXlOYW1lT2ZOb2RlID8gYWRhcHRlci5kaXNwbGF5TmFtZU9mTm9kZShuKSA6IGRpc3BsYXlOYW1lT2ZOb2RlKG4pXG4gICAgKSk7XG4gIH1cblxuICAvKipcbiAgICogUmV0dXJucyB3aGV0aGVyIG9yIG5vdCB0aGUgY3VycmVudCByb290IG5vZGUgaGFzIHRoZSBnaXZlbiBjbGFzcyBuYW1lIG9yIG5vdC5cbiAgICpcbiAgICogTk9URTogY2FuIG9ubHkgYmUgY2FsbGVkIG9uIGEgd3JhcHBlciBvZiBhIHNpbmdsZSBub2RlLlxuICAgKlxuICAgKiBAcGFyYW0ge1N0cmluZ30gY2xhc3NOYW1lXG4gICAqIEByZXR1cm5zIHtCb29sZWFufVxuICAgKi9cbiAgaGFzQ2xhc3MoY2xhc3NOYW1lKSB7XG4gICAgaWYgKHR5cGVvZiBjbGFzc05hbWUgPT09ICdzdHJpbmcnICYmIGNsYXNzTmFtZS5pbmRleE9mKCcuJykgIT09IC0xKSB7XG4gICAgICAvLyBlc2xpbnQtZGlzYWJsZS1uZXh0LWxpbmUgbm8tY29uc29sZVxuICAgICAgY29uc29sZS53YXJuKCdJdCBsb29rcyBsaWtlIHlvdVxcJ3JlIGNhbGxpbmcgYFJlYWN0V3JhcHBlcjo6aGFzQ2xhc3MoKWAgd2l0aCBhIENTUyBzZWxlY3Rvci4gaGFzQ2xhc3MoKSBleHBlY3RzIGEgY2xhc3MgbmFtZSwgbm90IGEgQ1NTIHNlbGVjdG9yLicpO1xuICAgIH1cbiAgICByZXR1cm4gdGhpcy5zaW5nbGUoJ2hhc0NsYXNzJywgKG4pID0+IGhhc0NsYXNzTmFtZShuLCBjbGFzc05hbWUpKTtcbiAgfVxuXG4gIC8qKlxuICAgKiBJdGVyYXRlcyB0aHJvdWdoIGVhY2ggbm9kZSBvZiB0aGUgY3VycmVudCB3cmFwcGVyIGFuZCBleGVjdXRlcyB0aGUgcHJvdmlkZWQgZnVuY3Rpb24gd2l0aCBhXG4gICAqIHdyYXBwZXIgYXJvdW5kIHRoZSBjb3JyZXNwb25kaW5nIG5vZGUgcGFzc2VkIGluIGFzIHRoZSBmaXJzdCBhcmd1bWVudC5cbiAgICpcbiAgICogQHBhcmFtIHtGdW5jdGlvbn0gZm5cbiAgICogQHJldHVybnMge1JlYWN0V3JhcHBlcn1cbiAgICovXG4gIGZvckVhY2goZm4pIHtcbiAgICB0aGlzLmdldE5vZGVzSW50ZXJuYWwoKS5mb3JFYWNoKChuLCBpKSA9PiBmbi5jYWxsKHRoaXMsIHRoaXMud3JhcChuKSwgaSkpO1xuICAgIHJldHVybiB0aGlzO1xuICB9XG5cbiAgLyoqXG4gICAqIE1hcHMgdGhlIGN1cnJlbnQgYXJyYXkgb2Ygbm9kZXMgdG8gYW5vdGhlciBhcnJheS4gRWFjaCBub2RlIGlzIHBhc3NlZCBpbiBhcyBhIGBSZWFjdFdyYXBwZXJgXG4gICAqIHRvIHRoZSBtYXAgZnVuY3Rpb24uXG4gICAqXG4gICAqIEBwYXJhbSB7RnVuY3Rpb259IGZuXG4gICAqIEByZXR1cm5zIHtBcnJheX1cbiAgICovXG4gIG1hcChmbikge1xuICAgIHJldHVybiB0aGlzLmdldE5vZGVzSW50ZXJuYWwoKS5tYXAoKG4sIGkpID0+IGZuLmNhbGwodGhpcywgdGhpcy53cmFwKG4pLCBpKSk7XG4gIH1cblxuICAvKipcbiAgICogUmVkdWNlcyB0aGUgY3VycmVudCBhcnJheSBvZiBub2RlcyB0byBhbm90aGVyIGFycmF5LlxuICAgKiBFYWNoIG5vZGUgaXMgcGFzc2VkIGluIGFzIGEgYFNoYWxsb3dXcmFwcGVyYCB0byB0aGUgcmVkdWNlciBmdW5jdGlvbi5cbiAgICpcbiAgICogQHBhcmFtIHtGdW5jdGlvbn0gZm4gLSB0aGUgcmVkdWNlciBmdW5jdGlvblxuICAgKiBAcGFyYW0geyp9IGluaXRpYWxWYWx1ZSAtIHRoZSBpbml0aWFsIHZhbHVlXG4gICAqIEByZXR1cm5zIHsqfVxuICAgKi9cbiAgcmVkdWNlKGZuLCBpbml0aWFsVmFsdWUgPSB1bmRlZmluZWQpIHtcbiAgICBpZiAoYXJndW1lbnRzLmxlbmd0aCA+IDEpIHtcbiAgICAgIHJldHVybiB0aGlzLmdldE5vZGVzSW50ZXJuYWwoKS5yZWR1Y2UoXG4gICAgICAgIChhY2N1bSwgbiwgaSkgPT4gZm4uY2FsbCh0aGlzLCBhY2N1bSwgdGhpcy53cmFwKG4pLCBpKSxcbiAgICAgICAgaW5pdGlhbFZhbHVlLFxuICAgICAgKTtcbiAgICB9XG4gICAgcmV0dXJuIHRoaXMuZ2V0Tm9kZXNJbnRlcm5hbCgpLnJlZHVjZSgoYWNjdW0sIG4sIGkpID0+IGZuLmNhbGwoXG4gICAgICB0aGlzLFxuICAgICAgaSA9PT0gMSA/IHRoaXMud3JhcChhY2N1bSkgOiBhY2N1bSxcbiAgICAgIHRoaXMud3JhcChuKSxcbiAgICAgIGksXG4gICAgKSk7XG4gIH1cblxuICAvKipcbiAgICogUmVkdWNlcyB0aGUgY3VycmVudCBhcnJheSBvZiBub2RlcyB0byBhbm90aGVyIGFycmF5LCBmcm9tIHJpZ2h0IHRvIGxlZnQuIEVhY2ggbm9kZSBpcyBwYXNzZWRcbiAgICogaW4gYXMgYSBgU2hhbGxvd1dyYXBwZXJgIHRvIHRoZSByZWR1Y2VyIGZ1bmN0aW9uLlxuICAgKlxuICAgKiBAcGFyYW0ge0Z1bmN0aW9ufSBmbiAtIHRoZSByZWR1Y2VyIGZ1bmN0aW9uXG4gICAqIEBwYXJhbSB7Kn0gaW5pdGlhbFZhbHVlIC0gdGhlIGluaXRpYWwgdmFsdWVcbiAgICogQHJldHVybnMgeyp9XG4gICAqL1xuICByZWR1Y2VSaWdodChmbiwgaW5pdGlhbFZhbHVlID0gdW5kZWZpbmVkKSB7XG4gICAgaWYgKGFyZ3VtZW50cy5sZW5ndGggPiAxKSB7XG4gICAgICByZXR1cm4gdGhpcy5nZXROb2Rlc0ludGVybmFsKCkucmVkdWNlUmlnaHQoXG4gICAgICAgIChhY2N1bSwgbiwgaSkgPT4gZm4uY2FsbCh0aGlzLCBhY2N1bSwgdGhpcy53cmFwKG4pLCBpKSxcbiAgICAgICAgaW5pdGlhbFZhbHVlLFxuICAgICAgKTtcbiAgICB9XG4gICAgcmV0dXJuIHRoaXMuZ2V0Tm9kZXNJbnRlcm5hbCgpLnJlZHVjZVJpZ2h0KChhY2N1bSwgbiwgaSkgPT4gZm4uY2FsbChcbiAgICAgIHRoaXMsXG4gICAgICBpID09PSAxID8gdGhpcy53cmFwKGFjY3VtKSA6IGFjY3VtLFxuICAgICAgdGhpcy53cmFwKG4pLFxuICAgICAgaSxcbiAgICApKTtcbiAgfVxuXG4gIC8qKlxuICAgKiBSZXR1cm5zIGEgbmV3IHdyYXBwZXIgd2l0aCBhIHN1YnNldCBvZiB0aGUgbm9kZXMgb2YgdGhlIG9yaWdpbmFsIHdyYXBwZXIsIGFjY29yZGluZyB0byB0aGVcbiAgICogcnVsZXMgb2YgYEFycmF5I3NsaWNlYC5cbiAgICpcbiAgICogQHBhcmFtIHtOdW1iZXJ9IGJlZ2luXG4gICAqIEBwYXJhbSB7TnVtYmVyfSBlbmRcbiAgICogQHJldHVybnMge1NoYWxsb3dXcmFwcGVyfVxuICAgKi9cbiAgc2xpY2UoYmVnaW4sIGVuZCkge1xuICAgIHJldHVybiB0aGlzLndyYXAodGhpcy5nZXROb2Rlc0ludGVybmFsKCkuc2xpY2UoYmVnaW4sIGVuZCkpO1xuICB9XG5cbiAgLyoqXG4gICAqIFJldHVybnMgd2hldGhlciBvciBub3QgYW55IG9mIHRoZSBub2RlcyBpbiB0aGUgd3JhcHBlciBtYXRjaCB0aGUgcHJvdmlkZWQgc2VsZWN0b3IuXG4gICAqXG4gICAqIEBwYXJhbSB7RW56eW1lU2VsZWN0b3J9IHNlbGVjdG9yXG4gICAqIEByZXR1cm5zIHtCb29sZWFufVxuICAgKi9cbiAgc29tZShzZWxlY3Rvcikge1xuICAgIGlmICh0aGlzW1JPT1RdID09PSB0aGlzKSB7XG4gICAgICB0aHJvdyBuZXcgRXJyb3IoJ1JlYWN0V3JhcHBlcjo6c29tZSgpIGNhbiBub3QgYmUgY2FsbGVkIG9uIHRoZSByb290Jyk7XG4gICAgfVxuICAgIGNvbnN0IHByZWRpY2F0ZSA9IGJ1aWxkUHJlZGljYXRlKHNlbGVjdG9yKTtcbiAgICByZXR1cm4gdGhpcy5nZXROb2Rlc0ludGVybmFsKCkuc29tZShwcmVkaWNhdGUpO1xuICB9XG5cbiAgLyoqXG4gICAqIFJldHVybnMgd2hldGhlciBvciBub3QgYW55IG9mIHRoZSBub2RlcyBpbiB0aGUgd3JhcHBlciBwYXNzIHRoZSBwcm92aWRlZCBwcmVkaWNhdGUgZnVuY3Rpb24uXG4gICAqXG4gICAqIEBwYXJhbSB7RnVuY3Rpb259IHByZWRpY2F0ZVxuICAgKiBAcmV0dXJucyB7Qm9vbGVhbn1cbiAgICovXG4gIHNvbWVXaGVyZShwcmVkaWNhdGUpIHtcbiAgICByZXR1cm4gdGhpcy5nZXROb2Rlc0ludGVybmFsKCkuc29tZSgobiwgaSkgPT4gcHJlZGljYXRlLmNhbGwodGhpcywgdGhpcy53cmFwKG4pLCBpKSk7XG4gIH1cblxuICAvKipcbiAgICogUmV0dXJucyB3aGV0aGVyIG9yIG5vdCBhbGwgb2YgdGhlIG5vZGVzIGluIHRoZSB3cmFwcGVyIG1hdGNoIHRoZSBwcm92aWRlZCBzZWxlY3Rvci5cbiAgICpcbiAgICogQHBhcmFtIHtFbnp5bWVTZWxlY3Rvcn0gc2VsZWN0b3JcbiAgICogQHJldHVybnMge0Jvb2xlYW59XG4gICAqL1xuICBldmVyeShzZWxlY3Rvcikge1xuICAgIGNvbnN0IHByZWRpY2F0ZSA9IGJ1aWxkUHJlZGljYXRlKHNlbGVjdG9yKTtcbiAgICByZXR1cm4gdGhpcy5nZXROb2Rlc0ludGVybmFsKCkuZXZlcnkocHJlZGljYXRlKTtcbiAgfVxuXG4gIC8qKlxuICAgKiBSZXR1cm5zIHdoZXRoZXIgb3Igbm90IGFueSBvZiB0aGUgbm9kZXMgaW4gdGhlIHdyYXBwZXIgcGFzcyB0aGUgcHJvdmlkZWQgcHJlZGljYXRlIGZ1bmN0aW9uLlxuICAgKlxuICAgKiBAcGFyYW0ge0Z1bmN0aW9ufSBwcmVkaWNhdGVcbiAgICogQHJldHVybnMge0Jvb2xlYW59XG4gICAqL1xuICBldmVyeVdoZXJlKHByZWRpY2F0ZSkge1xuICAgIHJldHVybiB0aGlzLmdldE5vZGVzSW50ZXJuYWwoKS5ldmVyeSgobiwgaSkgPT4gcHJlZGljYXRlLmNhbGwodGhpcywgdGhpcy53cmFwKG4pLCBpKSk7XG4gIH1cblxuICAvKipcbiAgICogVXRpbGl0eSBtZXRob2QgdXNlZCB0byBjcmVhdGUgbmV3IHdyYXBwZXJzIHdpdGggYSBtYXBwaW5nIGZ1bmN0aW9uIHRoYXQgcmV0dXJucyBhbiBhcnJheSBvZlxuICAgKiBub2RlcyBpbiByZXNwb25zZSB0byBhIHNpbmdsZSBub2RlIHdyYXBwZXIuIFRoZSByZXR1cm5lZCB3cmFwcGVyIGlzIGEgc2luZ2xlIHdyYXBwZXIgYXJvdW5kXG4gICAqIGFsbCBvZiB0aGUgbWFwcGVkIG5vZGVzIGZsYXR0ZW5lZCAoYW5kIGRlLWR1cGxpY2F0ZWQpLlxuICAgKlxuICAgKiBAcGFyYW0ge0Z1bmN0aW9ufSBmblxuICAgKiBAcmV0dXJucyB7UmVhY3RXcmFwcGVyfVxuICAgKi9cbiAgZmxhdE1hcChmbikge1xuICAgIGNvbnN0IG5vZGVzID0gdGhpcy5nZXROb2Rlc0ludGVybmFsKCkubWFwKChuLCBpKSA9PiBmbi5jYWxsKHRoaXMsIHRoaXMud3JhcChuKSwgaSkpO1xuICAgIGNvbnN0IGZsYXR0ZW5lZCA9IGZsYXQobm9kZXMsIDEpO1xuICAgIHJldHVybiB0aGlzLndyYXAoZmxhdHRlbmVkLmZpbHRlcihCb29sZWFuKSk7XG4gIH1cblxuICAvKipcbiAgICogRmluZHMgYWxsIG5vZGVzIGluIHRoZSBjdXJyZW50IHdyYXBwZXIgbm9kZXMnIHJlbmRlciB0cmVlcyB0aGF0IG1hdGNoIHRoZSBwcm92aWRlZCBwcmVkaWNhdGVcbiAgICogZnVuY3Rpb24uXG4gICAqXG4gICAqIEBwYXJhbSB7RnVuY3Rpb259IHByZWRpY2F0ZVxuICAgKiBAcmV0dXJucyB7UmVhY3RXcmFwcGVyfVxuICAgKi9cbiAgZmluZFdoZXJlKHByZWRpY2F0ZSkge1xuICAgIHJldHVybiBmaW5kV2hlcmVVbndyYXBwZWQodGhpcywgKG4pID0+IHtcbiAgICAgIGNvbnN0IG5vZGUgPSB0aGlzLndyYXAobik7XG4gICAgICByZXR1cm4gbm9kZS5sZW5ndGggPiAwICYmIHByZWRpY2F0ZShub2RlKTtcbiAgICB9KTtcbiAgfVxuXG4gIC8qKlxuICAgKiBSZXR1cm5zIHRoZSBub2RlIGF0IGEgZ2l2ZW4gaW5kZXggb2YgdGhlIGN1cnJlbnQgd3JhcHBlci5cbiAgICpcbiAgICogQHBhcmFtIHtOdW1iZXJ9IGluZGV4XG4gICAqIEByZXR1cm5zIHtSZWFjdEVsZW1lbnR9XG4gICAqL1xuICBnZXQoaW5kZXgpIHtcbiAgICByZXR1cm4gdGhpcy5nZXRFbGVtZW50cygpW2luZGV4XTtcbiAgfVxuXG4gIC8qKlxuICAgKiBSZXR1cm5zIGEgd3JhcHBlciBhcm91bmQgdGhlIG5vZGUgYXQgYSBnaXZlbiBpbmRleCBvZiB0aGUgY3VycmVudCB3cmFwcGVyLlxuICAgKlxuICAgKiBAcGFyYW0ge051bWJlcn0gaW5kZXhcbiAgICogQHJldHVybnMge1JlYWN0V3JhcHBlcn1cbiAgICovXG4gIGF0KGluZGV4KSB7XG4gICAgY29uc3Qgbm9kZXMgPSB0aGlzLmdldE5vZGVzSW50ZXJuYWwoKTtcbiAgICBpZiAoaW5kZXggPCBub2Rlcy5sZW5ndGgpIHtcbiAgICAgIHJldHVybiB0aGlzLndyYXAobm9kZXNbaW5kZXhdKTtcbiAgICB9XG4gICAgcmV0dXJuIHRoaXMud3JhcChbXSk7XG4gIH1cblxuICAvKipcbiAgICogUmV0dXJucyBhIHdyYXBwZXIgYXJvdW5kIHRoZSBmaXJzdCBub2RlIG9mIHRoZSBjdXJyZW50IHdyYXBwZXIuXG4gICAqXG4gICAqIEByZXR1cm5zIHtSZWFjdFdyYXBwZXJ9XG4gICAqL1xuICBmaXJzdCgpIHtcbiAgICByZXR1cm4gdGhpcy5hdCgwKTtcbiAgfVxuXG4gIC8qKlxuICAgKiBSZXR1cm5zIGEgd3JhcHBlciBhcm91bmQgdGhlIGxhc3Qgbm9kZSBvZiB0aGUgY3VycmVudCB3cmFwcGVyLlxuICAgKlxuICAgKiBAcmV0dXJucyB7UmVhY3RXcmFwcGVyfVxuICAgKi9cbiAgbGFzdCgpIHtcbiAgICByZXR1cm4gdGhpcy5hdCh0aGlzLmxlbmd0aCAtIDEpO1xuICB9XG5cbiAgLyoqXG4gICAqIERlbGVnYXRlcyB0byBleGlzdHMoKVxuICAgKlxuICAgKiBAcmV0dXJucyB7Ym9vbGVhbn1cbiAgICovXG4gIGlzRW1wdHkoKSB7XG4gICAgLy8gZXNsaW50LWRpc2FibGUtbmV4dC1saW5lIG5vLWNvbnNvbGVcbiAgICBjb25zb2xlLndhcm4oJ0VuenltZTo6RGVwcmVjYXRlZCBtZXRob2QgaXNFbXB0eSgpIGNhbGxlZCwgdXNlIGV4aXN0cygpIGluc3RlYWQuJyk7XG4gICAgcmV0dXJuICF0aGlzLmV4aXN0cygpO1xuICB9XG5cbiAgLyoqXG4gICAqIFJldHVybnMgdHJ1ZSBpZiB0aGUgY3VycmVudCB3cmFwcGVyIGhhcyBub2Rlcy4gRmFsc2Ugb3RoZXJ3aXNlLlxuICAgKiBJZiBjYWxsZWQgd2l0aCBhIHNlbGVjdG9yIGl0IHJldHVybnMgYC5maW5kKHNlbGVjdG9yKS5leGlzdHMoKWAgaW5zdGVhZC5cbiAgICpcbiAgICogQHBhcmFtIHtFbnp5bWVTZWxlY3Rvcn0gc2VsZWN0b3IgKG9wdGlvbmFsKVxuICAgKiBAcmV0dXJucyB7Ym9vbGVhbn1cbiAgICovXG4gIGV4aXN0cyhzZWxlY3RvciA9IG51bGwpIHtcbiAgICByZXR1cm4gYXJndW1lbnRzLmxlbmd0aCA+IDAgPyB0aGlzLmZpbmQoc2VsZWN0b3IpLmV4aXN0cygpIDogdGhpcy5sZW5ndGggPiAwO1xuICB9XG5cbiAgLyoqXG4gICAqIFV0aWxpdHkgbWV0aG9kIHRoYXQgdGhyb3dzIGFuIGVycm9yIGlmIHRoZSBjdXJyZW50IGluc3RhbmNlIGhhcyBhIGxlbmd0aCBvdGhlciB0aGFuIG9uZS5cbiAgICogVGhpcyBpcyBwcmltYXJpbHkgdXNlZCB0byBlbmZvcmNlIHRoYXQgY2VydGFpbiBtZXRob2RzIGFyZSBvbmx5IHJ1biBvbiBhIHdyYXBwZXIgd2hlbiBpdCBpc1xuICAgKiB3cmFwcGluZyBhIHNpbmdsZSBub2RlLlxuICAgKlxuICAgKiBAcGFyYW0ge0Z1bmN0aW9ufSBmblxuICAgKiBAcmV0dXJucyB7Kn1cbiAgICovXG4gIHNpbmdsZShuYW1lLCBmbikge1xuICAgIGNvbnN0IGZuTmFtZSA9IHR5cGVvZiBuYW1lID09PSAnc3RyaW5nJyA/IG5hbWUgOiAndW5rbm93bic7XG4gICAgY29uc3QgY2FsbGJhY2sgPSB0eXBlb2YgZm4gPT09ICdmdW5jdGlvbicgPyBmbiA6IG5hbWU7XG4gICAgaWYgKHRoaXMubGVuZ3RoICE9PSAxKSB7XG4gICAgICB0aHJvdyBuZXcgRXJyb3IoYE1ldGhvZCDigJwke2ZuTmFtZX3igJ0gaXMgbWVhbnQgdG8gYmUgcnVuIG9uIDEgbm9kZS4gJHt0aGlzLmxlbmd0aH0gZm91bmQgaW5zdGVhZC5gKTtcbiAgICB9XG4gICAgcmV0dXJuIGNhbGxiYWNrLmNhbGwodGhpcywgdGhpcy5nZXROb2RlSW50ZXJuYWwoKSk7XG4gIH1cblxuICAvKipcbiAgICogSGVscGZ1bCB1dGlsaXR5IG1ldGhvZCB0byBjcmVhdGUgYSBuZXcgd3JhcHBlciB3aXRoIHRoZSBzYW1lIHJvb3QgYXMgdGhlIGN1cnJlbnQgd3JhcHBlciwgd2l0aFxuICAgKiBhbnkgbm9kZXMgcGFzc2VkIGluIGFzIHRoZSBmaXJzdCBwYXJhbWV0ZXIgYXV0b21hdGljYWxseSB3cmFwcGVkLlxuICAgKlxuICAgKiBAcGFyYW0ge1JlYWN0V3JhcHBlcnxSZWFjdEVsZW1lbnR8QXJyYXk8UmVhY3RFbGVtZW50Pn0gbm9kZVxuICAgKiBAcmV0dXJucyB7UmVhY3RXcmFwcGVyfVxuICAgKi9cbiAgd3JhcChub2RlLCByb290ID0gdGhpc1tST09UXSwgLi4uYXJncykge1xuICAgIGlmIChub2RlIGluc3RhbmNlb2YgUmVhY3RXcmFwcGVyKSB7XG4gICAgICByZXR1cm4gbm9kZTtcbiAgICB9XG4gICAgcmV0dXJuIG5ldyBSZWFjdFdyYXBwZXIobm9kZSwgcm9vdCwgLi4uYXJncyk7XG4gIH1cblxuICAvKipcbiAgICogUmV0dXJucyBhbiBIVE1MLWxpa2Ugc3RyaW5nIG9mIHRoZSBzaGFsbG93IHJlbmRlciBmb3IgZGVidWdnaW5nIHB1cnBvc2VzLlxuICAgKlxuICAgKiBAcGFyYW0ge09iamVjdH0gW29wdGlvbnNdIC0gUHJvcGVydHkgYmFnIG9mIGFkZGl0aW9uYWwgb3B0aW9ucy5cbiAgICogQHBhcmFtIHtib29sZWFufSBbb3B0aW9ucy5pZ25vcmVQcm9wc10gLSBpZiB0cnVlLCBwcm9wcyBhcmUgb21pdHRlZCBmcm9tIHRoZSBzdHJpbmcuXG4gICAqIEBwYXJhbSB7Ym9vbGVhbn0gW29wdGlvbnMudmVyYm9zZV0gLSBpZiB0cnVlLCBhcnJheXMgYW5kIG9iamVjdHMgdG8gYmUgdmVyYm9zZWx5IHByaW50ZWQuXG4gICAqIEByZXR1cm5zIHtTdHJpbmd9XG4gICAqL1xuICBkZWJ1ZyhvcHRpb25zID0ge30pIHtcbiAgICByZXR1cm4gZGVidWdOb2Rlcyh0aGlzLmdldE5vZGVzSW50ZXJuYWwoKSwgb3B0aW9ucyk7XG4gIH1cblxuICAvKipcbiAgICogSW52b2tlcyBpbnRlcmNlcHRlciBhbmQgcmV0dXJucyBpdHNlbGYuIGludGVyY2VwdGVyIGlzIGNhbGxlZCB3aXRoIGl0c2VsZi5cbiAgICogVGhpcyBpcyBoZWxwZnVsIHdoZW4gZGVidWdnaW5nIG5vZGVzIGluIG1ldGhvZCBjaGFpbnMuXG4gICAqIEBwYXJhbSBmblxuICAgKiBAcmV0dXJucyB7UmVhY3RXcmFwcGVyfVxuICAgKi9cbiAgdGFwKGludGVyY2VwdGVyKSB7XG4gICAgaW50ZXJjZXB0ZXIodGhpcyk7XG4gICAgcmV0dXJuIHRoaXM7XG4gIH1cblxuICAvKipcbiAgICogRGV0YWNoZXMgdGhlIHJlYWN0IHRyZWUgZnJvbSB0aGUgRE9NLiBSdW5zIGBSZWFjdERPTS51bm1vdW50Q29tcG9uZW50QXROb2RlKClgIHVuZGVyIHRoZSBob29kLlxuICAgKlxuICAgKiBUaGlzIG1ldGhvZCB3aWxsIG1vc3QgY29tbW9ubHkgYmUgdXNlZCBhcyBhIFwiY2xlYW51cFwiIG1ldGhvZCBpZiB5b3UgZGVjaWRlIHRvIHVzZSB0aGVcbiAgICogYGF0dGFjaFRvYCBvcHRpb24gaW4gYG1vdW50KG5vZGUsIG9wdGlvbnMpYC5cbiAgICpcbiAgICogVGhlIG1ldGhvZCBpcyBpbnRlbnRpb25hbGx5IG5vdCBcImZsdWVudFwiIChpbiB0aGF0IGl0IGRvZXNuJ3QgcmV0dXJuIGB0aGlzYCkgYmVjYXVzZSB5b3Ugc2hvdWxkXG4gICAqIG5vdCBiZSBkb2luZyBhbnl0aGluZyB3aXRoIHRoaXMgd3JhcHBlciBhZnRlciB0aGlzIG1ldGhvZCBpcyBjYWxsZWQuXG4gICAqL1xuICBkZXRhY2goKSB7XG4gICAgaWYgKHRoaXNbUk9PVF0gIT09IHRoaXMpIHtcbiAgICAgIHRocm93IG5ldyBFcnJvcignUmVhY3RXcmFwcGVyOjpkZXRhY2goKSBjYW4gb25seSBiZSBjYWxsZWQgb24gdGhlIHJvb3QnKTtcbiAgICB9XG4gICAgaWYgKCF0aGlzW09QVElPTlNdLmF0dGFjaFRvKSB7XG4gICAgICB0aHJvdyBuZXcgRXJyb3IoJ1JlYWN0V3JhcHBlcjo6ZGV0YWNoKCkgY2FuIG9ubHkgYmUgY2FsbGVkIG9uIHdoZW4gdGhlIGBhdHRhY2hUb2Agb3B0aW9uIHdhcyBwYXNzZWQgaW50byBgbW91bnQoKWAuJyk7XG4gICAgfVxuICAgIHRoaXNbUkVOREVSRVJdLnVubW91bnQoKTtcbiAgfVxuXG4gIC8qKlxuICAgKiBTdHJpcHMgb3V0IGFsbCB0aGUgbm90IGhvc3Qtbm9kZXMgZnJvbSB0aGUgbGlzdCBvZiBub2Rlc1xuICAgKlxuICAgKiBUaGlzIG1ldGhvZCBpcyB1c2VmdWwgaWYgeW91IHdhbnQgdG8gY2hlY2sgZm9yIHRoZSBwcmVzZW5jZSBvZiBob3N0IG5vZGVzXG4gICAqIChhY3R1YWxseSByZW5kZXJlZCBIVE1MIGVsZW1lbnRzKSBpZ25vcmluZyB0aGUgUmVhY3Qgbm9kZXMuXG4gICAqL1xuICBob3N0Tm9kZXMoKSB7XG4gICAgcmV0dXJuIHRoaXMuZmlsdGVyV2hlcmUoKG4pID0+IHR5cGVvZiBuLnR5cGUoKSA9PT0gJ3N0cmluZycpO1xuICB9XG59XG5cbi8qKlxuICogQSAqc3BlY2lhbCogXCJyb290XCIgd3JhcHBlciB0aGF0IHJlcHJlc2VudHMgdGhlIGNvbXBvbmVudCBwYXNzZWQgYXMgYHdyYXBwaW5nQ29tcG9uZW50YC5cbiAqIEl0IGlzIGxpbmtlZCB0byB0aGUgcHJpbWFyeSByb290IHN1Y2ggdGhhdCB1cGRhdGVzIHRvIGl0IHdpbGwgdXBkYXRlIHRoZSBwcmltYXJ5LFxuICogYW5kIHZpY2UgdmVyc2EuXG4gKlxuICogQGNsYXNzIFdyYXBwaW5nQ29tcG9uZW50V3JhcHBlclxuICovXG5jbGFzcyBXcmFwcGluZ0NvbXBvbmVudFdyYXBwZXIgZXh0ZW5kcyBSZWFjdFdyYXBwZXIge1xuICAvKiBlc2xpbnQtZGlzYWJsZSBjbGFzcy1tZXRob2RzLXVzZS10aGlzICovXG4gIGNvbnN0cnVjdG9yKHJvb3QsIHJlbmRlcmVyKSB7XG4gICAgc3VwZXIocmVuZGVyZXIuZ2V0Tm9kZSgpLCByb290KTtcblxuICAgIHByaXZhdGVTZXQodGhpcywgUk9PVCwgdGhpcyk7XG4gICAgcHJpdmF0ZVNldCh0aGlzLCBSRU5ERVJFUiwgcmVuZGVyZXIpO1xuICAgIHRoaXNbTElOS0VEX1JPT1RTXS5wdXNoKHJvb3QpO1xuICB9XG5cbiAgZ2V0V3JhcHBpbmdDb21wb25lbnQoKSB7XG4gICAgdGhyb3cgbmV3IFR5cGVFcnJvcignUmVhY3RXcmFwcGVyOjpnZXRXcmFwcGluZ0NvbXBvbmVudCgpIGNhbiBvbmx5IGJlIGNhbGxlZCBvbiB0aGUgcm9vdCcpO1xuICB9XG59XG5cbmlmIChJVEVSQVRPUl9TWU1CT0wpIHtcbiAgT2JqZWN0LmRlZmluZVByb3BlcnR5KFJlYWN0V3JhcHBlci5wcm90b3R5cGUsIElURVJBVE9SX1NZTUJPTCwge1xuICAgIGNvbmZpZ3VyYWJsZTogdHJ1ZSxcbiAgICB2YWx1ZTogZnVuY3Rpb24gaXRlcmF0b3IoKSB7XG4gICAgICBjb25zdCBpdGVyID0gdGhpc1tOT0RFU11bSVRFUkFUT1JfU1lNQk9MXSgpO1xuICAgICAgY29uc3QgYWRhcHRlciA9IGdldEFkYXB0ZXIodGhpc1tPUFRJT05TXSk7XG4gICAgICByZXR1cm4ge1xuICAgICAgICBbSVRFUkFUT1JfU1lNQk9MXSgpIHsgcmV0dXJuIHRoaXM7IH0sXG4gICAgICAgIG5leHQoKSB7XG4gICAgICAgICAgY29uc3QgbmV4dCA9IGl0ZXIubmV4dCgpO1xuICAgICAgICAgIGlmIChuZXh0LmRvbmUpIHtcbiAgICAgICAgICAgIHJldHVybiB7IGRvbmU6IHRydWUgfTtcbiAgICAgICAgICB9XG4gICAgICAgICAgcmV0dXJuIHtcbiAgICAgICAgICAgIGRvbmU6IGZhbHNlLFxuICAgICAgICAgICAgdmFsdWU6IGFkYXB0ZXIubm9kZVRvRWxlbWVudChuZXh0LnZhbHVlKSxcbiAgICAgICAgICB9O1xuICAgICAgICB9LFxuICAgICAgfTtcbiAgICB9LFxuICB9KTtcbn1cblxuZnVuY3Rpb24gcHJpdmF0ZVdhcm5pbmcocHJvcCwgZXh0cmFNZXNzYWdlKSB7XG4gIE9iamVjdC5kZWZpbmVQcm9wZXJ0eShSZWFjdFdyYXBwZXIucHJvdG90eXBlLCBwcm9wLCB7XG4gICAgZ2V0KCkge1xuICAgICAgdGhyb3cgbmV3IEVycm9yKGBcbiAgICAgICAgQXR0ZW1wdGVkIHRvIGFjY2VzcyBSZWFjdFdyYXBwZXI6OiR7cHJvcH0sIHdoaWNoIHdhcyBwcmV2aW91c2x5IGEgcHJpdmF0ZSBwcm9wZXJ0eSBvblxuICAgICAgICBFbnp5bWUgUmVhY3RXcmFwcGVyIGluc3RhbmNlcywgYnV0IGlzIG5vIGxvbmdlciBhbmQgc2hvdWxkIG5vdCBiZSByZWxpZWQgdXBvbi5cbiAgICAgICAgJHtleHRyYU1lc3NhZ2V9XG4gICAgICBgKTtcbiAgICB9LFxuICAgIGVudW1lcmFibGU6IGZhbHNlLFxuICAgIGNvbmZpZ3VyYWJsZTogZmFsc2UsXG4gIH0pO1xufVxuXG5wcml2YXRlV2FybmluZygnbm9kZScsICdDb25zaWRlciB1c2luZyB0aGUgZ2V0RWxlbWVudCgpIG1ldGhvZCBpbnN0ZWFkLicpO1xucHJpdmF0ZVdhcm5pbmcoJ25vZGVzJywgJ0NvbnNpZGVyIHVzaW5nIHRoZSBnZXRFbGVtZW50cygpIG1ldGhvZCBpbnN0ZWFkLicpO1xucHJpdmF0ZVdhcm5pbmcoJ3JlbmRlcmVyJywgJycpO1xucHJpdmF0ZVdhcm5pbmcoJ29wdGlvbnMnLCAnJyk7XG5wcml2YXRlV2FybmluZygnY29tcGxleFNlbGVjdG9yJywgJycpO1xuXG5leHBvcnQgZGVmYXVsdCBSZWFjdFdyYXBwZXI7XG4iXSwibWFwcGluZ3MiOiI7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7QUFBQSxJQUFBQSxlQUFBLEdBQUFDLE9BQUE7O0FBQ0EsSUFBQUMsSUFBQSxHQUFBRCxPQUFBOztBQUVBLElBQUFFLE1BQUEsR0FBQUYsT0FBQTtBQWVBLElBQUFHLFdBQUEsR0FBQUgsT0FBQTs7QUFDQSxJQUFBSSxNQUFBLEdBQUFKLE9BQUE7QUFDQSxJQUFBSyxhQUFBLEdBQUFMLE9BQUE7QUFVQSxJQUFBTSxVQUFBLEdBQUFOLE9BQUE7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7O0FBRUEsSUFBTU8sSUFBQSxHQUFPLElBQUFMLE1BQUEsQ0FBQU0sR0FBQSxFQUFJLFVBQUosQ0FBYjtBQUNBLElBQU1DLEtBQUEsR0FBUSxJQUFBUCxNQUFBLENBQUFNLEdBQUEsRUFBSSxXQUFKLENBQWQ7QUFDQSxJQUFNRSxRQUFBLEdBQVcsSUFBQVIsTUFBQSxDQUFBTSxHQUFBLEVBQUksY0FBSixDQUFqQjtBQUNBLElBQU1HLFVBQUEsR0FBYSxJQUFBVCxNQUFBLENBQUFNLEdBQUEsRUFBSSxnQkFBSixDQUFuQjtBQUNBLElBQU1JLElBQUEsR0FBTyxJQUFBVixNQUFBLENBQUFNLEdBQUEsRUFBSSxVQUFKLENBQWI7QUFDQSxJQUFNSyxPQUFBLEdBQVUsSUFBQVgsTUFBQSxDQUFBTSxHQUFBLEVBQUksYUFBSixDQUFoQjtBQUNBLElBQU1NLFVBQUEsR0FBYSxJQUFBWixNQUFBLENBQUFNLEdBQUEsRUFBSSxlQUFKLENBQW5CO0FBQ0EsSUFBTU8sa0JBQUEsR0FBcUIsSUFBQWIsTUFBQSxDQUFBTSxHQUFBLEVBQUksdUJBQUosQ0FBM0I7QUFDQSxJQUFNUSxZQUFBLEdBQWUsSUFBQWQsTUFB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

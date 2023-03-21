@@ -1,0 +1,136 @@
+34836897051884cf6b336d9d8de97777
+"use strict";
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+exports.prepend = exports.prependChild = exports.append = exports.appendChild = exports.replaceElement = exports.removeElement = void 0;
+/**
+ * Remove an element from the dom
+ *
+ * @category Manipulation
+ * @param elem The element to be removed
+ */
+function removeElement(elem) {
+  if (elem.prev) elem.prev.next = elem.next;
+  if (elem.next) elem.next.prev = elem.prev;
+  if (elem.parent) {
+    var childs = elem.parent.children;
+    childs.splice(childs.lastIndexOf(elem), 1);
+  }
+}
+exports.removeElement = removeElement;
+/**
+ * Replace an element in the dom
+ *
+ * @category Manipulation
+ * @param elem The element to be replaced
+ * @param replacement The element to be added
+ */
+function replaceElement(elem, replacement) {
+  var prev = replacement.prev = elem.prev;
+  if (prev) {
+    prev.next = replacement;
+  }
+  var next = replacement.next = elem.next;
+  if (next) {
+    next.prev = replacement;
+  }
+  var parent = replacement.parent = elem.parent;
+  if (parent) {
+    var childs = parent.children;
+    childs[childs.lastIndexOf(elem)] = replacement;
+    elem.parent = null;
+  }
+}
+exports.replaceElement = replaceElement;
+/**
+ * Append a child to an element.
+ *
+ * @category Manipulation
+ * @param elem The element to append to.
+ * @param child The element to be added as a child.
+ */
+function appendChild(elem, child) {
+  removeElement(child);
+  child.next = null;
+  child.parent = elem;
+  if (elem.children.push(child) > 1) {
+    var sibling = elem.children[elem.children.length - 2];
+    sibling.next = child;
+    child.prev = sibling;
+  } else {
+    child.prev = null;
+  }
+}
+exports.appendChild = appendChild;
+/**
+ * Append an element after another.
+ *
+ * @category Manipulation
+ * @param elem The element to append after.
+ * @param next The element be added.
+ */
+function append(elem, next) {
+  removeElement(next);
+  var parent = elem.parent;
+  var currNext = elem.next;
+  next.next = currNext;
+  next.prev = elem;
+  elem.next = next;
+  next.parent = parent;
+  if (currNext) {
+    currNext.prev = next;
+    if (parent) {
+      var childs = parent.children;
+      childs.splice(childs.lastIndexOf(currNext), 0, next);
+    }
+  } else if (parent) {
+    parent.children.push(next);
+  }
+}
+exports.append = append;
+/**
+ * Prepend a child to an element.
+ *
+ * @category Manipulation
+ * @param elem The element to prepend before.
+ * @param child The element to be added as a child.
+ */
+function prependChild(elem, child) {
+  removeElement(child);
+  child.parent = elem;
+  child.prev = null;
+  if (elem.children.unshift(child) !== 1) {
+    var sibling = elem.children[1];
+    sibling.prev = child;
+    child.next = sibling;
+  } else {
+    child.next = null;
+  }
+}
+exports.prependChild = prependChild;
+/**
+ * Prepend an element before another.
+ *
+ * @category Manipulation
+ * @param elem The element to prepend before.
+ * @param prev The element be added.
+ */
+function prepend(elem, prev) {
+  removeElement(prev);
+  var parent = elem.parent;
+  if (parent) {
+    var childs = parent.children;
+    childs.splice(childs.indexOf(elem), 0, prev);
+  }
+  if (elem.prev) {
+    elem.prev.next = prev;
+  }
+  prev.parent = parent;
+  prev.prev = elem.prev;
+  prev.next = elem;
+  elem.prev = prev;
+}
+exports.prepend = prepend;
+//# sourceMappingURL=data:application/json;charset=utf-8;base64,eyJ2ZXJzaW9uIjozLCJuYW1lcyI6WyJyZW1vdmVFbGVtZW50IiwiZWxlbSIsInByZXYiLCJuZXh0IiwicGFyZW50IiwiY2hpbGRzIiwiY2hpbGRyZW4iLCJzcGxpY2UiLCJsYXN0SW5kZXhPZiIsImV4cG9ydHMiLCJyZXBsYWNlRWxlbWVudCIsInJlcGxhY2VtZW50IiwiYXBwZW5kQ2hpbGQiLCJjaGlsZCIsInB1c2giLCJzaWJsaW5nIiwibGVuZ3RoIiwiYXBwZW5kIiwiY3Vyck5leHQiLCJwcmVwZW5kQ2hpbGQiLCJ1bnNoaWZ0IiwicHJlcGVuZCIsImluZGV4T2YiXSwic291cmNlcyI6WyJodHRwczovL3Jhdy5naXRodWJ1c2VyY29udGVudC5jb20vZmI1NS9kb211dGlscy9mN2UzNTdiNWMyMTBiNjczMWMyYTYwZTBiN2IzY2ZhYTFmOTZiNzA2L3NyYy9tYW5pcHVsYXRpb24udHMiXSwic291cmNlc0NvbnRlbnQiOltudWxsXSwibWFwcGluZ3MiOiI7Ozs7OztBQUVBOzs7Ozs7QUFNQSxTQUFnQkEsYUFBYUEsQ0FBQ0MsSUFBZTtFQUN6QyxJQUFJQSxJQUFJLENBQUNDLElBQUksRUFBRUQsSUFBSSxDQUFDQyxJQUFJLENBQUNDLElBQUksR0FBR0YsSUFBSSxDQUFDRSxJQUFJO0VBQ3pDLElBQUlGLElBQUksQ0FBQ0UsSUFBSSxFQUFFRixJQUFJLENBQUNFLElBQUksQ0FBQ0QsSUFBSSxHQUFHRCxJQUFJLENBQUNDLElBQUk7RUFFekMsSUFBSUQsSUFBSSxDQUFDRyxNQUFNLEVBQUU7SUFDYixJQUFNQyxNQUFNLEdBQUdKLElBQUksQ0FBQ0csTUFBTSxDQUFDRSxRQUFRO0lBQ25DRCxNQUFNLENBQUNFLE1BQU0sQ0FBQ0YsTUFBTSxDQUFDRyxXQUFXLENBQUNQLElBQUksQ0FBQyxFQUFFLENBQUMsQ0FBQzs7QUFFbEQ7QUFSQVEsT0FBQSxDQUFBVCxhQUFBLEdBQUFBLGFBQUE7QUFVQTs7Ozs7OztBQU9BLFNBQWdCVSxjQUFjQSxDQUFDVCxJQUFlLEVBQUVVLFdBQXNCO0VBQ2xFLElBQU1ULElB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

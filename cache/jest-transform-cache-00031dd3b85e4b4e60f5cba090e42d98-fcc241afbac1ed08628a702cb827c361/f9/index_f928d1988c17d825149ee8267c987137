@@ -1,0 +1,139 @@
+19fb42f628712065ce43892485bd762e
+"use strict";
+
+var __createBinding = void 0 && (void 0).__createBinding || (Object.create ? function (o, m, k, k2) {
+  if (k2 === undefined) k2 = k;
+  var desc = Object.getOwnPropertyDescriptor(m, k);
+  if (!desc || ("get" in desc ? !m.__esModule : desc.writable || desc.configurable)) {
+    desc = {
+      enumerable: true,
+      get: function () {
+        return m[k];
+      }
+    };
+  }
+  Object.defineProperty(o, k2, desc);
+} : function (o, m, k, k2) {
+  if (k2 === undefined) k2 = k;
+  o[k2] = m[k];
+});
+var __setModuleDefault = void 0 && (void 0).__setModuleDefault || (Object.create ? function (o, v) {
+  Object.defineProperty(o, "default", {
+    enumerable: true,
+    value: v
+  });
+} : function (o, v) {
+  o["default"] = v;
+});
+var __importStar = void 0 && (void 0).__importStar || function (mod) {
+  if (mod && mod.__esModule) return mod;
+  var result = {};
+  if (mod != null) for (var k in mod) if (k !== "default" && Object.prototype.hasOwnProperty.call(mod, k)) __createBinding(result, mod, k);
+  __setModuleDefault(result, mod);
+  return result;
+};
+var __importDefault = void 0 && (void 0).__importDefault || function (mod) {
+  return mod && mod.__esModule ? mod : {
+    "default": mod
+  };
+};
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+exports.DefaultHandler = exports.DomUtils = exports.parseFeed = exports.getFeed = exports.ElementType = exports.Tokenizer = exports.createDomStream = exports.parseDOM = exports.parseDocument = exports.DomHandler = exports.Parser = void 0;
+var Parser_js_1 = require("./Parser.js");
+Object.defineProperty(exports, "Parser", {
+  enumerable: true,
+  get: function () {
+    return Parser_js_1.Parser;
+  }
+});
+var domhandler_1 = require("domhandler");
+Object.defineProperty(exports, "DomHandler", {
+  enumerable: true,
+  get: function () {
+    return domhandler_1.DomHandler;
+  }
+});
+Object.defineProperty(exports, "DefaultHandler", {
+  enumerable: true,
+  get: function () {
+    return domhandler_1.DomHandler;
+  }
+});
+// Helper methods
+/**
+ * Parses the data, returns the resulting document.
+ *
+ * @param data The data that should be parsed.
+ * @param options Optional options for the parser and DOM builder.
+ */
+function parseDocument(data, options) {
+  var handler = new domhandler_1.DomHandler(undefined, options);
+  new Parser_js_1.Parser(handler, options).end(data);
+  return handler.root;
+}
+exports.parseDocument = parseDocument;
+/**
+ * Parses data, returns an array of the root nodes.
+ *
+ * Note that the root nodes still have a `Document` node as their parent.
+ * Use `parseDocument` to get the `Document` node instead.
+ *
+ * @param data The data that should be parsed.
+ * @param options Optional options for the parser and DOM builder.
+ * @deprecated Use `parseDocument` instead.
+ */
+function parseDOM(data, options) {
+  return parseDocument(data, options).children;
+}
+exports.parseDOM = parseDOM;
+/**
+ * Creates a parser instance, with an attached DOM handler.
+ *
+ * @param cb A callback that will be called once parsing has been completed.
+ * @param options Optional options for the parser and DOM builder.
+ * @param elementCb An optional callback that will be called every time a tag has been completed inside of the DOM.
+ */
+function createDomStream(cb, options, elementCb) {
+  var handler = new domhandler_1.DomHandler(cb, options, elementCb);
+  return new Parser_js_1.Parser(handler, options);
+}
+exports.createDomStream = createDomStream;
+var Tokenizer_js_1 = require("./Tokenizer.js");
+Object.defineProperty(exports, "Tokenizer", {
+  enumerable: true,
+  get: function () {
+    return __importDefault(Tokenizer_js_1).default;
+  }
+});
+/*
+ * All of the following exports exist for backwards-compatibility.
+ * They should probably be removed eventually.
+ */
+var ElementType = __importStar(require("domelementtype"));
+exports.ElementType = ElementType;
+var domutils_1 = require("domutils");
+Object.defineProperty(exports, "getFeed", {
+  enumerable: true,
+  get: function () {
+    return domutils_1.getFeed;
+  }
+});
+/**
+ * Parse a feed.
+ *
+ * @param feed The feed that should be parsed, as a string.
+ * @param options Optionally, options for parsing. When using this, you should set `xmlMode` to `true`.
+ */
+function parseFeed(feed, options) {
+  if (options === void 0) {
+    options = {
+      xmlMode: true
+    };
+  }
+  return (0, domutils_1.getFeed)(parseDOM(feed, options));
+}
+exports.parseFeed = parseFeed;
+exports.DomUtils = __importStar(require("domutils"));
+//# sourceMappingURL=data:application/json;charset=utf-8;base64,eyJ2ZXJzaW9uIjozLCJuYW1lcyI6WyJQYXJzZXJfanNfMSIsInJlcXVpcmUiLCJPYmplY3QiLCJkZWZpbmVQcm9wZXJ0eSIsImV4cG9ydHMiLCJlbnVtZXJhYmxlIiwiZ2V0IiwiUGFyc2VyIiwiZG9taGFuZGxlcl8xIiwiRG9tSGFuZGxlciIsInBhcnNlRG9jdW1lbnQiLCJkYXRhIiwib3B0aW9ucyIsImhhbmRsZXIiLCJ1bmRlZmluZWQiLCJlbmQiLCJyb290IiwicGFyc2VET00iLCJjaGlsZHJlbiIsImNyZWF0ZURvbVN0cmVhbSIsImNiIiwiZWxlbWVudENiIiwiVG9rZW5pemVyX2pzXzEiLCJfX2ltcG9ydERlZmF1bHQiLCJkZWZhdWx0IiwiRWxlbWVudFR5cGUiLCJfX2ltcG9ydFN0YXIiLCJkb211dGlsc18xIiwiZ2V0RmVlZCIsInBhcnNlRmVlZCIsImZlZWQiLCJ4bWxNb2RlIiwiRG9tVXRpbHMiXSwic291cmNlcyI6WyJodHRwczovL3Jhdy5naXRodWJ1c2VyY29udGVudC5jb20vZmI1NS9odG1scGFyc2VyMi80NzYzMjA1NzQ2Y2Q4MDEyMGI1ZDJiNjkwNDExOTdhMzk0ZDI0YmE5L3NyYy9pbmRleC50cyJdLCJzb3VyY2VzQ29udGVudCI6W251bGxdLCJtYXBwaW5ncyI6Ijs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7O0FBQUEsSUFBQUEsV0FBQSxHQUFBQyxPQUFBO0FBQ1NDLE1BQUEsQ0FBQUMsY0FBQSxDQUFBQyxPQUFBO0VBQUFDLFVBQUE7RUFBQUMsR0FBQSxXQUFBQSxDQUFBO0lBQUEsT0FEQU4sV0FBQSxDQUFBTyxNQUFNO0VBQUE7QUFBQTtBQUdmLElBQUFDLFlBQUEsR0FBQVAsT0FBQTtBQVFTQyxNQUFBLENBQUFDLGNBQUEsQ0FBQUMsT0FBQTtFQUFBQyxVQUFBO0VBQUFDLEdBQUEsV0FBQUEsQ0FBQTtJQUFBLE9BUExFLFlBQUEsQ0FBQUMsVUFBVTtFQUFBO0FBQUE7QUFxRlNQLE1BQUEsQ0FBQUMsY0FBQSxDQUFBQyxPQUFBO0VBQUFDLFVBQUE7RUFBQUMsR0FBQSxXQUFBQSxDQUFBO0lBQUEsT0FyRm5CRSxZQUFBLENBQUFDLFVBQVU7RUFBQTtBQUFBO0FBV2Q7QUFFQTs7Ozs7O0FBTUEsU0FBZ0JDLGFBQWFBLENBQUNDLElBQVksRUFBRUMsT0FBaUI7RUFDekQsSUFBTUMsT0FBTyxHQUFHLElBQUlMLFlBQUEsQ0FBQUMsVUFBVSxDQUFDSyxTQUFTLEVBQUVGLE9BQU8sQ0FBQztFQUNsRCxJQUFJWixXQUFBLENBQUFPLE1BQU0sQ0FBQ00sT0FBTyxFQUFFRCxPQUFPLENBQUMsQ0FBQ0csR0FBRyxDQUFDSixJQUFJLENBQUM7RUFDdEMsT0FBT0UsT0FBTyxDQUFDRyxJQUFJO0FBQ3ZCO0FBSkFaLE9BQUEsQ0FBQU0sYUFBQSxHQUFBQSxhQUFBO0FBS0E7Ozs7Ozs7Ozs7QUFVQSxTQUFnQk8sUUFBUUEsQ0FBQ04sSUFBWSxFQUFFQyxPQUFpQjtFQUNwRCxPQUFPRixhQUFhLENBQUNDLElBQUksRUFBRUMsT0FBTyxDQUFDLENBQUNNLFFBQVE7QUFDaEQ7QUFGQWQsT0FBQSxDQUFBYSxRQUFBLEdBQUFBLFFBQUE7QUFHQTs7Ozs7OztBQU9BLFNBQWdCRSxlQUFlQSxDQUMzQkMsRUFBbUQsRUFDbkRSLE9BQWlCLEVBQ2pCUyxTQUFzQztFQUV0QyxJQUFNUixPQUFPLEdBQUcsSUFBSUwsWUFBQSxDQUFBQyxVQUFVLENBQUNXLEVBQUUsRUFBRVIsT0FBTyxFQUFFUyxTQUFTLENBQUM7RUFDdEQsT0FBTyxJQUFJckIsV0FBQSxDQUFBTyxNQUFNLENBQUNNLE9BQU8sRUFBRUQsT0FBTyxDQUFDO0FBQ3ZDO0FBUEFSLE9BQUEsQ0FBQWUsZUFBQSxHQUFBQSxlQUFBO0FBU0EsSUFBQUcsY0FBQSxHQUFBckIsT0FBQTtBQUNJQyxNQUFBLENBQUFDLGNBQUEsQ0FBQUMsT0FBQTtFQUFBQyxVQUFBO0VBQUFDLEdBQUEsV0FBQUEsQ0FBQTtJQUFBLE9BQUFpQixlQUFBLENBQUFELGNBQUEsRUFBQUUsT0FBTztFQUFBO0FBQUE7QUFJWDs7OztBQUlBLElBQUFDLFdBQUEsR0FBQUMsWUFBQSxDQUFBekIsT0FBQTtBQUNTRyxPQUFBLENBQUFxQixXQUFBLEdBQUFBLFdBQUE7QUFFVCxJQUFBRSxVQUFBLEdBQUExQixPQUFBO0FBRVNDLE1BQUEsQ0FBQUMsY0FBQSxDQUFBQyxPQUFBO0VBQUFDLFVBQUE7RUFBQUMsR0FBQSxXQUFBQSxDQUFBO0lBQUEsT0FGQXFCLFVBQUEsQ0FBQUMsT0FBTztFQUFBO0FBQUE7QUFJaEI7Ozs7OztBQU1BLFNBQWdCQyxTQUFTQSxDQUNyQkMsSUFBWSxFQUNabEIsT0FBOEQ7RUFBOUQsSUFBQUEsT0FBQTtJQUFBQSxPQUFBO01BQStDbUIsT0FBTyxFQUFFO0lBQUksQ0FBRTtFQUFBO0VBRTlELE9BQU8sSUFBQUosVUFBQSxDQUFBQyxPQUFPLEVBQUNYLFFBQVEsQ0FBQ2EsSUFBSSxFQUFFbEIsT0FBTyxDQUFDLENBQUM7QUFDM0M7QUFMQVIsT0FBQSxDQUFBeUIsU0FBQSxHQUFBQSxTQUFBO0FBT0F6QixPQUFBLENBQUE0QixRQUFBLEdBQUFOLFlBQUEsQ0FBQXpCLE9BQUEifQ==

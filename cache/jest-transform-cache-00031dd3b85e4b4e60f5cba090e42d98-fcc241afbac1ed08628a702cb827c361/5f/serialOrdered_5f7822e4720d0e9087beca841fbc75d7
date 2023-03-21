@@ -1,0 +1,69 @@
+c261b61960b6a9140d546d76501e04a7
+"use strict";
+
+var iterate = require('./lib/iterate.js'),
+  initState = require('./lib/state.js'),
+  terminator = require('./lib/terminator.js');
+
+// Public API
+module.exports = serialOrdered;
+// sorting helpers
+module.exports.ascending = ascending;
+module.exports.descending = descending;
+
+/**
+ * Runs iterator over provided sorted array elements in series
+ *
+ * @param   {array|object} list - array or object (named list) to iterate over
+ * @param   {function} iterator - iterator to run
+ * @param   {function} sortMethod - custom sort function
+ * @param   {function} callback - invoked when all elements processed
+ * @returns {function} - jobs terminator
+ */
+function serialOrdered(list, iterator, sortMethod, callback) {
+  var state = initState(list, sortMethod);
+  iterate(list, iterator, state, function iteratorHandler(error, result) {
+    if (error) {
+      callback(error, result);
+      return;
+    }
+    state.index++;
+
+    // are we there yet?
+    if (state.index < (state['keyedList'] || list).length) {
+      iterate(list, iterator, state, iteratorHandler);
+      return;
+    }
+
+    // done here
+    callback(null, state.results);
+  });
+  return terminator.bind(state, callback);
+}
+
+/*
+ * -- Sort methods
+ */
+
+/**
+ * sort helper to sort array elements in ascending order
+ *
+ * @param   {mixed} a - an item to compare
+ * @param   {mixed} b - an item to compare
+ * @returns {number} - comparison result
+ */
+function ascending(a, b) {
+  return a < b ? -1 : a > b ? 1 : 0;
+}
+
+/**
+ * sort helper to sort array elements in descending order
+ *
+ * @param   {mixed} a - an item to compare
+ * @param   {mixed} b - an item to compare
+ * @returns {number} - comparison result
+ */
+function descending(a, b) {
+  return -1 * ascending(a, b);
+}
+//# sourceMappingURL=data:application/json;charset=utf-8;base64,eyJ2ZXJzaW9uIjozLCJuYW1lcyI6WyJpdGVyYXRlIiwicmVxdWlyZSIsImluaXRTdGF0ZSIsInRlcm1pbmF0b3IiLCJtb2R1bGUiLCJleHBvcnRzIiwic2VyaWFsT3JkZXJlZCIsImFzY2VuZGluZyIsImRlc2NlbmRpbmciLCJsaXN0IiwiaXRlcmF0b3IiLCJzb3J0TWV0aG9kIiwiY2FsbGJhY2siLCJzdGF0ZSIsIml0ZXJhdG9ySGFuZGxlciIsImVycm9yIiwicmVzdWx0IiwiaW5kZXgiLCJsZW5ndGgiLCJyZXN1bHRzIiwiYmluZCIsImEiLCJiIl0sInNvdXJjZXMiOlsic2VyaWFsT3JkZXJlZC5qcyJdLCJzb3VyY2VzQ29udGVudCI6WyJ2YXIgaXRlcmF0ZSAgICA9IHJlcXVpcmUoJy4vbGliL2l0ZXJhdGUuanMnKVxuICAsIGluaXRTdGF0ZSAgPSByZXF1aXJlKCcuL2xpYi9zdGF0ZS5qcycpXG4gICwgdGVybWluYXRvciA9IHJlcXVpcmUoJy4vbGliL3Rlcm1pbmF0b3IuanMnKVxuICA7XG5cbi8vIFB1YmxpYyBBUElcbm1vZHVsZS5leHBvcnRzID0gc2VyaWFsT3JkZXJlZDtcbi8vIHNvcnRpbmcgaGVscGVyc1xubW9kdWxlLmV4cG9ydHMuYXNjZW5kaW5nICA9IGFzY2VuZGluZztcbm1vZHVsZS5leHBvcnRzLmRlc2NlbmRpbmcgPSBkZXNjZW5kaW5nO1xuXG4vKipcbiAqIFJ1bnMgaXRlcmF0b3Igb3ZlciBwcm92aWRlZCBzb3J0ZWQgYXJyYXkgZWxlbWVudHMgaW4gc2VyaWVzXG4gKlxuICogQHBhcmFtICAge2FycmF5fG9iamVjdH0gbGlzdCAtIGFycmF5IG9yIG9iamVjdCAobmFtZWQgbGlzdCkgdG8gaXRlcmF0ZSBvdmVyXG4gKiBAcGFyYW0gICB7ZnVuY3Rpb259IGl0ZXJhdG9yIC0gaXRlcmF0b3IgdG8gcnVuXG4gKiBAcGFyYW0gICB7ZnVuY3Rpb259IHNvcnRNZXRob2QgLSBjdXN0b20gc29ydCBmdW5jdGlvblxuICogQHBhcmFtICAge2Z1bmN0aW9ufSBjYWxsYmFjayAtIGludm9rZWQgd2hlbiBhbGwgZWxlbWVudHMgcHJvY2Vzc2VkXG4gKiBAcmV0dXJucyB7ZnVuY3Rpb259IC0gam9icyB0ZXJtaW5hdG9yXG4gKi9cbmZ1bmN0aW9uIHNlcmlhbE9yZGVyZWQobGlzdCwgaXRlcmF0b3IsIHNvcnRNZXRob2QsIGNhbGxiYWNrKVxue1xuICB2YXIgc3RhdGUgPSBpbml0U3RhdGUobGlzdCwgc29ydE1ldGhvZCk7XG5cbiAgaXRlcmF0ZShsaXN0LCBpdGVyYXRvciwgc3RhdGUsIGZ1bmN0aW9uIGl0ZXJhdG9ySGFuZGxlcihlcnJvciwgcmVzdWx0KVxuICB7XG4gICAgaWYgKGVycm9yKVxuICAgIHtcbiAgICAgIGNhbGxiYWNrKGVycm9yLCByZXN1bHQpO1xuICAgICAgcmV0dXJuO1xuICAgIH1cblxuICAgIHN0YXRlLmluZGV4Kys7XG5cbiAgICAvLyBhcmUgd2UgdGhlcmUgeWV0P1xuICAgIGlmIChzdGF0ZS5pbmRleCA8IChzdGF0ZVsna2V5ZWRMaXN0J10gfHwgbGlzdCkubGVuZ3RoKVxuICAgIHtcbiAgICAgIGl0ZXJhdGUobGlzdCwgaXRlcmF0b3IsIHN0YXRlLCBpdGVyYXRvckhhbmRsZXIpO1xuICAgICAgcmV0dXJuO1xuICAgIH1cblxuICAgIC8vIGRvbmUgaGVyZVxuICAgIGNhbGxiYWNrKG51bGwsIHN0YXRlLnJlc3VsdHMpO1xuICB9KTtcblxuICByZXR1cm4gdGVybWluYXRvci5iaW5kKHN0YXRlLCBjYWxsYmFjayk7XG59XG5cbi8qXG4gKiAtLSBTb3J0IG1ldGhvZHNcbiAqL1xuXG4vKipcbiAqIHNvcnQgaGVscGVyIHRvIHNvcnQgYXJyYXkgZWxlbWVudHMgaW4gYXNjZW5kaW5nIG9yZGVyXG4gKlxuICogQHBhcmFtICAge21peGVkfSBhIC0gYW4gaXRlbSB0byBjb21wYXJlXG4gKiBAcGFyYW0gICB7bWl4ZWR9IGIgLSBhbiBpdGVtIHRvIGNvbXBhcmVcbiAqIEByZXR1cm5zIHtudW1iZXJ9IC0gY29tcGFyaXNvbiByZXN1bHRcbiAqL1xuZnVuY3Rpb24gYXNjZW5kaW5nKGEsIGIpXG57XG4gIHJldHVybiBhIDwgYiA/IC0xIDogYSA+IGIgPyAxIDogMDtcbn1cblxuLyoqXG4gKiBzb3J0IGhlbHBlciB0byBzb3J0IGFycmF5IGVsZW1lbnRzIGluIGRlc2NlbmRpbmcgb3JkZXJcbiAqXG4gKiBAcGFyYW0gICB7bWl4ZWR9IGEgLSBhbiBpdGVtIHRvIGNvbXBhcmVcbiAqIEBwYXJhbSAgIHttaXhlZH0gYiAtIGFuIGl0ZW0gdG8gY29tcGFyZVxuICogQHJldHVybnMge251bWJlcn0gLSBjb21wYXJpc29uIHJlc3VsdFxuICovXG5mdW5jdGlvbiBkZXNjZW5kaW5nKGEsIGIpXG57XG4gIHJldHVybiAtMSAqIGFzY2VuZGluZyhhLCBiKTtcbn1cbiJdLCJtYXBwaW5ncyI6Ijs7QUFBQSxJQUFJQSxPQUFPLEdBQU1DLE9BQU8sQ0FBQyxrQkFBa0IsQ0FBQztFQUN4Q0MsU0FBUyxHQUFJRCxPQUFPLENBQUMsZ0JBQWdCLENBQUM7RUFDdENFLFVBQVUsR0FBR0YsT0FBTyxDQUFDLHFCQUFxQixDQUFDOztBQUcvQztBQUNBRyxNQUFNLENBQUNDLE9BQU8sR0FBR0MsYUFBYTtBQUM5QjtBQUNBRixNQUFNLENBQUNDLE9BQU8sQ0FBQ0UsU0FBUyxHQUFJQSxTQUFTO0FBQ3JDSCxNQUFNLENBQUNDLE9BQU8sQ0FBQ0csVUFBVSxHQUFHQSxVQUFVOztBQUV0QztBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQSxTQUFTRixhQUFhQSxDQUFDRyxJQUFJLEVBQUVDLFFBQVEsRUFBRUMsVUFBVSxFQUFFQyxRQUFRLEVBQzNEO0VBQ0UsSUFBSUMsS0FBSyxHQUFHWCxTQUFTLENBQUNPLElBQUksRUFBRUUsVUFBVSxDQUFDO0VBRXZDWCxPQUFPLENBQUNTLElBQUksRUFBRUMsUUFBUSxFQUFFRyxLQUFLLEVBQUUsU0FBU0MsZUFBZUEsQ0FBQ0MsS0FBSyxFQUFFQyxNQUFNLEVBQ3JFO0lBQ0UsSUFBSUQsS0FBSyxFQUNUO01BQ0VILFFBQVEsQ0FBQ0csS0FBSyxFQUFFQyxNQUFNLENBQUM7TUFDdkI7SUFDRjtJQUVBSCxLQUFLLENBQUNJLEtBQUssRUFBRTs7SUFFYjtJQUNBLElBQUlKLEtBQUssQ0FBQ0ksS0FBSyxHQUFHLENBQUNKLEtBQUssQ0FBQyxXQUFXLENBQUMsSUFBSUosSUFBSSxFQUFFUyxNQUFNLEVBQ3JEO01BQ0VsQixPQUFPLENBQUNTLElBQUksRUFBRUMsUUFBUSxFQUFFRyxLQUFLLEVBQUVDLGVBQWUsQ0FBQztNQUMvQztJQUNGOztJQUVBO0lBQ0FGLFFBQVEsQ0FBQyxJQUFJLEVBQUVDLEtBQUssQ0FBQ00sT0FBTyxDQUFDO0VBQy9CLENBQUMsQ0FBQztFQUVGLE9BQU9oQixVQUFVLENBQUNpQixJQUFJLENBQUNQLEtBQUssRUFBRUQsUUFBUSxDQUFDO0FBQ3pDOztBQUVBO0FBQ0E7QUFDQTs7QUFFQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBLFNBQVNMLFNBQVNBLENBQUNjLENBQUMsRUFBRUMsQ0FBQyxFQUN2QjtFQUNFLE9BQU9ELENBQUMsR0FBR0MsQ0FBQyxHQUFHLENBQUMsQ0FBQyxHQUFHRCxDQUFDLEdBQUdDLENBQUMsR0FBRyxDQUFDLEdBQUcsQ0FBQztBQUNuQzs7QUFFQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBLFNBQVNkLFVBQVVBLENBQUNhLENBQUMsRUFBRUMsQ0FBQyxFQUN4QjtFQUNFLE9BQU8sQ0FBQyxDQUFDLEdBQUdmLFNBQVMsQ0FBQ2MsQ0FBQyxFQUFFQyxDQUFDLENBQUM7QUFDN0IifQ==

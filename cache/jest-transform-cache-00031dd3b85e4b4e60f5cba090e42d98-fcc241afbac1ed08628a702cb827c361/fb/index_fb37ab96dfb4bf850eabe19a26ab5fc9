@@ -1,0 +1,72 @@
+cf191ab9aef1eff8cf3d0dc261bef4c2
+"use strict";
+
+var __createBinding = void 0 && (void 0).__createBinding || (Object.create ? function (o, m, k, k2) {
+  if (k2 === undefined) k2 = k;
+  var desc = Object.getOwnPropertyDescriptor(m, k);
+  if (!desc || ("get" in desc ? !m.__esModule : desc.writable || desc.configurable)) {
+    desc = {
+      enumerable: true,
+      get: function () {
+        return m[k];
+      }
+    };
+  }
+  Object.defineProperty(o, k2, desc);
+} : function (o, m, k, k2) {
+  if (k2 === undefined) k2 = k;
+  o[k2] = m[k];
+});
+var __exportStar = void 0 && (void 0).__exportStar || function (m, exports) {
+  for (var p in m) if (p !== "default" && !Object.prototype.hasOwnProperty.call(exports, p)) __createBinding(exports, m, p);
+};
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+exports.hasChildren = exports.isDocument = exports.isComment = exports.isText = exports.isCDATA = exports.isTag = void 0;
+__exportStar(require("./stringify.js"), exports);
+__exportStar(require("./traversal.js"), exports);
+__exportStar(require("./manipulation.js"), exports);
+__exportStar(require("./querying.js"), exports);
+__exportStar(require("./legacy.js"), exports);
+__exportStar(require("./helpers.js"), exports);
+__exportStar(require("./feeds.js"), exports);
+/** @deprecated Use these methods from `domhandler` directly. */
+var domhandler_1 = require("domhandler");
+Object.defineProperty(exports, "isTag", {
+  enumerable: true,
+  get: function () {
+    return domhandler_1.isTag;
+  }
+});
+Object.defineProperty(exports, "isCDATA", {
+  enumerable: true,
+  get: function () {
+    return domhandler_1.isCDATA;
+  }
+});
+Object.defineProperty(exports, "isText", {
+  enumerable: true,
+  get: function () {
+    return domhandler_1.isText;
+  }
+});
+Object.defineProperty(exports, "isComment", {
+  enumerable: true,
+  get: function () {
+    return domhandler_1.isComment;
+  }
+});
+Object.defineProperty(exports, "isDocument", {
+  enumerable: true,
+  get: function () {
+    return domhandler_1.isDocument;
+  }
+});
+Object.defineProperty(exports, "hasChildren", {
+  enumerable: true,
+  get: function () {
+    return domhandler_1.hasChildren;
+  }
+});
+//# sourceMappingURL=data:application/json;charset=utf-8;base64,eyJ2ZXJzaW9uIjozLCJuYW1lcyI6WyJfX2V4cG9ydFN0YXIiLCJyZXF1aXJlIiwiZXhwb3J0cyIsImRvbWhhbmRsZXJfMSIsIk9iamVjdCIsImRlZmluZVByb3BlcnR5IiwiZW51bWVyYWJsZSIsImdldCIsImlzVGFnIiwiaXNDREFUQSIsImlzVGV4dCIsImlzQ29tbWVudCIsImlzRG9jdW1lbnQiLCJoYXNDaGlsZHJlbiJdLCJzb3VyY2VzIjpbImh0dHBzOi8vcmF3LmdpdGh1YnVzZXJjb250ZW50LmNvbS9mYjU1L2RvbXV0aWxzL2Y3ZTM1N2I1YzIxMGI2NzMxYzJhNjBlMGI3YjNjZmFhMWY5NmI3MDYvc3JjL2luZGV4LnRzIl0sInNvdXJjZXNDb250ZW50IjpbbnVsbF0sIm1hcHBpbmdzIjoiOzs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7O0FBQUFBLFlBQUEsQ0FBQUMsT0FBQSxvQkFBQUMsT0FBQTtBQUNBRixZQUFBLENBQUFDLE9BQUEsb0JBQUFDLE9BQUE7QUFDQUYsWUFBQSxDQUFBQyxPQUFBLHVCQUFBQyxPQUFBO0FBQ0FGLFlBQUEsQ0FBQUMsT0FBQSxtQkFBQUMsT0FBQTtBQUNBRixZQUFBLENBQUFDLE9BQUEsaUJBQUFDLE9BQUE7QUFDQUYsWUFBQSxDQUFBQyxPQUFBLGtCQUFBQyxPQUFBO0FBQ0FGLFlBQUEsQ0FBQUMsT0FBQSxnQkFBQUMsT0FBQTtBQUNBO0FBQ0EsSUFBQUMsWUFBQSxHQUFBRixPQUFBO0FBQ0lHLE1BQUEsQ0FBQUMsY0FBQSxDQUFBSCxPQUFBO0VBQUFJLFVBQUE7RUFBQUMsR0FBQSxXQUFBQSxDQUFBO0lBQUEsT0FBQUosWUFBQSxDQUFBSyxLQUFLO0VBQUE7QUFBQTtBQUNMSixNQUFBLENBQUFDLGNBQUEsQ0FBQUgsT0FBQTtFQUFBSSxVQUFBO0VBQUFDLEdBQUEsV0FBQUEsQ0FBQTtJQUFBLE9BQUFKLFlBQUEsQ0FBQU0sT0FBTztFQUFBO0FBQUE7QUFDUEwsTUFBQSxDQUFBQyxjQUFBLENBQUFILE9BQUE7RUFBQUksVUFBQTtFQUFBQyxHQUFBLFdBQUFBLENBQUE7SUFBQSxPQUFBSixZQUFBLENBQUFPLE1BQU07RUFBQTtBQUFBO0FBQ05OLE1BQUEsQ0FBQUMsY0FBQSxDQUFBSCxPQUFBO0VBQUFJLFVBQUE7RUFBQUMsR0FBQSxXQUFBQSxDQUFBO0lBQUEsT0FBQUosWUFBQSxDQUFBUSxTQUFTO0VBQUE7QUFBQTtBQUNUUCxNQUFBLENBQUFDLGNBQUEsQ0FBQUgsT0FBQTtFQUFBSSxVQUFBO0VBQUFDLEdBQUEsV0FBQUEsQ0FBQTtJQUFBLE9BQUFKLFlBQUEsQ0FBQVMsVUFBVTtFQUFBO0FBQUE7QUFDVlIsTUFBQSxDQUFBQyxjQUFBLENBQUFILE9BQUE7RUFBQUksVUFBQTtFQUFBQyxHQUFBLFdBQUFBLENBQUE7SUFBQSxPQUFBSixZQUFBLENBQUFVLFdBQVc7RUFBQTtBQUFBIn0=

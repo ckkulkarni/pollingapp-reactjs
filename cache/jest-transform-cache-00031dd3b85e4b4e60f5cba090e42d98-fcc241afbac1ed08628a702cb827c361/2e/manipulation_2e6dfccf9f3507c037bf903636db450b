@@ -1,0 +1,832 @@
+cbdfb3ee3212fdb820b9f33f41f7bdc6
+"use strict";
+
+/**
+ * Methods for modifying the DOM structure.
+ *
+ * @module cheerio/manipulation
+ */
+var __spreadArray = void 0 && (void 0).__spreadArray || function (to, from, pack) {
+  if (pack || arguments.length === 2) for (var i = 0, l = from.length, ar; i < l; i++) {
+    if (ar || !(i in from)) {
+      if (!ar) ar = Array.prototype.slice.call(from, 0, i);
+      ar[i] = from[i];
+    }
+  }
+  return to.concat(ar || Array.prototype.slice.call(from));
+};
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+exports.clone = exports.text = exports.toString = exports.html = exports.empty = exports.replaceWith = exports.remove = exports.insertBefore = exports.before = exports.insertAfter = exports.after = exports.wrapAll = exports.unwrap = exports.wrapInner = exports.wrap = exports.prepend = exports.append = exports.prependTo = exports.appendTo = exports._makeDomArray = void 0;
+var domhandler_1 = require("domhandler");
+var parse_js_1 = require("../parse.js");
+var static_js_1 = require("../static.js");
+var utils_js_1 = require("../utils.js");
+var domutils_1 = require("domutils");
+/**
+ * Create an array of nodes, recursing into arrays and parsing strings if necessary.
+ *
+ * @private
+ * @category Manipulation
+ * @param elem - Elements to make an array of.
+ * @param clone - Optionally clone nodes.
+ * @returns The array of nodes.
+ */
+function _makeDomArray(elem, clone) {
+  var _this = this;
+  if (elem == null) {
+    return [];
+  }
+  if ((0, utils_js_1.isCheerio)(elem)) {
+    return clone ? (0, utils_js_1.cloneDom)(elem.get()) : elem.get();
+  }
+  if (Array.isArray(elem)) {
+    return elem.reduce(function (newElems, el) {
+      return newElems.concat(_this._makeDomArray(el, clone));
+    }, []);
+  }
+  if (typeof elem === 'string') {
+    return this._parse(elem, this.options, false, null).children;
+  }
+  return clone ? (0, utils_js_1.cloneDom)([elem]) : [elem];
+}
+exports._makeDomArray = _makeDomArray;
+function _insert(concatenator) {
+  return function () {
+    var _this = this;
+    var elems = [];
+    for (var _i = 0; _i < arguments.length; _i++) {
+      elems[_i] = arguments[_i];
+    }
+    var lastIdx = this.length - 1;
+    return (0, utils_js_1.domEach)(this, function (el, i) {
+      if (!(0, domhandler_1.hasChildren)(el)) return;
+      var domSrc = typeof elems[0] === 'function' ? elems[0].call(el, i, _this._render(el.children)) : elems;
+      var dom = _this._makeDomArray(domSrc, i < lastIdx);
+      concatenator(dom, el.children, el);
+    });
+  };
+}
+/**
+ * Modify an array in-place, removing some number of elements and adding new
+ * elements directly following them.
+ *
+ * @private
+ * @category Manipulation
+ * @param array - Target array to splice.
+ * @param spliceIdx - Index at which to begin changing the array.
+ * @param spliceCount - Number of elements to remove from the array.
+ * @param newElems - Elements to insert into the array.
+ * @param parent - The parent of the node.
+ * @returns The spliced array.
+ */
+function uniqueSplice(array, spliceIdx, spliceCount, newElems, parent) {
+  var _a, _b;
+  var spliceArgs = __spreadArray([spliceIdx, spliceCount], newElems, true);
+  var prev = spliceIdx === 0 ? null : array[spliceIdx - 1];
+  var next = spliceIdx + spliceCount >= array.length ? null : array[spliceIdx + spliceCount];
+  /*
+   * Before splicing in new elements, ensure they do not already appear in the
+   * current array.
+   */
+  for (var idx = 0; idx < newElems.length; ++idx) {
+    var node = newElems[idx];
+    var oldParent = node.parent;
+    if (oldParent) {
+      var oldSiblings = oldParent.children;
+      var prevIdx = oldSiblings.indexOf(node);
+      if (prevIdx > -1) {
+        oldParent.children.splice(prevIdx, 1);
+        if (parent === oldParent && spliceIdx > prevIdx) {
+          spliceArgs[0]--;
+        }
+      }
+    }
+    node.parent = parent;
+    if (node.prev) {
+      node.prev.next = (_a = node.next) !== null && _a !== void 0 ? _a : null;
+    }
+    if (node.next) {
+      node.next.prev = (_b = node.prev) !== null && _b !== void 0 ? _b : null;
+    }
+    node.prev = idx === 0 ? prev : newElems[idx - 1];
+    node.next = idx === newElems.length - 1 ? next : newElems[idx + 1];
+  }
+  if (prev) {
+    prev.next = newElems[0];
+  }
+  if (next) {
+    next.prev = newElems[newElems.length - 1];
+  }
+  return array.splice.apply(array, spliceArgs);
+}
+/**
+ * Insert every element in the set of matched elements to the end of the target.
+ *
+ * @category Manipulation
+ * @example
+ *
+ * ```js
+ * $('<li class="plum">Plum</li>').appendTo('#fruits');
+ * $.html();
+ * //=>  <ul id="fruits">
+ * //      <li class="apple">Apple</li>
+ * //      <li class="orange">Orange</li>
+ * //      <li class="pear">Pear</li>
+ * //      <li class="plum">Plum</li>
+ * //    </ul>
+ * ```
+ *
+ * @param target - Element to append elements to.
+ * @returns The instance itself.
+ * @see {@link https://api.jquery.com/appendTo/}
+ */
+function appendTo(target) {
+  var appendTarget = (0, utils_js_1.isCheerio)(target) ? target : this._make(target);
+  appendTarget.append(this);
+  return this;
+}
+exports.appendTo = appendTo;
+/**
+ * Insert every element in the set of matched elements to the beginning of the target.
+ *
+ * @category Manipulation
+ * @example
+ *
+ * ```js
+ * $('<li class="plum">Plum</li>').prependTo('#fruits');
+ * $.html();
+ * //=>  <ul id="fruits">
+ * //      <li class="plum">Plum</li>
+ * //      <li class="apple">Apple</li>
+ * //      <li class="orange">Orange</li>
+ * //      <li class="pear">Pear</li>
+ * //    </ul>
+ * ```
+ *
+ * @param target - Element to prepend elements to.
+ * @returns The instance itself.
+ * @see {@link https://api.jquery.com/prependTo/}
+ */
+function prependTo(target) {
+  var prependTarget = (0, utils_js_1.isCheerio)(target) ? target : this._make(target);
+  prependTarget.prepend(this);
+  return this;
+}
+exports.prependTo = prependTo;
+/**
+ * Inserts content as the _last_ child of each of the selected elements.
+ *
+ * @category Manipulation
+ * @example
+ *
+ * ```js
+ * $('ul').append('<li class="plum">Plum</li>');
+ * $.html();
+ * //=>  <ul id="fruits">
+ * //      <li class="apple">Apple</li>
+ * //      <li class="orange">Orange</li>
+ * //      <li class="pear">Pear</li>
+ * //      <li class="plum">Plum</li>
+ * //    </ul>
+ * ```
+ *
+ * @see {@link https://api.jquery.com/append/}
+ */
+exports.append = _insert(function (dom, children, parent) {
+  uniqueSplice(children, children.length, 0, dom, parent);
+});
+/**
+ * Inserts content as the _first_ child of each of the selected elements.
+ *
+ * @category Manipulation
+ * @example
+ *
+ * ```js
+ * $('ul').prepend('<li class="plum">Plum</li>');
+ * $.html();
+ * //=>  <ul id="fruits">
+ * //      <li class="plum">Plum</li>
+ * //      <li class="apple">Apple</li>
+ * //      <li class="orange">Orange</li>
+ * //      <li class="pear">Pear</li>
+ * //    </ul>
+ * ```
+ *
+ * @see {@link https://api.jquery.com/prepend/}
+ */
+exports.prepend = _insert(function (dom, children, parent) {
+  uniqueSplice(children, 0, 0, dom, parent);
+});
+function _wrap(insert) {
+  return function (wrapper) {
+    var lastIdx = this.length - 1;
+    var lastParent = this.parents().last();
+    for (var i = 0; i < this.length; i++) {
+      var el = this[i];
+      var wrap_1 = typeof wrapper === 'function' ? wrapper.call(el, i, el) : typeof wrapper === 'string' && !(0, utils_js_1.isHtml)(wrapper) ? lastParent.find(wrapper).clone() : wrapper;
+      var wrapperDom = this._makeDomArray(wrap_1, i < lastIdx)[0];
+      if (!wrapperDom || !(0, domhandler_1.hasChildren)(wrapperDom)) continue;
+      var elInsertLocation = wrapperDom;
+      /*
+       * Find the deepest child. Only consider the first tag child of each node
+       * (ignore text); stop if no children are found.
+       */
+      var j = 0;
+      while (j < elInsertLocation.children.length) {
+        var child = elInsertLocation.children[j];
+        if ((0, utils_js_1.isTag)(child)) {
+          elInsertLocation = child;
+          j = 0;
+        } else {
+          j++;
+        }
+      }
+      insert(el, elInsertLocation, [wrapperDom]);
+    }
+    return this;
+  };
+}
+/**
+ * The .wrap() function can take any string or object that could be passed to
+ * the $() factory function to specify a DOM structure. This structure may be
+ * nested several levels deep, but should contain only one inmost element. A
+ * copy of this structure will be wrapped around each of the elements in the set
+ * of matched elements. This method returns the original set of elements for
+ * chaining purposes.
+ *
+ * @category Manipulation
+ * @example
+ *
+ * ```js
+ * const redFruit = $('<div class="red-fruit"></div>');
+ * $('.apple').wrap(redFruit);
+ *
+ * //=> <ul id="fruits">
+ * //     <div class="red-fruit">
+ * //      <li class="apple">Apple</li>
+ * //     </div>
+ * //     <li class="orange">Orange</li>
+ * //     <li class="plum">Plum</li>
+ * //   </ul>
+ *
+ * const healthy = $('<div class="healthy"></div>');
+ * $('li').wrap(healthy);
+ *
+ * //=> <ul id="fruits">
+ * //     <div class="healthy">
+ * //       <li class="apple">Apple</li>
+ * //     </div>
+ * //     <div class="healthy">
+ * //       <li class="orange">Orange</li>
+ * //     </div>
+ * //     <div class="healthy">
+ * //        <li class="plum">Plum</li>
+ * //     </div>
+ * //   </ul>
+ * ```
+ *
+ * @param wrapper - The DOM structure to wrap around each element in the selection.
+ * @see {@link https://api.jquery.com/wrap/}
+ */
+exports.wrap = _wrap(function (el, elInsertLocation, wrapperDom) {
+  var parent = el.parent;
+  if (!parent) return;
+  var siblings = parent.children;
+  var index = siblings.indexOf(el);
+  (0, parse_js_1.update)([el], elInsertLocation);
+  /*
+   * The previous operation removed the current element from the `siblings`
+   * array, so the `dom` array can be inserted without removing any
+   * additional elements.
+   */
+  uniqueSplice(siblings, index, 0, wrapperDom, parent);
+});
+/**
+ * The .wrapInner() function can take any string or object that could be passed
+ * to the $() factory function to specify a DOM structure. This structure may be
+ * nested several levels deep, but should contain only one inmost element. The
+ * structure will be wrapped around the content of each of the elements in the
+ * set of matched elements.
+ *
+ * @category Manipulation
+ * @example
+ *
+ * ```js
+ * const redFruit = $('<div class="red-fruit"></div>');
+ * $('.apple').wrapInner(redFruit);
+ *
+ * //=> <ul id="fruits">
+ * //     <li class="apple">
+ * //       <div class="red-fruit">Apple</div>
+ * //     </li>
+ * //     <li class="orange">Orange</li>
+ * //     <li class="pear">Pear</li>
+ * //   </ul>
+ *
+ * const healthy = $('<div class="healthy"></div>');
+ * $('li').wrapInner(healthy);
+ *
+ * //=> <ul id="fruits">
+ * //     <li class="apple">
+ * //       <div class="healthy">Apple</div>
+ * //     </li>
+ * //     <li class="orange">
+ * //       <div class="healthy">Orange</div>
+ * //     </li>
+ * //     <li class="pear">
+ * //       <div class="healthy">Pear</div>
+ * //     </li>
+ * //   </ul>
+ * ```
+ *
+ * @param wrapper - The DOM structure to wrap around the content of each element
+ *   in the selection.
+ * @returns The instance itself, for chaining.
+ * @see {@link https://api.jquery.com/wrapInner/}
+ */
+exports.wrapInner = _wrap(function (el, elInsertLocation, wrapperDom) {
+  if (!(0, domhandler_1.hasChildren)(el)) return;
+  (0, parse_js_1.update)(el.children, elInsertLocation);
+  (0, parse_js_1.update)(wrapperDom, el);
+});
+/**
+ * The .unwrap() function, removes the parents of the set of matched elements
+ * from the DOM, leaving the matched elements in their place.
+ *
+ * @category Manipulation
+ * @example <caption>without selector</caption>
+ *
+ * ```js
+ * const $ = cheerio.load(
+ *   '<div id=test>\n  <div><p>Hello</p></div>\n  <div><p>World</p></div>\n</div>'
+ * );
+ * $('#test p').unwrap();
+ *
+ * //=> <div id=test>
+ * //     <p>Hello</p>
+ * //     <p>World</p>
+ * //   </div>
+ * ```
+ *
+ * @example <caption>with selector</caption>
+ *
+ * ```js
+ * const $ = cheerio.load(
+ *   '<div id=test>\n  <p>Hello</p>\n  <b><p>World</p></b>\n</div>'
+ * );
+ * $('#test p').unwrap('b');
+ *
+ * //=> <div id=test>
+ * //     <p>Hello</p>
+ * //     <p>World</p>
+ * //   </div>
+ * ```
+ *
+ * @param selector - A selector to check the parent element against. If an
+ *   element's parent does not match the selector, the element won't be unwrapped.
+ * @returns The instance itself, for chaining.
+ * @see {@link https://api.jquery.com/unwrap/}
+ */
+function unwrap(selector) {
+  var _this = this;
+  this.parent(selector).not('body').each(function (_, el) {
+    _this._make(el).replaceWith(el.children);
+  });
+  return this;
+}
+exports.unwrap = unwrap;
+/**
+ * The .wrapAll() function can take any string or object that could be passed to
+ * the $() function to specify a DOM structure. This structure may be nested
+ * several levels deep, but should contain only one inmost element. The
+ * structure will be wrapped around all of the elements in the set of matched
+ * elements, as a single group.
+ *
+ * @category Manipulation
+ * @example <caption>With markup passed to `wrapAll`</caption>
+ *
+ * ```js
+ * const $ = cheerio.load(
+ *   '<div class="container"><div class="inner">First</div><div class="inner">Second</div></div>'
+ * );
+ * $('.inner').wrapAll("<div class='new'></div>");
+ *
+ * //=> <div class="container">
+ * //     <div class='new'>
+ * //       <div class="inner">First</div>
+ * //       <div class="inner">Second</div>
+ * //     </div>
+ * //   </div>
+ * ```
+ *
+ * @example <caption>With an existing cheerio instance</caption>
+ *
+ * ```js
+ * const $ = cheerio.load(
+ *   '<span>Span 1</span><strong>Strong</strong><span>Span 2</span>'
+ * );
+ * const wrap = $('<div><p><em><b></b></em></p></div>');
+ * $('span').wrapAll(wrap);
+ *
+ * //=> <div>
+ * //     <p>
+ * //       <em>
+ * //         <b>
+ * //           <span>Span 1</span>
+ * //           <span>Span 2</span>
+ * //         </b>
+ * //       </em>
+ * //     </p>
+ * //   </div>
+ * //   <strong>Strong</strong>
+ * ```
+ *
+ * @param wrapper - The DOM structure to wrap around all matched elements in the
+ *   selection.
+ * @returns The instance itself.
+ * @see {@link https://api.jquery.com/wrapAll/}
+ */
+function wrapAll(wrapper) {
+  var el = this[0];
+  if (el) {
+    var wrap_2 = this._make(typeof wrapper === 'function' ? wrapper.call(el, 0, el) : wrapper).insertBefore(el);
+    // If html is given as wrapper, wrap may contain text elements
+    var elInsertLocation = void 0;
+    for (var i = 0; i < wrap_2.length; i++) {
+      if (wrap_2[i].type === 'tag') elInsertLocation = wrap_2[i];
+    }
+    var j = 0;
+    /*
+     * Find the deepest child. Only consider the first tag child of each node
+     * (ignore text); stop if no children are found.
+     */
+    while (elInsertLocation && j < elInsertLocation.children.length) {
+      var child = elInsertLocation.children[j];
+      if (child.type === 'tag') {
+        elInsertLocation = child;
+        j = 0;
+      } else {
+        j++;
+      }
+    }
+    if (elInsertLocation) this._make(elInsertLocation).append(this);
+  }
+  return this;
+}
+exports.wrapAll = wrapAll;
+/* eslint-disable jsdoc/check-param-names*/
+/**
+ * Insert content next to each element in the set of matched elements.
+ *
+ * @category Manipulation
+ * @example
+ *
+ * ```js
+ * $('.apple').after('<li class="plum">Plum</li>');
+ * $.html();
+ * //=>  <ul id="fruits">
+ * //      <li class="apple">Apple</li>
+ * //      <li class="plum">Plum</li>
+ * //      <li class="orange">Orange</li>
+ * //      <li class="pear">Pear</li>
+ * //    </ul>
+ * ```
+ *
+ * @param content - HTML string, DOM element, array of DOM elements or Cheerio
+ *   to insert after each element in the set of matched elements.
+ * @returns The instance itself.
+ * @see {@link https://api.jquery.com/after/}
+ */
+function after() {
+  var _this = this;
+  var elems = [];
+  for (var _i = 0; _i < arguments.length; _i++) {
+    elems[_i] = arguments[_i];
+  }
+  var lastIdx = this.length - 1;
+  return (0, utils_js_1.domEach)(this, function (el, i) {
+    var parent = el.parent;
+    if (!(0, domhandler_1.hasChildren)(el) || !parent) {
+      return;
+    }
+    var siblings = parent.children;
+    var index = siblings.indexOf(el);
+    // If not found, move on
+    /* istanbul ignore next */
+    if (index < 0) return;
+    var domSrc = typeof elems[0] === 'function' ? elems[0].call(el, i, _this._render(el.children)) : elems;
+    var dom = _this._makeDomArray(domSrc, i < lastIdx);
+    // Add element after `this` element
+    uniqueSplice(siblings, index + 1, 0, dom, parent);
+  });
+}
+exports.after = after;
+/* eslint-enable jsdoc/check-param-names*/
+/**
+ * Insert every element in the set of matched elements after the target.
+ *
+ * @category Manipulation
+ * @example
+ *
+ * ```js
+ * $('<li class="plum">Plum</li>').insertAfter('.apple');
+ * $.html();
+ * //=>  <ul id="fruits">
+ * //      <li class="apple">Apple</li>
+ * //      <li class="plum">Plum</li>
+ * //      <li class="orange">Orange</li>
+ * //      <li class="pear">Pear</li>
+ * //    </ul>
+ * ```
+ *
+ * @param target - Element to insert elements after.
+ * @returns The set of newly inserted elements.
+ * @see {@link https://api.jquery.com/insertAfter/}
+ */
+function insertAfter(target) {
+  var _this = this;
+  if (typeof target === 'string') {
+    target = this._make(target);
+  }
+  this.remove();
+  var clones = [];
+  this._makeDomArray(target).forEach(function (el) {
+    var clonedSelf = _this.clone().toArray();
+    var parent = el.parent;
+    if (!parent) {
+      return;
+    }
+    var siblings = parent.children;
+    var index = siblings.indexOf(el);
+    // If not found, move on
+    /* istanbul ignore next */
+    if (index < 0) return;
+    // Add cloned `this` element(s) after target element
+    uniqueSplice(siblings, index + 1, 0, clonedSelf, parent);
+    clones.push.apply(clones, clonedSelf);
+  });
+  return this._make(clones);
+}
+exports.insertAfter = insertAfter;
+/* eslint-disable jsdoc/check-param-names*/
+/**
+ * Insert content previous to each element in the set of matched elements.
+ *
+ * @category Manipulation
+ * @example
+ *
+ * ```js
+ * $('.apple').before('<li class="plum">Plum</li>');
+ * $.html();
+ * //=>  <ul id="fruits">
+ * //      <li class="plum">Plum</li>
+ * //      <li class="apple">Apple</li>
+ * //      <li class="orange">Orange</li>
+ * //      <li class="pear">Pear</li>
+ * //    </ul>
+ * ```
+ *
+ * @param content - HTML string, DOM element, array of DOM elements or Cheerio
+ *   to insert before each element in the set of matched elements.
+ * @returns The instance itself.
+ * @see {@link https://api.jquery.com/before/}
+ */
+function before() {
+  var _this = this;
+  var elems = [];
+  for (var _i = 0; _i < arguments.length; _i++) {
+    elems[_i] = arguments[_i];
+  }
+  var lastIdx = this.length - 1;
+  return (0, utils_js_1.domEach)(this, function (el, i) {
+    var parent = el.parent;
+    if (!(0, domhandler_1.hasChildren)(el) || !parent) {
+      return;
+    }
+    var siblings = parent.children;
+    var index = siblings.indexOf(el);
+    // If not found, move on
+    /* istanbul ignore next */
+    if (index < 0) return;
+    var domSrc = typeof elems[0] === 'function' ? elems[0].call(el, i, _this._render(el.children)) : elems;
+    var dom = _this._makeDomArray(domSrc, i < lastIdx);
+    // Add element before `el` element
+    uniqueSplice(siblings, index, 0, dom, parent);
+  });
+}
+exports.before = before;
+/* eslint-enable jsdoc/check-param-names*/
+/**
+ * Insert every element in the set of matched elements before the target.
+ *
+ * @category Manipulation
+ * @example
+ *
+ * ```js
+ * $('<li class="plum">Plum</li>').insertBefore('.apple');
+ * $.html();
+ * //=>  <ul id="fruits">
+ * //      <li class="plum">Plum</li>
+ * //      <li class="apple">Apple</li>
+ * //      <li class="orange">Orange</li>
+ * //      <li class="pear">Pear</li>
+ * //    </ul>
+ * ```
+ *
+ * @param target - Element to insert elements before.
+ * @returns The set of newly inserted elements.
+ * @see {@link https://api.jquery.com/insertBefore/}
+ */
+function insertBefore(target) {
+  var _this = this;
+  var targetArr = this._make(target);
+  this.remove();
+  var clones = [];
+  (0, utils_js_1.domEach)(targetArr, function (el) {
+    var clonedSelf = _this.clone().toArray();
+    var parent = el.parent;
+    if (!parent) {
+      return;
+    }
+    var siblings = parent.children;
+    var index = siblings.indexOf(el);
+    // If not found, move on
+    /* istanbul ignore next */
+    if (index < 0) return;
+    // Add cloned `this` element(s) after target element
+    uniqueSplice(siblings, index, 0, clonedSelf, parent);
+    clones.push.apply(clones, clonedSelf);
+  });
+  return this._make(clones);
+}
+exports.insertBefore = insertBefore;
+/**
+ * Removes the set of matched elements from the DOM and all their children.
+ * `selector` filters the set of matched elements to be removed.
+ *
+ * @category Manipulation
+ * @example
+ *
+ * ```js
+ * $('.pear').remove();
+ * $.html();
+ * //=>  <ul id="fruits">
+ * //      <li class="apple">Apple</li>
+ * //      <li class="orange">Orange</li>
+ * //    </ul>
+ * ```
+ *
+ * @param selector - Optional selector for elements to remove.
+ * @returns The instance itself.
+ * @see {@link https://api.jquery.com/remove/}
+ */
+function remove(selector) {
+  // Filter if we have selector
+  var elems = selector ? this.filter(selector) : this;
+  (0, utils_js_1.domEach)(elems, function (el) {
+    (0, domutils_1.removeElement)(el);
+    el.prev = el.next = el.parent = null;
+  });
+  return this;
+}
+exports.remove = remove;
+/**
+ * Replaces matched elements with `content`.
+ *
+ * @category Manipulation
+ * @example
+ *
+ * ```js
+ * const plum = $('<li class="plum">Plum</li>');
+ * $('.pear').replaceWith(plum);
+ * $.html();
+ * //=> <ul id="fruits">
+ * //     <li class="apple">Apple</li>
+ * //     <li class="orange">Orange</li>
+ * //     <li class="plum">Plum</li>
+ * //   </ul>
+ * ```
+ *
+ * @param content - Replacement for matched elements.
+ * @returns The instance itself.
+ * @see {@link https://api.jquery.com/replaceWith/}
+ */
+function replaceWith(content) {
+  var _this = this;
+  return (0, utils_js_1.domEach)(this, function (el, i) {
+    var parent = el.parent;
+    if (!parent) {
+      return;
+    }
+    var siblings = parent.children;
+    var cont = typeof content === 'function' ? content.call(el, i, el) : content;
+    var dom = _this._makeDomArray(cont);
+    /*
+     * In the case that `dom` contains nodes that already exist in other
+     * structures, ensure those nodes are properly removed.
+     */
+    (0, parse_js_1.update)(dom, null);
+    var index = siblings.indexOf(el);
+    // Completely remove old element
+    uniqueSplice(siblings, index, 1, dom, parent);
+    if (!dom.includes(el)) {
+      el.parent = el.prev = el.next = null;
+    }
+  });
+}
+exports.replaceWith = replaceWith;
+/**
+ * Empties an element, removing all its children.
+ *
+ * @category Manipulation
+ * @example
+ *
+ * ```js
+ * $('ul').empty();
+ * $.html();
+ * //=>  <ul id="fruits"></ul>
+ * ```
+ *
+ * @returns The instance itself.
+ * @see {@link https://api.jquery.com/empty/}
+ */
+function empty() {
+  return (0, utils_js_1.domEach)(this, function (el) {
+    if (!(0, domhandler_1.hasChildren)(el)) return;
+    el.children.forEach(function (child) {
+      child.next = child.prev = child.parent = null;
+    });
+    el.children.length = 0;
+  });
+}
+exports.empty = empty;
+function html(str) {
+  var _this = this;
+  if (str === undefined) {
+    var el = this[0];
+    if (!el || !(0, domhandler_1.hasChildren)(el)) return null;
+    return this._render(el.children);
+  }
+  return (0, utils_js_1.domEach)(this, function (el) {
+    if (!(0, domhandler_1.hasChildren)(el)) return;
+    el.children.forEach(function (child) {
+      child.next = child.prev = child.parent = null;
+    });
+    var content = (0, utils_js_1.isCheerio)(str) ? str.toArray() : _this._parse("".concat(str), _this.options, false, el).children;
+    (0, parse_js_1.update)(content, el);
+  });
+}
+exports.html = html;
+/**
+ * Turns the collection to a string. Alias for `.html()`.
+ *
+ * @category Manipulation
+ * @returns The rendered document.
+ */
+function toString() {
+  return this._render(this);
+}
+exports.toString = toString;
+function text(str) {
+  var _this = this;
+  // If `str` is undefined, act as a "getter"
+  if (str === undefined) {
+    return (0, static_js_1.text)(this);
+  }
+  if (typeof str === 'function') {
+    // Function support
+    return (0, utils_js_1.domEach)(this, function (el, i) {
+      return _this._make(el).text(str.call(el, i, (0, static_js_1.text)([el])));
+    });
+  }
+  // Append text node to each selected elements
+  return (0, utils_js_1.domEach)(this, function (el) {
+    if (!(0, domhandler_1.hasChildren)(el)) return;
+    el.children.forEach(function (child) {
+      child.next = child.prev = child.parent = null;
+    });
+    var textNode = new domhandler_1.Text("".concat(str));
+    (0, parse_js_1.update)(textNode, el);
+  });
+}
+exports.text = text;
+/**
+ * Clone the cheerio object.
+ *
+ * @category Manipulation
+ * @example
+ *
+ * ```js
+ * const moreFruit = $('#fruits').clone();
+ * ```
+ *
+ * @returns The cloned object.
+ * @see {@link https://api.jquery.com/clone/}
+ */
+function clone() {
+  return this._make((0, utils_js_1.cloneDom)(this.get()));
+}
+exports.clone = clone;
+//# sourceMappingURL=data:application/json;charset=utf-8;base64,eyJ2ZXJzaW9uIjozLCJuYW1lcyI6WyJkb21oYW5kbGVyXzEiLCJyZXF1aXJlIiwicGFyc2VfanNfMSIsInN0YXRpY19qc18xIiwidXRpbHNfanNfMSIsImRvbXV0aWxzXzEiLCJfbWFrZURvbUFycmF5IiwiZWxlbSIsImNsb25lIiwiX3RoaXMiLCJpc0NoZWVyaW8iLCJjbG9uZURvbSIsImdldCIsIkFycmF5IiwiaXNBcnJheSIsInJlZHVjZSIsIm5ld0VsZW1zIiwiZWwiLCJjb25jYXQiLCJfcGFyc2UiLCJvcHRpb25zIiwiY2hpbGRyZW4iLCJleHBvcnRzIiwiX2luc2VydCIsImNvbmNhdGVuYXRvciIsImVsZW1zIiwiX2kiLCJhcmd1bWVudHMiLCJsZW5ndGgiLCJsYXN0SWR4IiwiZG9tRWFjaCIsImkiLCJoYXNDaGlsZHJlbiIsImRvbVNyYyIsImNhbGwiLCJfcmVuZGVyIiwiZG9tIiwidW5pcXVlU3BsaWNlIiwiYXJyYXkiLCJzcGxpY2VJZHgiLCJzcGxpY2VDb3VudCIsInBhcmVudCIsInNwbGljZUFyZ3MiLCJfX3NwcmVhZEFycmF5IiwicHJldiIsIm5leHQiLCJpZHgiLCJub2RlIiwib2xkUGFyZW50Iiwib2xkU2libGluZ3MiLCJwcmV2SWR4IiwiaW5kZXhPZiIsInNwbGljZSIsIl9hIiwiX2IiLCJhcHBseSIsImFwcGVuZFRvIiwidGFyZ2V0IiwiYXBwZW5kVGFyZ2V0IiwiX21ha2UiLCJhcHBlbmQiLCJwcmVwZW5kVG8iLCJwcmVwZW5kVGFyZ2V0IiwicHJlcGVuZCIsIl93cmFwIiwiaW5zZXJ0Iiwid3JhcHBlciIsImxhc3RQYXJlbnQiLCJwYXJlbnRzIiwibGFzdCIsIndyYXBfMSIsImlzSHRtbCIsImZpbmQiLCJ3cmFwcGVyRG9tIiwiZWxJbnNlcnRMb2NhdGlvbiIsImoiLCJjaGlsZCIsImlzVGFnIiwid3JhcCIsInNpYmxpbmdzIiwiaW5kZXgiLCJ1cGRhdGUiLCJ3cmFwSW5uZXIiLCJ1bndyYXAiLCJzZWxlY3RvciIsIm5vdCIsImVhY2giLCJfIiwicmVwbGFjZVdpdGgiLCJ3cmFwQWxsIiwid3JhcF8yIiwiaW5zZXJ0QmVmb3JlIiwidHlwZSIsImFmdGVyIiwiaW5zZXJ0QWZ0ZXIiLCJyZW1vdmUiLCJjbG9uZXMiLCJmb3JFYWNoIiwiY2xvbmVkU2VsZiIsInRvQXJyYXkiLCJwdXNoIiwiYmVmb3JlIiwidGFyZ2V0QXJyIiwiZmlsdGVyIiwicmVtb3ZlRWxlbWVudCIsImNvbnRlbnQiLCJjb250IiwiaW5jbHVkZXMiLCJlbXB0eSIsImh0bWwiLCJzdHIiLCJ1bmRlZmluZWQiLCJ0b1N0cmluZyIsInRleHQiLCJ0ZXh0Tm9kZSIsIlRleHQiXSwic291cmNlcyI6WyJodHRwczovL3Jhdy5naXRodWJ1c2VyY29udGVudC5jb20vY2hlZXJpb2pzL2NoZWVyaW8vZDFjYmM2NmQ1MzM5MmNlOGJmNmNkMDA2OGY2NzU4MzYzNzJkMmJmMy9zcmMvYXBpL21hbmlwdWxhdGlvbi50cyJdLCJzb3VyY2VzQ29udGVudCI6W251bGxdLCJtYXBwaW5ncyI6Ijs7QUFBQTs7Ozs7Ozs7Ozs7Ozs7Ozs7O0FBTUEsSUFBQUEsWUFBQSxHQUFBQyxPQUFBO0FBQ0EsSUFBQUMsVUFBQSxHQUFBRCxPQUFBO0FBQ0EsSUFBQUUsV0FBQSxHQUFBRixPQUFBO0FBQ0EsSUFBQUcsVUFBQSxHQUFBSCxPQUFBO0FBQ0EsSUFBQUksVUFBQSxHQUFBSixPQUFBO0FBSUE7Ozs7Ozs7OztBQVNBLFNBQWdCSyxhQUFhQSxDQUUzQkMsSUFBa0MsRUFDbENDLEtBQWU7RUFIakIsSUFBQUMsS0FBQTtFQUtFLElBQUlGLElBQUksSUFBSSxJQUFJLEVBQUU7SUFDaEIsT0FBTyxFQUFFOztFQUVYLElBQUksSUFBQUgsVUFBQSxDQUFBTSxTQUFTLEVBQUNILElBQUksQ0FBQyxFQUFFO0lBQ25CLE9BQU9DLEtBQUssR0FBRyxJQUFBSixVQUFBLENBQUFPLFFBQVEsRUFBQ0osSUFBSSxDQUFDSyxHQUFHLEVBQUUsQ0FBQyxHQUFHTCxJQUFJLENBQUNLLEdBQUcsRUFBRTs7RUFFbEQsSUFBSUMsS0FBSyxDQUFDQyxPQUFPLENBQUNQ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

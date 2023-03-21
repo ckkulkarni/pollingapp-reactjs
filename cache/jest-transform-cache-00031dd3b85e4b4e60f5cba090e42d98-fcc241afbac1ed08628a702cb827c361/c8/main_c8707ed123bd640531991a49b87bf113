@@ -1,0 +1,20 @@
+676b924a2f62fc21a9b7a5327d25490f
+/**
+ * React Router DOM v6.9.0
+ *
+ * Copyright (c) Remix Software Inc.
+ *
+ * This source code is licensed under the MIT license found in the
+ * LICENSE.md file in the root directory of this source tree.
+ *
+ * @license MIT
+ */
+'use strict';
+
+/* eslint-env node */
+if (process.env.NODE_ENV === "production") {
+  module.exports = require("./umd/react-router-dom.production.min.js");
+} else {
+  module.exports = require("./umd/react-router-dom.development.js");
+}
+//# sourceMappingURL=data:application/json;charset=utf-8;base64,eyJ2ZXJzaW9uIjozLCJuYW1lcyI6WyJwcm9jZXNzIiwiZW52IiwiTk9ERV9FTlYiLCJtb2R1bGUiLCJleHBvcnRzIiwicmVxdWlyZSJdLCJzb3VyY2VzIjpbIm1haW4uanMiXSwic291cmNlc0NvbnRlbnQiOlsiLyoqXG4gKiBSZWFjdCBSb3V0ZXIgRE9NIHY2LjkuMFxuICpcbiAqIENvcHlyaWdodCAoYykgUmVtaXggU29mdHdhcmUgSW5jLlxuICpcbiAqIFRoaXMgc291cmNlIGNvZGUgaXMgbGljZW5zZWQgdW5kZXIgdGhlIE1JVCBsaWNlbnNlIGZvdW5kIGluIHRoZVxuICogTElDRU5TRS5tZCBmaWxlIGluIHRoZSByb290IGRpcmVjdG9yeSBvZiB0aGlzIHNvdXJjZSB0cmVlLlxuICpcbiAqIEBsaWNlbnNlIE1JVFxuICovXG4ndXNlIHN0cmljdCc7XG5cbi8qIGVzbGludC1lbnYgbm9kZSAqL1xuXG5pZiAocHJvY2Vzcy5lbnYuTk9ERV9FTlYgPT09IFwicHJvZHVjdGlvblwiKSB7XG4gIG1vZHVsZS5leHBvcnRzID0gcmVxdWlyZShcIi4vdW1kL3JlYWN0LXJvdXRlci1kb20ucHJvZHVjdGlvbi5taW4uanNcIik7XG59IGVsc2Uge1xuICBtb2R1bGUuZXhwb3J0cyA9IHJlcXVpcmUoXCIuL3VtZC9yZWFjdC1yb3V0ZXItZG9tLmRldmVsb3BtZW50LmpzXCIpO1xufVxuIl0sIm1hcHBpbmdzIjoiQUFBQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBLFlBQVk7O0FBRVo7QUFFQSxJQUFJQSxPQUFPLENBQUNDLEdBQUcsQ0FBQ0MsUUFBUSxLQUFLLFlBQVksRUFBRTtFQUN6Q0MsTUFBTSxDQUFDQyxPQUFPLEdBQUdDLE9BQU8sQ0FBQywwQ0FBMEMsQ0FBQztBQUN0RSxDQUFDLE1BQU07RUFDTEYsTUFBTSxDQUFDQyxPQUFPLEdBQUdDLE9BQU8sQ0FBQyx1Q0FBdUMsQ0FBQztBQUNuRSJ9

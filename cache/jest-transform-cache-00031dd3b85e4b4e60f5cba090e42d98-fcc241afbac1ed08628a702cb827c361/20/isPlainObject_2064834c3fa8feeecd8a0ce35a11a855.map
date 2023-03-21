@@ -1,0 +1,1 @@
+{"version":3,"names":["_isPlainObject","_interopRequireDefault","require"],"sources":["../../src/helpers/isPlainObject.js"],"sourcesContent":["import isPlainObject from 'prop-types-exact/build/helpers/isPlainObject';\n\nexport default isPlainObject;\n"],"mappings":";;;;;;AAAA,IAAAA,cAAA,GAAAC,sBAAA,CAAAC,OAAA;;;;;;eAEeF,cAAA,W"}

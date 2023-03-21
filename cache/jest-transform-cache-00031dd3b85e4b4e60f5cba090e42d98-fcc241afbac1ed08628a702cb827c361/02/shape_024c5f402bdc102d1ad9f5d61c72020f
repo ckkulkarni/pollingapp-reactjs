@@ -1,0 +1,52 @@
+1cc508c2f7bed6a2966a7d764a84ce96
+"use strict";
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+exports["default"] = shapeValidator;
+var _isPlainObject = _interopRequireDefault(require("./helpers/isPlainObject"));
+var _wrapValidator = _interopRequireDefault(require("./helpers/wrapValidator"));
+function _interopRequireDefault(obj) {
+  return obj && obj.__esModule ? obj : {
+    "default": obj
+  };
+}
+function shapeValidator(shapeTypes) {
+  if (!(0, _isPlainObject["default"])(shapeTypes)) {
+    throw new TypeError('shape must be a normal object');
+  }
+  function shape(props, propName, componentName, location) {
+    var propValue = props[propName];
+    if (propValue == null) {
+      return null;
+    } // code adapted from PropTypes.shape: https://github.com/facebook/react/blob/14156e56b9cf18ac86963185c5af4abddf3ff811/src/isomorphic/classic/types/ReactPropTypes.js#L381
+    // eslint-disable-next-line guard-for-in, no-restricted-syntax
+
+    for (var _len = arguments.length, rest = new Array(_len > 4 ? _len - 4 : 0), _key = 4; _key < _len; _key++) {
+      rest[_key - 4] = arguments[_key];
+    }
+    for (var key in shapeTypes) {
+      var checker = shapeTypes[key];
+      if (checker) {
+        var error = checker.apply(void 0, [propValue, key, componentName, location].concat(rest));
+        if (error) {
+          return error;
+        }
+      }
+    }
+    return null;
+  }
+  shape.isRequired = function shapeRequired(props, propName, componentName) {
+    var propValue = props[propName];
+    if (propValue == null) {
+      return new TypeError("".concat(componentName, ": ").concat(propName, " is required."));
+    }
+    for (var _len2 = arguments.length, rest = new Array(_len2 > 3 ? _len2 - 3 : 0), _key2 = 3; _key2 < _len2; _key2++) {
+      rest[_key2 - 3] = arguments[_key2];
+    }
+    return shape.apply(void 0, [props, propName, componentName].concat(rest));
+  };
+  return (0, _wrapValidator["default"])(shape, 'shape', shapeTypes);
+}
+//# sourceMappingURL=data:application/json;charset=utf-8;base64,eyJ2ZXJzaW9uIjozLCJuYW1lcyI6WyJfaXNQbGFpbk9iamVjdCIsIl9pbnRlcm9wUmVxdWlyZURlZmF1bHQiLCJyZXF1aXJlIiwiX3dyYXBWYWxpZGF0b3IiLCJzaGFwZVZhbGlkYXRvciIsInNoYXBlVHlwZXMiLCJUeXBlRXJyb3IiLCJzaGFwZSIsInByb3BzIiwicHJvcE5hbWUiLCJjb21wb25lbnROYW1lIiwibG9jYXRpb24iLCJwcm9wVmFsdWUiLCJfbGVuIiwiYXJndW1lbnRzIiwibGVuZ3RoIiwicmVzdCIsIkFycmF5IiwiX2tleSIsImtleSIsImNoZWNrZXIiLCJlcnJvciIsImFwcGx5IiwiY29uY2F0IiwiaXNSZXF1aXJlZCIsInNoYXBlUmVxdWlyZWQiLCJfbGVuMiIsIl9rZXkyIl0sInNvdXJjZXMiOlsiLi4vc3JjL3NoYXBlLmpzIl0sInNvdXJjZXNDb250ZW50IjpbImltcG9ydCBpc1BsYWluT2JqZWN0IGZyb20gJy4vaGVscGVycy9pc1BsYWluT2JqZWN0JztcbmltcG9ydCB3cmFwVmFsaWRhdG9yIGZyb20gJy4vaGVscGVycy93cmFwVmFsaWRhdG9yJztcblxuZXhwb3J0IGRlZmF1bHQgZnVuY3Rpb24gc2hhcGVWYWxpZGF0b3Ioc2hhcGVUeXBlcykge1xuICBpZiAoIWlzUGxhaW5PYmplY3Qoc2hhcGVUeXBlcykpIHtcbiAgICB0aHJvdyBuZXcgVHlwZUVycm9yKCdzaGFwZSBtdXN0IGJlIGEgbm9ybWFsIG9iamVjdCcpO1xuICB9XG5cbiAgZnVuY3Rpb24gc2hhcGUocHJvcHMsIHByb3BOYW1lLCBjb21wb25lbnROYW1lLCBsb2NhdGlvbiwgLi4ucmVzdCkge1xuICAgIGNvbnN0IHsgW3Byb3BOYW1lXTogcHJvcFZhbHVlIH0gPSBwcm9wcztcbiAgICBpZiAocHJvcFZhbHVlID09IG51bGwpIHtcbiAgICAgIHJldHVybiBudWxsO1xuICAgIH1cbiAgICAvLyBjb2RlIGFkYXB0ZWQgZnJvbSBQcm9wVHlwZXMuc2hhcGU6IGh0dHBzOi8vZ2l0aHViLmNvbS9mYWNlYm9vay9yZWFjdC9ibG9iLzE0MTU2ZTU2YjljZjE4YWM4Njk2MzE4NWM1YWY0YWJkZGYzZmY4MTEvc3JjL2lzb21vcnBoaWMvY2xhc3NpYy90eXBlcy9SZWFjdFByb3BUeXBlcy5qcyNMMzgxXG4gICAgLy8gZXNsaW50LWRpc2FibGUtbmV4dC1saW5lIGd1YXJkLWZvci1pbiwgbm8tcmVzdHJpY3RlZC1zeW50YXhcbiAgICBmb3IgKGNvbnN0IGtleSBpbiBzaGFwZVR5cGVzKSB7XG4gICAgICBjb25zdCBjaGVja2VyID0gc2hhcGVUeXBlc1trZXldO1xuICAgICAgaWYgKGNoZWNrZXIpIHtcbiAgICAgICAgY29uc3QgZXJyb3IgPSBjaGVja2VyKFxuICAgICAgICAgIHByb3BWYWx1ZSxcbiAgICAgICAgICBrZXksXG4gICAgICAgICAgY29tcG9uZW50TmFtZSxcbiAgICAgICAgICBsb2NhdGlvbixcbiAgICAgICAgICAuLi5yZXN0LFxuICAgICAgICApO1xuICAgICAgICBpZiAoZXJyb3IpIHtcbiAgICAgICAgICByZXR1cm4gZXJyb3I7XG4gICAgICAgIH1cbiAgICAgIH1cbiAgICB9XG4gICAgcmV0dXJuIG51bGw7XG4gIH1cblxuICBzaGFwZS5pc1JlcXVpcmVkID0gZnVuY3Rpb24gc2hhcGVSZXF1aXJlZChwcm9wcywgcHJvcE5hbWUsIGNvbXBvbmVudE5hbWUsIC4uLnJlc3QpIHtcbiAgICBjb25zdCB7IFtwcm9wTmFtZV06IHByb3BWYWx1ZSB9ID0gcHJvcHM7XG4gICAgaWYgKHByb3BWYWx1ZSA9PSBudWxsKSB7XG4gICAgICByZXR1cm4gbmV3IFR5cGVFcnJvcihgJHtjb21wb25lbnROYW1lfTogJHtwcm9wTmFtZX0gaXMgcmVxdWlyZWQuYCk7XG4gICAgfVxuICAgIHJldHVybiBzaGFwZShwcm9wcywgcHJvcE5hbWUsIGNvbXBvbmVudE5hbWUsIC4uLnJlc3QpO1xuICB9O1xuXG4gIHJldHVybiB3cmFwVmFsaWRhdG9yKHNoYXBlLCAnc2hhcGUnLCBzaGFwZVR5cGVzKTtcbn1cbiJdLCJtYXBwaW5ncyI6Ijs7Ozs7O0FBQUEsSUFBQUEsY0FBQSxHQUFBQyxzQkFBQSxDQUFBQyxPQUFBO0FBQ0EsSUFBQUMsY0FBQSxHQUFBRixzQkFBQSxDQUFBQyxPQUFBOzs7Ozs7QUFFZSxTQUFTRSxjQUFUQSxDQUF3QkMsVUFBeEIsRUFBb0M7RUFDakQsSUFBSSxDQUFDLElBQUFMLGNBQUEsYUFBY0ssVUFBZCxDQUFMLEVBQWdDO0lBQzlCLE1BQU0sSUFBSUMsU0FBSixDQUFjLCtCQUFkLENBQU47RUFDRDtFQUVELFNBQVNDLEtBQVRBLENBQWVDLEtBQWYsRUFBc0JDLFFBQXRCLEVBQWdDQyxhQUFoQyxFQUErQ0MsUUFBL0MsRUFBa0U7SUFBQSxJQUM1Q0MsU0FENEMsR0FDOUJKLEtBRDhCLENBQ3ZEQyxRQUR1RDtJQUVoRSxJQUFJRyxTQUFTLElBQUksSUFBakIsRUFBdUI7TUFDckIsT0FBTyxJQUFQO0lBQ0QsQ0FKK0QsQ0FLaEU7SUFDQTs7SUFOZ0UsU0FBQUMsSUFBQSxHQUFBQyxTQUFBLENBQUFDLE1BQUEsRUFBTkMsSUFBTSxPQUFBQyxLQUFBLENBQUFKLElBQUEsT0FBQUEsSUFBQSxXQUFBSyxJQUFBLE1BQUFBLElBQUEsR0FBQUwsSUFBQSxFQUFBSyxJQUFBO01BQU5GLElBQU0sQ0FBQUUsSUFBQSxRQUFBSixTQUFBLENBQUFJLElBQUE7SUFBQTtJQU9oRSxLQUFLLElBQU1DLEdBQVgsSUFBa0JkLFVBQWxCLEVBQThCO01BQzVCLElBQU1lLE9BQU8sR0FBR2YsVUFBVSxDQUFDYyxHQUFELENBQTFCO01BQ0EsSUFBSUMsT0FBSixFQUFhO1FBQ1gsSUFBTUMsS0FBSyxHQUFHRCxPQUFPLENBQUFFLEtBQVAsVUFDWlYsU0FEWSxFQUVaTyxHQUZZLEVBR1pULGFBSFksRUFJWkMsUUFKWSxFQUFBWSxNQUFBLENBS1RQLElBTFMsRUFBZDtRQU9BLElBQUlLLEtBQUosRUFBVztVQUNULE9BQU9BLEtBQVA7UUFDRDtNQUNGO0lBQ0Y7SUFDRCxPQUFPLElBQVA7RUFDRDtFQUVEZCxLQUFLLENBQUNpQixVQUFOLEdBQW1CLFNBQVNDLGFBQVRBLENBQXVCakIsS0FBdkIsRUFBOEJDLFFBQTlCLEVBQXdDQyxhQUF4QyxFQUFnRTtJQUFBLElBQzdERSxTQUQ2RCxHQUMvQ0osS0FEK0MsQ0FDeEVDLFFBRHdFO0lBRWpGLElBQUlHLFNBQVMsSUFBSSxJQUFqQixFQUF1QjtNQUNyQixPQUFPLElBQUlOLFNBQUosSUFBQWlCLE1BQUEsQ0FBaUJiLGFBQWpCLFFBQUFhLE1BQUEsQ0FBbUNkLFFBQW5DLG1CQUFQO0lBQ0Q7SUFKZ0YsU0FBQWlCLEtBQUEsR0FBQVosU0FBQSxDQUFBQyxNQUFBLEVBQU5DLElBQU0sT0FBQUMsS0FBQSxDQUFBUyxLQUFBLE9BQUFBLEtBQUEsV0FBQUMsS0FBQSxNQUFBQSxLQUFBLEdBQUFELEtBQUEsRUFBQUMsS0FBQTtNQUFOWCxJQUFNLENBQUFXLEtBQUEsUUFBQWIsU0FBQSxDQUFBYSxLQUFBO0lBQUE7SUFLakYsT0FBT3BCLEtBQUssQ0FBQWUsS0FBTCxVQUFNZCxLQUFOLEVBQWFDLFFBQWIsRUFBdUJDLGFBQXZCLEVBQUFhLE1BQUEsQ0FBeUNQLElBQXpDLEVBQVA7RUFDRCxDQU5EO0VBUUEsT0FBTyxJQUFBYixjQUFBLGFBQWNJLEtBQWQsRUFBcUIsT0FBckIsRUFBOEJGLFVBQTlCLENBQVA7QUFDRCJ9

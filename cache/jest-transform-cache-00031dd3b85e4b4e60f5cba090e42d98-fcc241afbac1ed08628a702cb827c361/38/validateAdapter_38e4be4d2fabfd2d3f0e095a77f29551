@@ -1,0 +1,31 @@
+73d3dfbe1d1d34b808b43b54a5615155
+'use strict';
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+exports['default'] = validateAdapter;
+var _EnzymeAdapter = require('./EnzymeAdapter');
+var _EnzymeAdapter2 = _interopRequireDefault(_EnzymeAdapter);
+function _interopRequireDefault(obj) {
+  return obj && obj.__esModule ? obj : {
+    'default': obj
+  };
+}
+function validateAdapter(adapter) {
+  if (!adapter) {
+    throw new Error('\n      Enzyme Internal Error: Enzyme expects an adapter to be configured, but found none.\n      To configure an adapter, you should call `Enzyme.configure({ adapter: new Adapter() })`\n      before using any of Enzyme\'s top level APIs, where `Adapter` is the adapter\n      corresponding to the library currently being tested. For example:\n\n      import Adapter from \'enzyme-adapter-react-15\';\n\n      To find out more about this, see https://airbnb.io/enzyme/docs/installation/index.html\n    ');
+  }
+  if (typeof adapter === 'function') {
+    if (Object.getPrototypeOf(adapter) === _EnzymeAdapter2['default']) {
+      throw new Error('\n        Enzyme Internal Error: Enzyme expects an adapter instance to be configured -\n        you provided an adapter *constructor*.\n        To configure an adapter, you should call `Enzyme.configure({ adapter: new Adapter() })`\n        before using any of Enzyme\'s top level APIs, where `Adapter` is the adapter\n        corresponding to the library currently being tested. For example:\n\n        import Adapter from \'enzyme-adapter-react-15\';\n\n        To find out more about this, see https://airbnb.io/enzyme/docs/installation/index.html\n      ');
+    }
+    throw new Error('\n      Enzyme Internal Error: Enzyme expects an adapter to be configured -\n      an enzyme adapter must be an object instance; you provided a function.\n      To configure an adapter, you should call `Enzyme.configure({ adapter: new Adapter() })`\n      before using any of Enzyme\'s top level APIs, where `Adapter` is the adapter\n      corresponding to the library currently being tested. For example:\n\n      import Adapter from \'enzyme-adapter-react-15\';\n\n      To find out more about this, see https://airbnb.io/enzyme/docs/installation/index.html\n    ');
+  }
+  if (!(adapter instanceof _EnzymeAdapter2['default'])) {
+    throw new Error('Enzyme Internal Error: configured enzyme adapter did not inherit from the EnzymeAdapter base class');
+  }
+}
+
+//# sourceMappingURL=validateAdapter.js.map
+//# sourceMappingURL=data:application/json;charset=utf-8;base64,eyJ2ZXJzaW9uIjozLCJuYW1lcyI6WyJ2YWxpZGF0ZUFkYXB0ZXIiLCJfRW56eW1lQWRhcHRlciIsInJlcXVpcmUiLCJhZGFwdGVyIiwiRXJyb3IiLCJPYmplY3QiLCJnZXRQcm90b3R5cGVPZiIsIl9Fbnp5bWVBZGFwdGVyMiJdLCJzb3VyY2VzIjpbIi4uL3NyYy92YWxpZGF0ZUFkYXB0ZXIuanMiXSwic291cmNlc0NvbnRlbnQiOlsiaW1wb3J0IEVuenltZUFkYXB0ZXIgZnJvbSAnLi9Fbnp5bWVBZGFwdGVyJztcblxuZXhwb3J0IGRlZmF1bHQgZnVuY3Rpb24gdmFsaWRhdGVBZGFwdGVyKGFkYXB0ZXIpIHtcbiAgaWYgKCFhZGFwdGVyKSB7XG4gICAgdGhyb3cgbmV3IEVycm9yKGBcbiAgICAgIEVuenltZSBJbnRlcm5hbCBFcnJvcjogRW56eW1lIGV4cGVjdHMgYW4gYWRhcHRlciB0byBiZSBjb25maWd1cmVkLCBidXQgZm91bmQgbm9uZS5cbiAgICAgIFRvIGNvbmZpZ3VyZSBhbiBhZGFwdGVyLCB5b3Ugc2hvdWxkIGNhbGwgXFxgRW56eW1lLmNvbmZpZ3VyZSh7IGFkYXB0ZXI6IG5ldyBBZGFwdGVyKCkgfSlcXGBcbiAgICAgIGJlZm9yZSB1c2luZyBhbnkgb2YgRW56eW1lJ3MgdG9wIGxldmVsIEFQSXMsIHdoZXJlIFxcYEFkYXB0ZXJcXGAgaXMgdGhlIGFkYXB0ZXJcbiAgICAgIGNvcnJlc3BvbmRpbmcgdG8gdGhlIGxpYnJhcnkgY3VycmVudGx5IGJlaW5nIHRlc3RlZC4gRm9yIGV4YW1wbGU6XG5cbiAgICAgIGltcG9ydCBBZGFwdGVyIGZyb20gJ2VuenltZS1hZGFwdGVyLXJlYWN0LTE1JztcblxuICAgICAgVG8gZmluZCBvdXQgbW9yZSBhYm91dCB0aGlzLCBzZWUgaHR0cHM6Ly9haXJibmIuaW8vZW56eW1lL2RvY3MvaW5zdGFsbGF0aW9uL2luZGV4Lmh0bWxcbiAgICBgKTtcbiAgfVxuICBpZiAodHlwZW9mIGFkYXB0ZXIgPT09ICdmdW5jdGlvbicpIHtcbiAgICBpZiAoT2JqZWN0LmdldFByb3RvdHlwZU9mKGFkYXB0ZXIpID09PSBFbnp5bWVBZGFwdGVyKSB7XG4gICAgICB0aHJvdyBuZXcgRXJyb3IoYFxuICAgICAgICBFbnp5bWUgSW50ZXJuYWwgRXJyb3I6IEVuenltZSBleHBlY3RzIGFuIGFkYXB0ZXIgaW5zdGFuY2UgdG8gYmUgY29uZmlndXJlZCAtXG4gICAgICAgIHlvdSBwcm92aWRlZCBhbiBhZGFwdGVyICpjb25zdHJ1Y3RvciouXG4gICAgICAgIFRvIGNvbmZpZ3VyZSBhbiBhZGFwdGVyLCB5b3Ugc2hvdWxkIGNhbGwgXFxgRW56eW1lLmNvbmZpZ3VyZSh7IGFkYXB0ZXI6IG5ldyBBZGFwdGVyKCkgfSlcXGBcbiAgICAgICAgYmVmb3JlIHVzaW5nIGFueSBvZiBFbnp5bWUncyB0b3AgbGV2ZWwgQVBJcywgd2hlcmUgXFxgQWRhcHRlclxcYCBpcyB0aGUgYWRhcHRlclxuICAgICAgICBjb3JyZXNwb25kaW5nIHRvIHRoZSBsaWJyYXJ5IGN1cnJlbnRseSBiZWluZyB0ZXN0ZWQuIEZvciBleGFtcGxlOlxuXG4gICAgICAgIGltcG9ydCBBZGFwdGVyIGZyb20gJ2VuenltZS1hZGFwdGVyLXJlYWN0LTE1JztcblxuICAgICAgICBUbyBmaW5kIG91dCBtb3JlIGFib3V0IHRoaXMsIHNlZSBodHRwczovL2FpcmJuYi5pby9lbnp5bWUvZG9jcy9pbnN0YWxsYXRpb24vaW5kZXguaHRtbFxuICAgICAgYCk7XG4gICAgfVxuICAgIHRocm93IG5ldyBFcnJvcihgXG4gICAgICBFbnp5bWUgSW50ZXJuYWwgRXJyb3I6IEVuenltZSBleHBlY3RzIGFuIGFkYXB0ZXIgdG8gYmUgY29uZmlndXJlZCAtXG4gICAgICBhbiBlbnp5bWUgYWRhcHRlciBtdXN0IGJlIGFuIG9iamVjdCBpbnN0YW5jZTsgeW91IHByb3ZpZGVkIGEgZnVuY3Rpb24uXG4gICAgICBUbyBjb25maWd1cmUgYW4gYWRhcHRlciwgeW91IHNob3VsZCBjYWxsIFxcYEVuenltZS5jb25maWd1cmUoeyBhZGFwdGVyOiBuZXcgQWRhcHRlcigpIH0pXFxgXG4gICAgICBiZWZvcmUgdXNpbmcgYW55IG9mIEVuenltZSdzIHRvcCBsZXZlbCBBUElzLCB3aGVyZSBcXGBBZGFwdGVyXFxgIGlzIHRoZSBhZGFwdGVyXG4gICAgICBjb3JyZXNwb25kaW5nIHRvIHRoZSBsaWJyYXJ5IGN1cnJlbnRseSBiZWluZyB0ZXN0ZWQuIEZvciBleGFtcGxlOlxuXG4gICAgICBpbXBvcnQgQWRhcHRlciBmcm9tICdlbnp5bWUtYWRhcHRlci1yZWFjdC0xNSc7XG5cbiAgICAgIFRvIGZpbmQgb3V0IG1vcmUgYWJvdXQgdGhpcywgc2VlIGh0dHBzOi8vYWlyYm5iLmlvL2VuenltZS9kb2NzL2luc3RhbGxhdGlvbi9pbmRleC5odG1sXG4gICAgYCk7XG4gIH1cbiAgaWYgKCEoYWRhcHRlciBpbnN0YW5jZW9mIEVuenltZUFkYXB0ZXIpKSB7XG4gICAgdGhyb3cgbmV3IEVycm9yKCdFbnp5bWUgSW50ZXJuYWwgRXJyb3I6IGNvbmZpZ3VyZWQgZW56eW1lIGFkYXB0ZXIgZGlkIG5vdCBpbmhlcml0IGZyb20gdGhlIEVuenltZUFkYXB0ZXIgYmFzZSBjbGFzcycpO1xuICB9XG59XG4iXSwibWFwcGluZ3MiOiI7Ozs7O3FCQUV3QkEsZTtBQUZ4QixJQUFBQyxjQUFBLEdBQUFDLE9BQUE7Ozs7Ozs7QUFFZSxTQUFTRixlQUFUQSxDQUF5QkcsT0FBekIsRUFBa0M7RUFDL0MsSUFBSSxDQUFDQSxPQUFMLEVBQWM7SUFDWixNQUFNLElBQUlDLEtBQUosMGZBQU47RUFVRDtFQUNELElBQUksT0FBT0QsT0FBUCxLQUFtQixVQUF2QixFQUFtQztJQUNqQyxJQUFJRSxNQUFBLENBQU9DLGNBQVAsQ0FBc0JILE9BQXRCLE1BQW1DSSxlQUFBLFdBQXZDLEVBQXNEO01BQ3BELE1BQU0sSUFBSUgsS0FBSixrakJBQU47SUFXRDtJQUNELE1BQU0sSUFBSUEsS0FBSix5akJBQU47RUFXRDtFQUNELElBQUksRUFBRUQsT0FBQSxZQUFtQkksZUFBQSxXQUFyQixDQUFKLEVBQXlDO0lBQ3ZDLE1BQU0sSUFBSUgsS0FBSixDQUFVLG9HQUFWLENBQU47RUFDRDtBQUNGIn0=

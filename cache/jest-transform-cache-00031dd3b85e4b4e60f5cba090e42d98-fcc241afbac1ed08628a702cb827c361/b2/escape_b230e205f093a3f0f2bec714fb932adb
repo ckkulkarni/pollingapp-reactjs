@@ -1,0 +1,96 @@
+fec2b1a9f000a2931fcb46db8df65e27
+"use strict";
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+exports.escapeText = exports.escapeAttribute = exports.escapeUTF8 = exports.escape = exports.encodeXML = exports.getCodePoint = exports.xmlReplacer = void 0;
+exports.xmlReplacer = /["&'<>$\x80-\uFFFF]/g;
+var xmlCodeMap = new Map([[34, "&quot;"], [38, "&amp;"], [39, "&apos;"], [60, "&lt;"], [62, "&gt;"]]);
+// For compatibility with node < 4, we wrap `codePointAt`
+exports.getCodePoint =
+// eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
+String.prototype.codePointAt != null ? function (str, index) {
+  return str.codePointAt(index);
+} :
+// http://mathiasbynens.be/notes/javascript-encoding#surrogate-formulae
+function (c, index) {
+  return (c.charCodeAt(index) & 0xfc00) === 0xd800 ? (c.charCodeAt(index) - 0xd800) * 0x400 + c.charCodeAt(index + 1) - 0xdc00 + 0x10000 : c.charCodeAt(index);
+};
+/**
+ * Encodes all non-ASCII characters, as well as characters not valid in XML
+ * documents using XML entities.
+ *
+ * If a character has no equivalent entity, a
+ * numeric hexadecimal reference (eg. `&#xfc;`) will be used.
+ */
+function encodeXML(str) {
+  var ret = "";
+  var lastIdx = 0;
+  var match;
+  while ((match = exports.xmlReplacer.exec(str)) !== null) {
+    var i = match.index;
+    var char = str.charCodeAt(i);
+    var next = xmlCodeMap.get(char);
+    if (next !== undefined) {
+      ret += str.substring(lastIdx, i) + next;
+      lastIdx = i + 1;
+    } else {
+      ret += "".concat(str.substring(lastIdx, i), "&#x").concat((0, exports.getCodePoint)(str, i).toString(16), ";");
+      // Increase by 1 if we have a surrogate pair
+      lastIdx = exports.xmlReplacer.lastIndex += Number((char & 0xfc00) === 0xd800);
+    }
+  }
+  return ret + str.substr(lastIdx);
+}
+exports.encodeXML = encodeXML;
+/**
+ * Encodes all non-ASCII characters, as well as characters not valid in XML
+ * documents using numeric hexadecimal reference (eg. `&#xfc;`).
+ *
+ * Have a look at `escapeUTF8` if you want a more concise output at the expense
+ * of reduced transportability.
+ *
+ * @param data String to escape.
+ */
+exports.escape = encodeXML;
+function getEscaper(regex, map) {
+  return function escape(data) {
+    var match;
+    var lastIdx = 0;
+    var result = "";
+    while (match = regex.exec(data)) {
+      if (lastIdx !== match.index) {
+        result += data.substring(lastIdx, match.index);
+      }
+      // We know that this chararcter will be in the map.
+      result += map.get(match[0].charCodeAt(0));
+      // Every match will be of length 1
+      lastIdx = match.index + 1;
+    }
+    return result + data.substring(lastIdx);
+  };
+}
+/**
+ * Encodes all characters not valid in XML documents using XML entities.
+ *
+ * Note that the output will be character-set dependent.
+ *
+ * @param data String to escape.
+ */
+exports.escapeUTF8 = getEscaper(/[&<>'"]/g, xmlCodeMap);
+/**
+ * Encodes all characters that have to be escaped in HTML attributes,
+ * following {@link https://html.spec.whatwg.org/multipage/parsing.html#escapingString}.
+ *
+ * @param data String to escape.
+ */
+exports.escapeAttribute = getEscaper(/["&\u00A0]/g, new Map([[34, "&quot;"], [38, "&amp;"], [160, "&nbsp;"]]));
+/**
+ * Encodes all characters that have to be escaped in HTML text,
+ * following {@link https://html.spec.whatwg.org/multipage/parsing.html#escapingString}.
+ *
+ * @param data String to escape.
+ */
+exports.escapeText = getEscaper(/[&<>\u00A0]/g, new Map([[38, "&amp;"], [60, "&lt;"], [62, "&gt;"], [160, "&nbsp;"]]));
+//# sourceMappingURL=data:application/json;charset=utf-8;base64,eyJ2ZXJzaW9uIjozLCJuYW1lcyI6WyJleHBvcnRzIiwieG1sUmVwbGFjZXIiLCJ4bWxDb2RlTWFwIiwiTWFwIiwiZ2V0Q29kZVBvaW50IiwiU3RyaW5nIiwicHJvdG90eXBlIiwiY29kZVBvaW50QXQiLCJzdHIiLCJpbmRleCIsImMiLCJjaGFyQ29kZUF0IiwiZW5jb2RlWE1MIiwicmV0IiwibGFzdElkeCIsIm1hdGNoIiwiZXhlYyIsImkiLCJjaGFyIiwibmV4dCIsImdldCIsInVuZGVmaW5lZCIsInN1YnN0cmluZyIsImNvbmNhdCIsInRvU3RyaW5nIiwibGFzdEluZGV4IiwiTnVtYmVyIiwic3Vic3RyIiwiZXNjYXBlIiwiZ2V0RXNjYXBlciIsInJlZ2V4IiwibWFwIiwiZGF0YSIsInJlc3VsdCIsImVzY2FwZVVURjgiLCJlc2NhcGVBdHRyaWJ1dGUiLCJlc2NhcGVUZXh0Il0sInNvdXJjZXMiOlsiaHR0cHM6Ly9yYXcuZ2l0aHVidXNlcmNvbnRlbnQuY29tL2ZiNTUvZW50aXRpZXMvODY3YWM3MDliYTQ4MmE1NmE5OGI3YzM1ZjQ5Y2E4MzNjNzRkYzE5My9zcmMvZXNjYXBlLnRzIl0sInNvdXJjZXNDb250ZW50IjpbbnVsbF0sIm1hcHBpbmdzIjoiOzs7Ozs7QUFBYUEsT0FBQSxDQUFBQyxXQUFXLEdBQUcsc0JBQXNCO0FBRWpELElBQU1DLFVBQVUsR0FBRyxJQUFJQyxHQUFHLENBQUMsQ0FDdkIsQ0FBQyxFQUFFLEVBQUUsUUFBUSxDQUFDLEVBQ2QsQ0FBQyxFQUFFLEVBQUUsT0FBTyxDQUFDLEVBQ2IsQ0FBQyxFQUFFLEVBQUUsUUFBUSxDQUFDLEVBQ2QsQ0FBQyxFQUFFLEVBQUUsTUFBTSxDQUFDLEVBQ1osQ0FBQyxFQUFFLEVBQUUsTUFBTSxDQUFDLENBQ2YsQ0FBQztBQUVGO0FBQ2FILE9BQUEsQ0FBQUksWUFBWTtBQUNyQjtBQUNBQyxNQUFNLENBQUNDLFNBQVMsQ0FBQ0MsV0FBVyxJQUFJLElBQUksR0FDOUIsVUFBQ0MsR0FBVyxFQUFFQyxLQUFhO0VBQWEsT0FBQUQsR0FBRyxDQUFD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

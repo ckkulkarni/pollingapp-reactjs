@@ -1,0 +1,30 @@
+a4cd93c61bde8ea2a6ca44561198950d
+"use strict";
+
+// API
+module.exports = abort;
+
+/**
+ * Aborts leftover active jobs
+ *
+ * @param {object} state - current state object
+ */
+function abort(state) {
+  Object.keys(state.jobs).forEach(clean.bind(state));
+
+  // reset leftover jobs
+  state.jobs = {};
+}
+
+/**
+ * Cleans up leftover job by invoking abort function for the provided job id
+ *
+ * @this  state
+ * @param {string|number} key - job id to abort
+ */
+function clean(key) {
+  if (typeof this.jobs[key] == 'function') {
+    this.jobs[key]();
+  }
+}
+//# sourceMappingURL=data:application/json;charset=utf-8;base64,eyJ2ZXJzaW9uIjozLCJuYW1lcyI6WyJtb2R1bGUiLCJleHBvcnRzIiwiYWJvcnQiLCJzdGF0ZSIsIk9iamVjdCIsImtleXMiLCJqb2JzIiwiZm9yRWFjaCIsImNsZWFuIiwiYmluZCIsImtleSJdLCJzb3VyY2VzIjpbImFib3J0LmpzIl0sInNvdXJjZXNDb250ZW50IjpbIi8vIEFQSVxubW9kdWxlLmV4cG9ydHMgPSBhYm9ydDtcblxuLyoqXG4gKiBBYm9ydHMgbGVmdG92ZXIgYWN0aXZlIGpvYnNcbiAqXG4gKiBAcGFyYW0ge29iamVjdH0gc3RhdGUgLSBjdXJyZW50IHN0YXRlIG9iamVjdFxuICovXG5mdW5jdGlvbiBhYm9ydChzdGF0ZSlcbntcbiAgT2JqZWN0LmtleXMoc3RhdGUuam9icykuZm9yRWFjaChjbGVhbi5iaW5kKHN0YXRlKSk7XG5cbiAgLy8gcmVzZXQgbGVmdG92ZXIgam9ic1xuICBzdGF0ZS5qb2JzID0ge307XG59XG5cbi8qKlxuICogQ2xlYW5zIHVwIGxlZnRvdmVyIGpvYiBieSBpbnZva2luZyBhYm9ydCBmdW5jdGlvbiBmb3IgdGhlIHByb3ZpZGVkIGpvYiBpZFxuICpcbiAqIEB0aGlzICBzdGF0ZVxuICogQHBhcmFtIHtzdHJpbmd8bnVtYmVyfSBrZXkgLSBqb2IgaWQgdG8gYWJvcnRcbiAqL1xuZnVuY3Rpb24gY2xlYW4oa2V5KVxue1xuICBpZiAodHlwZW9mIHRoaXMuam9ic1trZXldID09ICdmdW5jdGlvbicpXG4gIHtcbiAgICB0aGlzLmpvYnNba2V5XSgpO1xuICB9XG59XG4iXSwibWFwcGluZ3MiOiI7O0FBQUE7QUFDQUEsTUFBTSxDQUFDQyxPQUFPLEdBQUdDLEtBQUs7O0FBRXRCO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQSxTQUFTQSxLQUFLQSxDQUFDQyxLQUFLLEVBQ3BCO0VBQ0VDLE1BQU0sQ0FBQ0MsSUFBSSxDQUFDRixLQUFLLENBQUNHLElBQUksQ0FBQyxDQUFDQyxPQUFPLENBQUNDLEtBQUssQ0FBQ0MsSUFBSSxDQUFDTixLQUFLLENBQUMsQ0FBQzs7RUFFbEQ7RUFDQUEsS0FBSyxDQUFDRyxJQUFJLEdBQUcsQ0FBQyxDQUFDO0FBQ2pCOztBQUVBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBLFNBQVNFLEtBQUtBLENBQUNFLEdBQUcsRUFDbEI7RUFDRSxJQUFJLE9BQU8sSUFBSSxDQUFDSixJQUFJLENBQUNJLEdBQUcsQ0FBQyxJQUFJLFVBQVUsRUFDdkM7SUFDRSxJQUFJLENBQUNKLElBQUksQ0FBQ0ksR0FBRyxDQUFDLEVBQUU7RUFDbEI7QUFDRiJ9

@@ -1,0 +1,8 @@
+525033a6c7450cb3a6f07b6eff567c32
+'use strict';
+
+// http://262.ecma-international.org/5.1/#sec-9.2
+module.exports = function ToBoolean(value) {
+  return !!value;
+};
+//# sourceMappingURL=data:application/json;charset=utf-8;base64,eyJ2ZXJzaW9uIjozLCJuYW1lcyI6WyJtb2R1bGUiLCJleHBvcnRzIiwiVG9Cb29sZWFuIiwidmFsdWUiXSwic291cmNlcyI6WyJUb0Jvb2xlYW4uanMiXSwic291cmNlc0NvbnRlbnQiOlsiJ3VzZSBzdHJpY3QnO1xuXG4vLyBodHRwOi8vMjYyLmVjbWEtaW50ZXJuYXRpb25hbC5vcmcvNS4xLyNzZWMtOS4yXG5cbm1vZHVsZS5leHBvcnRzID0gZnVuY3Rpb24gVG9Cb29sZWFuKHZhbHVlKSB7IHJldHVybiAhIXZhbHVlOyB9O1xuIl0sIm1hcHBpbmdzIjoiQUFBQSxZQUFZOztBQUVaO0FBRUFBLE1BQU0sQ0FBQ0MsT0FBTyxHQUFHLFNBQVNDLFNBQVNBLENBQUNDLEtBQUssRUFBRTtFQUFFLE9BQU8sQ0FBQyxDQUFDQSxLQUFLO0FBQUUsQ0FBQyJ9

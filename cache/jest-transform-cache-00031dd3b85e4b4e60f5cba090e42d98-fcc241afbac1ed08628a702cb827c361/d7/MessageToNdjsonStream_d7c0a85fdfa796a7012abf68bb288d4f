@@ -1,0 +1,61 @@
+a4566844c374d4a6bce5a1f4ec39220f
+"use strict";
+
+var __extends = void 0 && (void 0).__extends || function () {
+  var extendStatics = function (d, b) {
+    extendStatics = Object.setPrototypeOf || {
+      __proto__: []
+    } instanceof Array && function (d, b) {
+      d.__proto__ = b;
+    } || function (d, b) {
+      for (var p in b) if (b.hasOwnProperty(p)) d[p] = b[p];
+    };
+    return extendStatics(d, b);
+  };
+  return function (d, b) {
+    extendStatics(d, b);
+    function __() {
+      this.constructor = d;
+    }
+    d.prototype = b === null ? Object.create(b) : (__.prototype = b.prototype, new __());
+  };
+}();
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+var stream_1 = require("stream");
+/**
+ * Transforms a stream of message objects to NDJSON
+ */
+var MessageToNdjsonStream = /** @class */function (_super) {
+  __extends(MessageToNdjsonStream, _super);
+  function MessageToNdjsonStream() {
+    return _super.call(this, {
+      writableObjectMode: true,
+      readableObjectMode: true
+    }) || this;
+  }
+  MessageToNdjsonStream.prototype._transform = function (message, encoding, callback) {
+    // @ts-ignore
+    if (!message.constructor.toObject) {
+      return callback(new Error("Not a protobuf object: " + JSON.stringify(message)));
+    }
+    // @ts-ignore
+    var object = message.constructor.toObject(message, {
+      defaults: false,
+      enums: String,
+      arrays: false,
+      objects: false
+    });
+    // This reviver omits printing fields with empty values
+    // This is to make it behave the same as Golang's protobuf->JSON converter
+    var json = JSON.stringify(object, function (key, value) {
+      return value === '' ? undefined : value;
+    });
+    this.push(json + '\n');
+    callback();
+  };
+  return MessageToNdjsonStream;
+}(stream_1.Transform);
+exports.default = MessageToNdjsonStream;
+//# sourceMappingURL=data:application/json;charset=utf-8;base64,eyJ2ZXJzaW9uIjozLCJuYW1lcyI6WyJzdHJlYW1fMSIsInJlcXVpcmUiLCJNZXNzYWdlVG9OZGpzb25TdHJlYW0iLCJfc3VwZXIiLCJfX2V4dGVuZHMiLCJjYWxsIiwid3JpdGFibGVPYmplY3RNb2RlIiwicmVhZGFibGVPYmplY3RNb2RlIiwicHJvdG90eXBlIiwiX3RyYW5zZm9ybSIsIm1lc3NhZ2UiLCJlbmNvZGluZyIsImNhbGxiYWNrIiwiY29uc3RydWN0b3IiLCJ0b09iamVjdCIsIkVycm9yIiwiSlNPTiIsInN0cmluZ2lmeSIsIm9iamVjdCIsImRlZmF1bHRzIiwiZW51bXMiLCJTdHJpbmciLCJhcnJheXMiLCJvYmplY3RzIiwianNvbiIsImtleSIsInZhbHVlIiwidW5kZWZpbmVkIiwicHVzaCIsIlRyYW5zZm9ybSJdLCJzb3VyY2VzIjpbIi4uLy4uL3NyYy9NZXNzYWdlVG9OZGpzb25TdHJlYW0udHMiXSwic291cmNlc0NvbnRlbnQiOltudWxsXSwibWFwcGluZ3MiOiI7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7OztBQUFBLElBQUFBLFFBQUEsR0FBQUMsT0FBQTtBQUVBOzs7QUFHQSxJQUFBQyxxQkFBQSwwQkFBQUMsTUFBQTtFQUFzREMsU0FBQSxDQUFBRixxQkFBQSxFQUFBQyxNQUFBO0VBQ3BELFNBQUFELHNCQUFBO1dBQ0VDLE1BQUEsQ0FBQUUsSUFBQSxPQUFNO01BQ0pDLGtCQUFrQixFQUFFLElBQUk7TUFDeEJDLGtCQUFrQixFQUFFO0tBQ3JCLENBQUM7RUFDSjtFQUVPTCxxQkFBQSxDQUFBTSxTQUFBLENBQUFDLFVBQVUsR0FBakIsVUFBa0JDLE9BQVUsRUFBRUMsUUFBZ0IsRUFBRUMsUUFBMkI7SUFDekU7SUFDQSxJQUFJLENBQUNGLE9BQU8sQ0FBQ0csV0FBVyxDQUFDQyxRQUFRLEVBQUU7TUFDakMsT0FBT0YsUUFBUSxDQUNiLElBQUlHLEtBQUssQ0FBQyw0QkFBMEJDLElBQUksQ0FBQ0MsU0FBUyxDQUFDUCxPQUFPLENBQUcsQ0FBQyxDQUMvRDs7SUFFSDtJQUNBLElBQU1RLE1BQU0sR0FBR1IsT0FBTyxDQUFDRyxXQUFXLENBQUNDLFFBQVEsQ0FBQ0osT0FBTyxFQUFFO01BQ25EUyxRQUFRLEVBQUUsS0FBSztNQUNmQyxLQUFLLEVBQUVDLE1BQU07TUFDYkMsTUFBTSxFQUFFLEtBQUs7TUFDYkMsT0FBTyxFQUFFO0tBQ1YsQ0FBQztJQUVGO0lBQ0E7SUFDQSxJQUFNQyxJQUFJLEdBQUdSLElBQUksQ0FBQ0MsU0FBUyxDQUFDQyxNQUFNLEVBQUUsVUFBQ08sR0FBVyxFQUFFQyxLQUFVO01BQzFELE9BQU9BLEtBQUssS0FBSyxFQUFFLEdBQUdDLFNBQVMsR0FBR0QsS0FBSztJQUN6QyxDQUFDLENBQUM7SUFDRixJQUFJLENBQUNFLElBQUksQ0FBQ0osSUFBSSxHQUFHLElBQUksQ0FBQztJQUN0QlosUUFBUSxFQUFFO0VBQ1osQ0FBQztFQUNILE9BQUFWLHFCQUFDO0FBQUQsQ0FBQyxDQS9CcURGLFFBQUEsQ0FBQTZCLFNBQVMifQ==

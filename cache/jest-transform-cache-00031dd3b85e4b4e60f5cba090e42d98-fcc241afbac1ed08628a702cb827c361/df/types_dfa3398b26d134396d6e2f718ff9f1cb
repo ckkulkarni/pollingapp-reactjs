@@ -1,0 +1,144 @@
+482bc9dab97322564853b6a76f162064
+"use strict";
+
+/**
+ * Common type constants.
+ * @namespace
+ */
+var types = exports;
+var util = require("./util");
+var s = ["double",
+// 0
+"float",
+// 1
+"int32",
+// 2
+"uint32",
+// 3
+"sint32",
+// 4
+"fixed32",
+// 5
+"sfixed32",
+// 6
+"int64",
+// 7
+"uint64",
+// 8
+"sint64",
+// 9
+"fixed64",
+// 10
+"sfixed64",
+// 11
+"bool",
+// 12
+"string",
+// 13
+"bytes" // 14
+];
+
+function bake(values, offset) {
+  var i = 0,
+    o = {};
+  offset |= 0;
+  while (i < values.length) o[s[i + offset]] = values[i++];
+  return o;
+}
+
+/**
+ * Basic type wire types.
+ * @type {Object.<string,number>}
+ * @const
+ * @property {number} double=1 Fixed64 wire type
+ * @property {number} float=5 Fixed32 wire type
+ * @property {number} int32=0 Varint wire type
+ * @property {number} uint32=0 Varint wire type
+ * @property {number} sint32=0 Varint wire type
+ * @property {number} fixed32=5 Fixed32 wire type
+ * @property {number} sfixed32=5 Fixed32 wire type
+ * @property {number} int64=0 Varint wire type
+ * @property {number} uint64=0 Varint wire type
+ * @property {number} sint64=0 Varint wire type
+ * @property {number} fixed64=1 Fixed64 wire type
+ * @property {number} sfixed64=1 Fixed64 wire type
+ * @property {number} bool=0 Varint wire type
+ * @property {number} string=2 Ldelim wire type
+ * @property {number} bytes=2 Ldelim wire type
+ */
+types.basic = bake([/* double   */1, /* float    */5, /* int32    */0, /* uint32   */0, /* sint32   */0, /* fixed32  */5, /* sfixed32 */5, /* int64    */0, /* uint64   */0, /* sint64   */0, /* fixed64  */1, /* sfixed64 */1, /* bool     */0, /* string   */2, /* bytes    */2]);
+
+/**
+ * Basic type defaults.
+ * @type {Object.<string,*>}
+ * @const
+ * @property {number} double=0 Double default
+ * @property {number} float=0 Float default
+ * @property {number} int32=0 Int32 default
+ * @property {number} uint32=0 Uint32 default
+ * @property {number} sint32=0 Sint32 default
+ * @property {number} fixed32=0 Fixed32 default
+ * @property {number} sfixed32=0 Sfixed32 default
+ * @property {number} int64=0 Int64 default
+ * @property {number} uint64=0 Uint64 default
+ * @property {number} sint64=0 Sint32 default
+ * @property {number} fixed64=0 Fixed64 default
+ * @property {number} sfixed64=0 Sfixed64 default
+ * @property {boolean} bool=false Bool default
+ * @property {string} string="" String default
+ * @property {Array.<number>} bytes=Array(0) Bytes default
+ * @property {null} message=null Message default
+ */
+types.defaults = bake([/* double   */0, /* float    */0, /* int32    */0, /* uint32   */0, /* sint32   */0, /* fixed32  */0, /* sfixed32 */0, /* int64    */0, /* uint64   */0, /* sint64   */0, /* fixed64  */0, /* sfixed64 */0, /* bool     */false, /* string   */"", /* bytes    */util.emptyArray, /* message  */null]);
+
+/**
+ * Basic long type wire types.
+ * @type {Object.<string,number>}
+ * @const
+ * @property {number} int64=0 Varint wire type
+ * @property {number} uint64=0 Varint wire type
+ * @property {number} sint64=0 Varint wire type
+ * @property {number} fixed64=1 Fixed64 wire type
+ * @property {number} sfixed64=1 Fixed64 wire type
+ */
+types.long = bake([/* int64    */0, /* uint64   */0, /* sint64   */0, /* fixed64  */1, /* sfixed64 */1], 7);
+
+/**
+ * Allowed types for map keys with their associated wire type.
+ * @type {Object.<string,number>}
+ * @const
+ * @property {number} int32=0 Varint wire type
+ * @property {number} uint32=0 Varint wire type
+ * @property {number} sint32=0 Varint wire type
+ * @property {number} fixed32=5 Fixed32 wire type
+ * @property {number} sfixed32=5 Fixed32 wire type
+ * @property {number} int64=0 Varint wire type
+ * @property {number} uint64=0 Varint wire type
+ * @property {number} sint64=0 Varint wire type
+ * @property {number} fixed64=1 Fixed64 wire type
+ * @property {number} sfixed64=1 Fixed64 wire type
+ * @property {number} bool=0 Varint wire type
+ * @property {number} string=2 Ldelim wire type
+ */
+types.mapKey = bake([/* int32    */0, /* uint32   */0, /* sint32   */0, /* fixed32  */5, /* sfixed32 */5, /* int64    */0, /* uint64   */0, /* sint64   */0, /* fixed64  */1, /* sfixed64 */1, /* bool     */0, /* string   */2], 2);
+
+/**
+ * Allowed types for packed repeated fields with their associated wire type.
+ * @type {Object.<string,number>}
+ * @const
+ * @property {number} double=1 Fixed64 wire type
+ * @property {number} float=5 Fixed32 wire type
+ * @property {number} int32=0 Varint wire type
+ * @property {number} uint32=0 Varint wire type
+ * @property {number} sint32=0 Varint wire type
+ * @property {number} fixed32=5 Fixed32 wire type
+ * @property {number} sfixed32=5 Fixed32 wire type
+ * @property {number} int64=0 Varint wire type
+ * @property {number} uint64=0 Varint wire type
+ * @property {number} sint64=0 Varint wire type
+ * @property {number} fixed64=1 Fixed64 wire type
+ * @property {number} sfixed64=1 Fixed64 wire type
+ * @property {number} bool=0 Varint wire type
+ */
+types.packed = bake([/* double   */1, /* float    */5, /* int32    */0, /* uint32   */0, /* sint32   */0, /* fixed32  */5, /* sfixed32 */5, /* int64    */0, /* uint64   */0, /* sint64   */0, /* fixed64  */1, /* sfixed64 */1, /* bool     */0]);
+//# sourceMappingURL=data:application/json;charset=utf-8;base64,eyJ2ZXJzaW9uIjozLCJuYW1lcyI6WyJ0eXBlcyIsImV4cG9ydHMiLCJ1dGlsIiwicmVxdWlyZSIsInMiLCJiYWtlIiwidmFsdWVzIiwib2Zmc2V0IiwiaSIsIm8iLCJsZW5ndGgiLCJiYXNpYyIsImRlZmF1bHRzIiwiZW1wdHlBcnJheSIsImxvbmciLCJtYXBLZXkiLCJwYWNrZWQiXSwic291cmNlcyI6WyJ0eXBlcy5qcyJdLCJzb3VyY2VzQ29udGVudCI6WyJcInVzZSBzdHJpY3RcIjtcblxuLyoqXG4gKiBDb21tb24gdHlwZSBjb25zdGFudHMuXG4gKiBAbmFtZXNwYWNlXG4gKi9cbnZhciB0eXBlcyA9IGV4cG9ydHM7XG5cbnZhciB1dGlsID0gcmVxdWlyZShcIi4vdXRpbFwiKTtcblxudmFyIHMgPSBbXG4gICAgXCJkb3VibGVcIiwgICAvLyAwXG4gICAgXCJmbG9hdFwiLCAgICAvLyAxXG4gICAgXCJpbnQzMlwiLCAgICAvLyAyXG4gICAgXCJ1aW50MzJcIiwgICAvLyAzXG4gICAgXCJzaW50MzJcIiwgICAvLyA0XG4gICAgXCJmaXhlZDMyXCIsICAvLyA1XG4gICAgXCJzZml4ZWQzMlwiLCAvLyA2XG4gICAgXCJpbnQ2NFwiLCAgICAvLyA3XG4gICAgXCJ1aW50NjRcIiwgICAvLyA4XG4gICAgXCJzaW50NjRcIiwgICAvLyA5XG4gICAgXCJmaXhlZDY0XCIsICAvLyAxMFxuICAgIFwic2ZpeGVkNjRcIiwgLy8gMTFcbiAgICBcImJvb2xcIiwgICAgIC8vIDEyXG4gICAgXCJzdHJpbmdcIiwgICAvLyAxM1xuICAgIFwiYnl0ZXNcIiAgICAgLy8gMTRcbl07XG5cbmZ1bmN0aW9uIGJha2UodmFsdWVzLCBvZmZzZXQpIHtcbiAgICB2YXIgaSA9IDAsIG8gPSB7fTtcbiAgICBvZmZzZXQgfD0gMDtcbiAgICB3aGlsZSAoaSA8IHZhbHVlcy5sZW5ndGgpIG9bc1tpICsgb2Zmc2V0XV0gPSB2YWx1ZXNbaSsrXTtcbiAgICByZXR1cm4gbztcbn1cblxuLyoqXG4gKiBCYXNpYyB0eXBlIHdpcmUgdHlwZXMuXG4gKiBAdHlwZSB7T2JqZWN0LjxzdHJpbmcsbnVtYmVyPn1cbiAqIEBjb25zdFxuICogQHByb3BlcnR5IHtudW1iZXJ9IGRvdWJsZT0xIEZpeGVkNjQgd2lyZSB0eXBlXG4gKiBAcHJvcGVydHkge251bWJlcn0gZmxvYXQ9NSBGaXhlZDMyIHdpcmUgdHlwZVxuICogQHByb3BlcnR5IHtudW1iZXJ9IGludDMyPTAgVmFyaW50IHdpcmUgdHlwZVxuICogQHByb3BlcnR5IHtudW1iZXJ9IHVpbnQzMj0wIFZhcmludCB3aXJlIHR5cGVcbiAqIEBwcm9wZXJ0eSB7bnVtYmVyfSBzaW50MzI9MCBWYXJpbnQgd2lyZSB0eXBlXG4gKiBAcHJvcGVydHkge251bWJlcn0gZml4ZWQzMj01IEZpeGVkMzIgd2lyZSB0eXBlXG4gKiBAcHJvcGVydHkge251bWJlcn0gc2ZpeGVkMzI9NSBGaXhlZDMyIHdpcmUgdHlwZVxuICogQHByb3BlcnR5IHtudW1iZXJ9IGludDY0PTAgVmFyaW50IHdpcmUgdHlwZVxuICogQHByb3BlcnR5IHtudW1iZXJ9IHVpbnQ2ND0wIFZhcmludCB3aXJlIHR5cGVcbiAqIEBwcm9wZXJ0eSB7bnVtYmVyfSBzaW50NjQ9MCBWYXJpbnQgd2lyZSB0eXBlXG4gKiBAcHJvcGVydHkge251bWJlcn0gZml4ZWQ2ND0xIEZpeGVkNjQgd2lyZSB0eXBlXG4gKiBAcHJvcGVydHkge251bWJlcn0gc2ZpeGVkNjQ9MSBGaXhlZDY0IHdpcmUgdHlwZVxuICogQHByb3BlcnR5IHtudW1iZXJ9IGJvb2w9MCBWYXJpbnQgd2lyZSB0eXBlXG4gKiBAcHJvcGVydHkge251bWJlcn0gc3RyaW5nPTIgTGRlbGltIHdpcmUgdHlwZVxuICogQHByb3BlcnR5IHtudW1iZXJ9IGJ5dGVzPTIgTGRlbGltIHdpcmUgdHlwZVxuICovXG50eXBlcy5iYXNpYyA9IGJha2UoW1xuICAgIC8qIGRvdWJsZSAgICovIDEsXG4gICAgLyogZmxvYXQgICAgKi8gNSxcbiAgICAvKiBpbnQzMiAgICAqLyAwLFxuICAgIC8qIHVpbnQzMiAgICovIDAsXG4gICAgLyogc2ludDMyICAgKi8gMCxcbiAgICAvKiBmaXhlZDMyICAqLyA1LFxuICAgIC8qIHNmaXhlZDMyICovIDUsXG4gICAgLyogaW50NjQgICAgKi8gMCxcbiAgICAvKiB1aW50NjQgICAqLyAwLFxuICAgIC8qIHNpbnQ2NCAgICovIDAsXG4gICAgLyogZml4ZWQ2NCAgKi8gMSxcbiAgICAvKiBzZml4ZWQ2NCAqLyAxLFxuICAgIC8qIGJvb2wgICAgICovIDAsXG4gICAgLyogc3RyaW5nICAgKi8gMixcbiAgICAvKiBieXRlcyAgICAqLyAyXG5dKTtcblxuLyoqXG4gKiBCYXNpYyB0eXBlIGRlZmF1bHRzLlxuICogQHR5cGUge09iamVjdC48c3RyaW5nLCo+fVxuICogQGNvbnN0XG4gKiBAcHJvcGVydHkge251bWJlcn0gZG91YmxlPTAgRG91YmxlIGRlZmF1bHRcbiAqIEBwcm9wZXJ0eSB7bnVtYmVyfSBmbG9hdD0wIEZsb2F0IGRlZmF1bHRcbiAqIEBwcm9wZXJ0eSB7bnVtYmVyfSBpbnQzMj0wIEludDMyIGRlZmF1bHRcbiAqIEBwcm9wZXJ0eSB7bnVtYmVyfSB1aW50MzI9MCBVaW50MzIgZGVmYXVsdFxuICogQHByb3BlcnR5IHtudW1iZXJ9IHNpbnQzMj0wIFNpbnQzMiBkZWZhdWx0XG4gKiBAcHJvcGVydHkge251bWJlcn0gZml4ZWQzMj0wIEZpeGVkMzIgZGVmYXVsdFxuICogQHByb3BlcnR5IHtudW1iZXJ9IHNmaXhlZDMyPTAgU2ZpeGVkMzIgZGVmYXVsdFxuICogQHByb3BlcnR5IHtudW1iZXJ9IGludDY0PTAgSW50NjQgZGVmYXVsdFxuICogQHByb3BlcnR5IHtudW1iZXJ9IHVpbnQ2ND0wIFVpbnQ2NCBkZWZhdWx0XG4gKiBAcHJvcGVydHkge251bWJlcn0gc2ludDY0PTAgU2ludDMyIGRlZmF1bHRcbiAqIEBwcm9wZXJ0eSB7bnVtYmVyfSBmaXhlZDY0PTAgRml4ZWQ2NCBkZWZhdWx0XG4gKiBAcHJvcGVydHkge251bWJlcn0gc2ZpeGVkNjQ9MCBTZml4ZWQ2NCBkZWZhdWx0XG4gKiBAcHJvcGVydHkge2Jvb2xlYW59IGJvb2w9ZmFsc2UgQm9vbCBkZWZhdWx0XG4gKiBAcHJvcGVydHkge3N0cmluZ30gc3RyaW5nPVwiXCIgU3RyaW5nIGRlZmF1bHRcbiAqIEBwcm9wZXJ0eSB7QXJyYXkuPG51bWJlcj59IGJ5dGVzPUFycmF5KDApIEJ5dGVzIGRlZmF1bHRcbiAqIEBwcm9wZXJ0eSB7bnVsbH0gbWVzc2FnZT1udWxsIE1lc3NhZ2UgZGVmYXVsdFxuICovXG50eXBlcy5kZWZhdWx0cyA9IGJha2UoW1xuICAgIC8qIGRvdWJsZSAgICovIDAsXG4gICAgLyogZmxvYXQgICAgKi8gMCxcbiAgICAvKiBpbnQzMiAgICAqLyAwLFxuICAgIC8qIHVpbnQzMiAgICovIDAsXG4gICAgLyogc2ludDMyICAgKi8gMCxcbiAgICAvKiBmaXhlZDMyICAqLyAwLFxuICAgIC8qIHNmaXhlZDMyICovIDAsXG4gICAgLyogaW50NjQgICAgKi8gMCxcbiAgICAvKiB1aW50NjQgICAqLyAwLFxuICAgIC8qIHNpbnQ2NCAgICovIDAsXG4gICAgLyogZml4ZWQ2NCAgKi8gMCxcbiAgICAvKiBzZml4ZWQ2NCAqLyAwLFxuICAgIC8qIGJvb2wgICAgICovIGZhbHNlLFxuICAgIC8qIHN0cmluZyAgICovIFwiXCIsXG4gICAgLyogYnl0ZXMgICAgKi8gdXRpbC5lbXB0eUFycmF5LFxuICAgIC8qIG1lc3NhZ2UgICovIG51bGxcbl0pO1xuXG4vKipcbiAqIEJhc2ljIGxvbmcgdHlwZSB3aXJlIHR5cGVzLlxuICogQHR5cGUge09iamVjdC48c3RyaW5nLG51bWJlcj59XG4gKiBAY29uc3RcbiAqIEBwcm9wZXJ0eSB7bnVtYmVyfSBpbnQ2ND0wIFZhcmludCB3aXJlIHR5cGVcbiAqIEBwcm9wZXJ0eSB7bnVtYmVyfSB1aW50NjQ9MCBWYXJpbnQgd2lyZSB0eXBlXG4gKiBAcHJvcGVydHkge251bWJlcn0gc2ludDY0PTAgVmFyaW50IHdpcmUgdHlwZVxuICogQHByb3BlcnR5IHtudW1iZXJ9IGZpeGVkNjQ9MSBGaXhlZDY0IHdpcmUgdHlwZVxuICogQHByb3BlcnR5IHtudW1iZXJ9IHNmaXhlZDY0PTEgRml4ZWQ2NCB3aXJlIHR5cGVcbiAqL1xudHlwZXMubG9uZyA9IGJha2UoW1xuICAgIC8qIGludDY0ICAgICovIDAsXG4gICAgLyogdWludDY0ICAgKi8gMCxcbiAgICAvKiBzaW50NjQgICAqLyAwLFxuICAgIC8qIGZpeGVkNjQgICovIDEsXG4gICAgLyogc2ZpeGVkNjQgKi8gMVxuXSwgNyk7XG5cbi8qKlxuICogQWxsb3dlZCB0eXBlcyBmb3IgbWFwIGtleXMgd2l0aCB0aGVpciBhc3NvY2lhdGVkIHdpcmUgdHlwZS5cbiAqIEB0eXBlIHtPYmplY3QuPHN0cmluZyxudW1iZXI+fVxuICogQGNvbnN0XG4gKiBAcHJvcGVydHkge251bWJlcn0gaW50MzI9MCBWYXJpbnQgd2lyZSB0eXBlXG4gKiBAcHJvcGVydHkge251bWJlcn0gdWludDMyPTAgVmFyaW50IHdpcmUgdHlwZVxuICogQHByb3BlcnR5IHtudW1iZXJ9IHNpbnQzMj0wIFZhcmludCB3aXJlIHR5cGVcbiAqIEBwcm9wZXJ0eSB7bnVtYmVyfSBmaXhlZDMyPTUgRml4ZWQzMiB3aXJlIHR5cGVcbiAqIEBwcm9wZXJ0eSB7bnVtYmVyfSBzZml4ZWQzMj01IEZpeGVkMzIgd2lyZSB0eXBlXG4gKiBAcHJvcGVydHkge251bWJlcn0gaW50NjQ9MCBWYXJpbnQgd2lyZSB0eXBlXG4gKiBAcHJvcGVydHkge251bWJlcn0gdWludDY0PTAgVmFyaW50IHdpcmUgdHlwZVxuICogQHByb3BlcnR5IHtudW1iZXJ9IHNpbnQ2ND0wIFZhcmludCB3aXJlIHR5cGVcbiAqIEBwcm9wZXJ0eSB7bnVtYmVyfSBmaXhlZDY0PTEgRml4ZWQ2NCB3aXJlIHR5cGVcbiAqIEBwcm9wZXJ0eSB7bnVtYmVyfSBzZml4ZWQ2ND0xIEZpeGVkNjQgd2lyZSB0eXBlXG4gKiBAcHJvcGVydHkge251bWJlcn0gYm9vbD0wIFZhcmludCB3aXJlIHR5cGVcbiAqIEBwcm9wZXJ0eSB7bnVtYmVyfSBzdHJpbmc9MiBMZGVsaW0gd2lyZSB0eXBlXG4gKi9cbnR5cGVzLm1hcEtleSA9IGJha2UoW1xuICAgIC8qIGludDMyICAgICovIDAsXG4gICAgLyogdWludDMyICAgKi8gMCxcbiAgICAvKiBzaW50MzIgICAqLyAwLFxuICAgIC8qIGZpeGVkMzIgICovIDUsXG4gICAgLyogc2ZpeGVkMzIgKi8gNSxcbiAgICAvKiBpbnQ2NCAgICAqLyAwLFxuICAgIC8qIHVpbnQ2NCAgICovIDAsXG4gICAgLyogc2ludDY0ICAgKi8gMCxcbiAgICAvKiBmaXhlZDY0ICAqLyAxLFxuICAgIC8qIHNmaXhlZDY0ICovIDEsXG4gICAgLyogYm9vbCAgICAgKi8gMCxcbiAgICAvKiBzdHJpbmcgICAqLyAyXG5dLCAyKTtcblxuLyoqXG4gKiBBbGxvd2VkIHR5cGVzIGZvciBwYWNrZWQgcmVwZWF0ZWQgZmllbGRzIHdpdGggdGhlaXIgYXNzb2NpYXRlZCB3aXJlIHR5cGUuXG4gKiBAdHlwZSB7T2JqZWN0LjxzdHJpbmcsbnVtYmVyPn1cbiAqIEBjb25zdFxuICogQHByb3BlcnR5IHtudW1iZXJ9IGRvdWJsZT0xIEZpeGVkNjQgd2lyZSB0eXBlXG4gKiBAcHJvcGVydHkge251bWJlcn0gZmxvYXQ9NSBGaXhlZDMyIHdpcmUgdHlwZVxuICogQHByb3BlcnR5IHtudW1iZXJ9IGludDMyPTAgVmFyaW50IHdpcmUgdHlwZVxuICogQHByb3BlcnR5IHtudW1iZXJ9IHVpbnQzMj0wIFZhcmludCB3aXJlIHR5cGVcbiAqIEBwcm9wZXJ0eSB7bnVtYmVyfSBzaW50MzI9MCBWYXJpbnQgd2lyZSB0eXBlXG4gKiBAcHJvcGVydHkge251bWJlcn0gZml4ZWQzMj01IEZpeGVkMzIgd2lyZSB0eXBlXG4gKiBAcHJvcGVydHkge251bWJlcn0gc2ZpeGVkMzI9NSBGaXhlZDMyIHdpcmUgdHlwZVxuICogQHByb3BlcnR5IHtudW1iZXJ9IGludDY0PTAgVmFyaW50IHdpcmUgdHlwZVxuICogQHByb3BlcnR5IHtudW1iZXJ9IHVpbnQ2ND0wIFZhcmludCB3aXJlIHR5cGVcbiAqIEBwcm9wZXJ0eSB7bnVtYmVyfSBzaW50NjQ9MCBWYXJpbnQgd2lyZSB0eXBlXG4gKiBAcHJvcGVydHkge251bWJlcn0gZml4ZWQ2ND0xIEZpeGVkNjQgd2lyZSB0eXBlXG4gKiBAcHJvcGVydHkge251bWJlcn0gc2ZpeGVkNjQ9MSBGaXhlZDY0IHdpcmUgdHlwZVxuICogQHByb3BlcnR5IHtudW1iZXJ9IGJvb2w9MCBWYXJpbnQgd2lyZSB0eXBlXG4gKi9cbnR5cGVzLnBhY2tlZCA9IGJha2UoW1xuICAgIC8qIGRvdWJsZSAgICovIDEsXG4gICAgLyogZmxvYXQgICAgKi8gNSxcbiAgICAvKiBpbnQzMiAgICAqLyAwLFxuICAgIC8qIHVpbnQzMiAgICovIDAsXG4gICAgLyogc2ludDMyICAgKi8gMCxcbiAgICAvKiBmaXhlZDMyICAqLyA1LFxuICAgIC8qIHNmaXhlZDMyICovIDUsXG4gICAgLyogaW50NjQgICAgKi8gMCxcbiAgICAvKiB1aW50NjQgICAqLyAwLFxuICAgIC8qIHNpbnQ2NCAgICovIDAsXG4gICAgLyogZml4ZWQ2NCAgKi8gMSxcbiAgICAvKiBzZml4ZWQ2NCAqLyAxLFxuICAgIC8qIGJvb2wgICAgICovIDBcbl0pO1xuIl0sIm1hcHBpbmdzIjoiQUFBQSxZQUFZOztBQUVaO0FBQ0E7QUFDQTtBQUNBO0FBQ0EsSUFBSUEsS0FBSyxHQUFHQyxPQUFPO0FBRW5CLElBQUlDLElBQUksR0FBR0MsT0FBTyxDQUFDLFFBQVEsQ0FBQztBQUU1QixJQUFJQyxDQUFDLEdBQUcsQ0FDSixRQUFRO0FBQUk7QUFDWixPQUFPO0FBQUs7QUFDWixPQUFPO0FBQUs7QUFDWixRQUFRO0FBQUk7QUFDWixRQUFRO0FBQUk7QUFDWixTQUFTO0FBQUc7QUFDWixVQUFVO0FBQUU7QUFDWixPQUFPO0FBQUs7QUFDWixRQUFRO0FBQUk7QUFDWixRQUFRO0FBQUk7QUFDWixTQUFTO0FBQUc7QUFDWixVQUFVO0FBQUU7QUFDWixNQUFNO0FBQU07QUFDWixRQUFRO0FBQUk7QUFDWixPQUFPLENBQUs7QUFBQSxDQUNmOztBQUVELFNBQVNDLElBQUlBLENBQUNDLE1BQU0sRUFBRUMsTUFBTSxFQUFFO0VBQzFCLElBQUlDLENBQUMsR0FBRyxDQUFDO0lBQUVDLENBQUMsR0FBRyxDQUFDLENBQUM7RUFDakJGLE1BQU0sSUFBSSxDQUFDO0VBQ1gsT0FBT0MsQ0FBQyxHQUFHRixNQUFNLENBQUNJLE1BQU0sRUFBRUQsQ0FBQyxDQUFDTCxDQUFDLENBQUNJLENBQUMsR0FBR0QsTUFBTSxDQUFDLENBQUMsR0FBR0QsTUFBTSxDQUFDRSxDQUFDLEVBQUUsQ0FBQztFQUN4RCxPQUFPQyxDQUFDO0FBQ1o7O0FBRUE7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBVCxLQUFLLENBQUNXLEtBQUssR0FBR04sSUFBSSxDQUFDLENBQ2YsY0FBZSxDQUFDLEVBQ2hCLGNBQWUsQ0FBQyxFQUNoQixjQUFlLENBQUMsRUFDaEIsY0FBZSxDQUFDLEVBQ2hCLGNBQWUsQ0FBQyxFQUNoQixjQUFlLENBQUMsRUFDaEIsY0FBZSxDQUFDLEVBQ2hCLGNBQWUsQ0FBQyxFQUNoQixjQUFlLENBQUMsRUFDaEIsY0FBZSxDQUFDLEVBQ2hCLGNBQWUsQ0FBQyxFQUNoQixjQUFlLENBQUMsRUFDaEIsY0FBZSxDQUFDLEVBQ2hCLGNBQWUsQ0FBQyxFQUNoQixjQUFlLENBQUMsQ0FDbkIsQ0FBQzs7QUFFRjtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQUwsS0FBSyxDQUFDWSxRQUFRLEdBQUdQLElBQUksQ0FBQyxDQUNsQixjQUFlLENBQUMsRUFDaEIsY0FBZSxDQUFDLEVBQ2hCLGNBQWUsQ0FBQyxFQUNoQixjQUFlLENBQUMsRUFDaEIsY0FBZSxDQUFDLEVBQ2hCLGNBQWUsQ0FBQyxFQUNoQixjQUFlLENBQUMsRUFDaEIsY0FBZSxDQUFDLEVBQ2hCLGNBQWUsQ0FBQyxFQUNoQixjQUFlLENBQUMsRUFDaEIsY0FBZSxDQUFDLEVBQ2hCLGNBQWUsQ0FBQyxFQUNoQixjQUFlLEtBQUssRUFDcEIsY0FBZSxFQUFFLEVBQ2pCLGNBQWVILElBQUksQ0FBQ1csVUFBVSxFQUM5QixjQUFlLElBQUksQ0FDdEIsQ0FBQzs7QUFFRjtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBYixLQUFLLENBQUNjLElBQUksR0FBR1QsSUFBSSxDQUFDLENBQ2QsY0FBZSxDQUFDLEVBQ2hCLGNBQWUsQ0FBQyxFQUNoQixjQUFlLENBQUMsRUFDaEIsY0FBZSxDQUFDLEVBQ2hCLGNBQWUsQ0FBQyxDQUNuQixFQUFFLENBQUMsQ0FBQzs7QUFFTDtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0FMLEtBQUssQ0FBQ2UsTUFBTSxHQUFHVixJQUFJLENBQUMsQ0FDaEIsY0FBZSxDQUFDLEVBQ2hCLGNBQWUsQ0FBQyxFQUNoQixjQUFlLENBQUMsRUFDaEIsY0FBZSxDQUFDLEVBQ2hCLGNBQWUsQ0FBQyxFQUNoQixjQUFlLENBQUMsRUFDaEIsY0FBZSxDQUFDLEVBQ2hCLGNBQWUsQ0FBQyxFQUNoQixjQUFlLENBQUMsRUFDaEIsY0FBZSxDQUFDLEVBQ2hCLGNBQWUsQ0FBQyxFQUNoQixjQUFlLENBQUMsQ0FDbkIsRUFBRSxDQUFDLENBQUM7O0FBRUw7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0FMLEtBQUssQ0FBQ2dCLE1BQU0sR0FBR1gsSUFBSSxDQUFDLENBQ2hCLGNBQWUsQ0FBQyxFQUNoQixjQUFlLENBQUMsRUFDaEIsY0FBZSxDQUFDLEVBQ2hCLGNBQWUsQ0FBQyxFQUNoQixjQUFlLENBQUMsRUFDaEIsY0FBZSxDQUFDLEVBQ2hCLGNBQWUsQ0FBQyxFQUNoQixjQUFlLENBQUMsRUFDaEIsY0FBZSxDQUFDLEVBQ2hCLGNBQWUsQ0FBQyxFQUNoQixjQUFlLENBQUMsRUFDaEIsY0FBZSxDQUFDLEVBQ2hCLGNBQWUsQ0FBQyxDQUNuQixDQUFDIn0=

@@ -1,0 +1,235 @@
+92dd1a1f2def4e8676150e2d28e818cd
+"use strict";
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+exports.decodeXMLStrict = exports.decodeHTML5Strict = exports.decodeHTML4Strict = exports.decodeHTML5 = exports.decodeHTML4 = exports.decodeHTMLStrict = exports.decodeHTML = exports.decodeXML = exports.encodeHTML5 = exports.encodeHTML4 = exports.encodeNonAsciiHTML = exports.encodeHTML = exports.escapeText = exports.escapeAttribute = exports.escapeUTF8 = exports.escape = exports.encodeXML = exports.encode = exports.decodeStrict = exports.decode = exports.EncodingMode = exports.DecodingMode = exports.EntityLevel = void 0;
+var decode_js_1 = require("./decode.js");
+var encode_js_1 = require("./encode.js");
+var escape_js_1 = require("./escape.js");
+/** The level of entities to support. */
+var EntityLevel;
+(function (EntityLevel) {
+  /** Support only XML entities. */
+  EntityLevel[EntityLevel["XML"] = 0] = "XML";
+  /** Support HTML entities, which are a superset of XML entities. */
+  EntityLevel[EntityLevel["HTML"] = 1] = "HTML";
+})(EntityLevel = exports.EntityLevel || (exports.EntityLevel = {}));
+/** Determines whether some entities are allowed to be written without a trailing `;`. */
+var DecodingMode;
+(function (DecodingMode) {
+  /** Support legacy HTML entities. */
+  DecodingMode[DecodingMode["Legacy"] = 0] = "Legacy";
+  /** Do not support legacy HTML entities. */
+  DecodingMode[DecodingMode["Strict"] = 1] = "Strict";
+})(DecodingMode = exports.DecodingMode || (exports.DecodingMode = {}));
+var EncodingMode;
+(function (EncodingMode) {
+  /**
+   * The output is UTF-8 encoded. Only characters that need escaping within
+   * XML will be escaped.
+   */
+  EncodingMode[EncodingMode["UTF8"] = 0] = "UTF8";
+  /**
+   * The output consists only of ASCII characters. Characters that need
+   * escaping within HTML, and characters that aren't ASCII characters will
+   * be escaped.
+   */
+  EncodingMode[EncodingMode["ASCII"] = 1] = "ASCII";
+  /**
+   * Encode all characters that have an equivalent entity, as well as all
+   * characters that are not ASCII characters.
+   */
+  EncodingMode[EncodingMode["Extensive"] = 2] = "Extensive";
+  /**
+   * Encode all characters that have to be escaped in HTML attributes,
+   * following {@link https://html.spec.whatwg.org/multipage/parsing.html#escapingString}.
+   */
+  EncodingMode[EncodingMode["Attribute"] = 3] = "Attribute";
+  /**
+   * Encode all characters that have to be escaped in HTML text,
+   * following {@link https://html.spec.whatwg.org/multipage/parsing.html#escapingString}.
+   */
+  EncodingMode[EncodingMode["Text"] = 4] = "Text";
+})(EncodingMode = exports.EncodingMode || (exports.EncodingMode = {}));
+/**
+ * Decodes a string with entities.
+ *
+ * @param data String to decode.
+ * @param options Decoding options.
+ */
+function decode(data, options) {
+  if (options === void 0) {
+    options = EntityLevel.XML;
+  }
+  var opts = typeof options === "number" ? {
+    level: options
+  } : options;
+  if (opts.level === EntityLevel.HTML) {
+    if (opts.mode === DecodingMode.Strict) {
+      return (0, decode_js_1.decodeHTMLStrict)(data);
+    }
+    return (0, decode_js_1.decodeHTML)(data);
+  }
+  return (0, decode_js_1.decodeXML)(data);
+}
+exports.decode = decode;
+/**
+ * Decodes a string with entities. Does not allow missing trailing semicolons for entities.
+ *
+ * @param data String to decode.
+ * @param options Decoding options.
+ * @deprecated Use `decode` with the `mode` set to `Strict`.
+ */
+function decodeStrict(data, options) {
+  if (options === void 0) {
+    options = EntityLevel.XML;
+  }
+  var opts = typeof options === "number" ? {
+    level: options
+  } : options;
+  if (opts.level === EntityLevel.HTML) {
+    if (opts.mode === DecodingMode.Legacy) {
+      return (0, decode_js_1.decodeHTML)(data);
+    }
+    return (0, decode_js_1.decodeHTMLStrict)(data);
+  }
+  return (0, decode_js_1.decodeXML)(data);
+}
+exports.decodeStrict = decodeStrict;
+/**
+ * Encodes a string with entities.
+ *
+ * @param data String to encode.
+ * @param options Encoding options.
+ */
+function encode(data, options) {
+  if (options === void 0) {
+    options = EntityLevel.XML;
+  }
+  var opts = typeof options === "number" ? {
+    level: options
+  } : options;
+  // Mode `UTF8` just escapes XML entities
+  if (opts.mode === EncodingMode.UTF8) return (0, escape_js_1.escapeUTF8)(data);
+  if (opts.mode === EncodingMode.Attribute) return (0, escape_js_1.escapeAttribute)(data);
+  if (opts.mode === EncodingMode.Text) return (0, escape_js_1.escapeText)(data);
+  if (opts.level === EntityLevel.HTML) {
+    if (opts.mode === EncodingMode.ASCII) {
+      return (0, encode_js_1.encodeNonAsciiHTML)(data);
+    }
+    return (0, encode_js_1.encodeHTML)(data);
+  }
+  // ASCII and Extensive are equivalent
+  return (0, escape_js_1.encodeXML)(data);
+}
+exports.encode = encode;
+var escape_js_2 = require("./escape.js");
+Object.defineProperty(exports, "encodeXML", {
+  enumerable: true,
+  get: function () {
+    return escape_js_2.encodeXML;
+  }
+});
+Object.defineProperty(exports, "escape", {
+  enumerable: true,
+  get: function () {
+    return escape_js_2.escape;
+  }
+});
+Object.defineProperty(exports, "escapeUTF8", {
+  enumerable: true,
+  get: function () {
+    return escape_js_2.escapeUTF8;
+  }
+});
+Object.defineProperty(exports, "escapeAttribute", {
+  enumerable: true,
+  get: function () {
+    return escape_js_2.escapeAttribute;
+  }
+});
+Object.defineProperty(exports, "escapeText", {
+  enumerable: true,
+  get: function () {
+    return escape_js_2.escapeText;
+  }
+});
+var encode_js_2 = require("./encode.js");
+Object.defineProperty(exports, "encodeHTML", {
+  enumerable: true,
+  get: function () {
+    return encode_js_2.encodeHTML;
+  }
+});
+Object.defineProperty(exports, "encodeNonAsciiHTML", {
+  enumerable: true,
+  get: function () {
+    return encode_js_2.encodeNonAsciiHTML;
+  }
+});
+// Legacy aliases (deprecated)
+Object.defineProperty(exports, "encodeHTML4", {
+  enumerable: true,
+  get: function () {
+    return encode_js_2.encodeHTML;
+  }
+});
+Object.defineProperty(exports, "encodeHTML5", {
+  enumerable: true,
+  get: function () {
+    return encode_js_2.encodeHTML;
+  }
+});
+var decode_js_2 = require("./decode.js");
+Object.defineProperty(exports, "decodeXML", {
+  enumerable: true,
+  get: function () {
+    return decode_js_2.decodeXML;
+  }
+});
+Object.defineProperty(exports, "decodeHTML", {
+  enumerable: true,
+  get: function () {
+    return decode_js_2.decodeHTML;
+  }
+});
+Object.defineProperty(exports, "decodeHTMLStrict", {
+  enumerable: true,
+  get: function () {
+    return decode_js_2.decodeHTMLStrict;
+  }
+});
+// Legacy aliases (deprecated)
+Object.defineProperty(exports, "decodeHTML4", {
+  enumerable: true,
+  get: function () {
+    return decode_js_2.decodeHTML;
+  }
+});
+Object.defineProperty(exports, "decodeHTML5", {
+  enumerable: true,
+  get: function () {
+    return decode_js_2.decodeHTML;
+  }
+});
+Object.defineProperty(exports, "decodeHTML4Strict", {
+  enumerable: true,
+  get: function () {
+    return decode_js_2.decodeHTMLStrict;
+  }
+});
+Object.defineProperty(exports, "decodeHTML5Strict", {
+  enumerable: true,
+  get: function () {
+    return decode_js_2.decodeHTMLStrict;
+  }
+});
+Object.defineProperty(exports, "decodeXMLStrict", {
+  enumerable: true,
+  get: function () {
+    return decode_js_2.decodeXML;
+  }
+});
+//# sourceMappingURL=data:application/json;charset=utf-8;base64,eyJ2ZXJzaW9uIjozLCJuYW1lcyI6WyJkZWNvZGVfanNfMSIsInJlcXVpcmUiLCJlbmNvZGVfanNfMSIsImVzY2FwZV9qc18xIiwiRW50aXR5TGV2ZWwiLCJleHBvcnRzIiwiRGVjb2RpbmdNb2RlIiwiRW5jb2RpbmdNb2RlIiwiZGVjb2RlIiwiZGF0YSIsIm9wdGlvbnMiLCJYTUwiLCJvcHRzIiwibGV2ZWwiLCJIVE1MIiwibW9kZSIsIlN0cmljdCIsImRlY29kZUhUTUxTdHJpY3QiLCJkZWNvZGVIVE1MIiwiZGVjb2RlWE1MIiwiZGVjb2RlU3RyaWN0IiwiTGVnYWN5IiwiZW5jb2RlIiwiVVRGOCIsImVzY2FwZVVURjgiLCJBdHRyaWJ1dGUiLCJlc2NhcGVBdHRyaWJ1dGUiLCJUZXh0IiwiZXNjYXBlVGV4dCIsIkFTQ0lJIiwiZW5jb2RlTm9uQXNjaWlIVE1MIiwiZW5jb2RlSFRNTCIsImVuY29kZVhNTCIsImVzY2FwZV9qc18yIiwiT2JqZWN0IiwiZGVmaW5lUHJvcGVydHkiLCJlbnVtZXJhYmxlIiwiZ2V0IiwiZXNjYXBlIiwiZW5jb2RlX2pzXzIiLCJkZWNvZGVfanNfMiJdLCJzb3VyY2VzIjpbImh0dHBzOi8vcmF3LmdpdGh1YnVzZXJjb250ZW50LmNvbS9mYjU1L2VudGl0aWVzLzg2N2FjNzA5YmE0ODJhNTZhOThiN2MzNWY0OWNhODMzYzc0ZGMxOTMvc3JjL2luZGV4LnRzIl0sInNvdXJjZXNDb250ZW50IjpbbnVsbF0sIm1hcHBpbmdzIjoiOzs7Ozs7QUFBQSxJQUFBQSxXQUFBLEdBQUFDLE9BQUE7QUFDQSxJQUFBQyxXQUFBLEdBQUFELE9BQUE7QUFDQSxJQUFBRSxXQUFBLEdBQUFGLE9BQUE7QUFPQTtBQUNBLElBQVlHLFdBS1g7QUFMRCxXQUFZQSxXQUFXO0VBQ25CO0VBQ0FBLFdBQUEsQ0FBQUEsV0FBQSxvQkFBTztFQUNQO0VBQ0FBLFdBQUEsQ0FBQUEsV0FBQSxzQkFBUTtBQUNaLENBQUMsRUFMV0EsV0FBVyxHQUFYQyxPQUFBLENBQUFELFdBQVcsS0FBWEMsT0FBQSxDQUFBRCxX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

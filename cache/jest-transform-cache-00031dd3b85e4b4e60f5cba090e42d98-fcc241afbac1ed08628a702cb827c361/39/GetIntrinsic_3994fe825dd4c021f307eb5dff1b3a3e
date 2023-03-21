@@ -1,0 +1,6 @@
+2097d30ca3896093754afb4ccf319603
+'use strict';
+
+// TODO: remove, semver-major
+module.exports = require('get-intrinsic');
+//# sourceMappingURL=data:application/json;charset=utf-8;base64,eyJ2ZXJzaW9uIjozLCJuYW1lcyI6WyJtb2R1bGUiLCJleHBvcnRzIiwicmVxdWlyZSJdLCJzb3VyY2VzIjpbIkdldEludHJpbnNpYy5qcyJdLCJzb3VyY2VzQ29udGVudCI6WyIndXNlIHN0cmljdCc7XG5cbi8vIFRPRE86IHJlbW92ZSwgc2VtdmVyLW1ham9yXG5cbm1vZHVsZS5leHBvcnRzID0gcmVxdWlyZSgnZ2V0LWludHJpbnNpYycpO1xuIl0sIm1hcHBpbmdzIjoiQUFBQSxZQUFZOztBQUVaO0FBRUFBLE1BQU0sQ0FBQ0MsT0FBTyxHQUFHQyxPQUFPLENBQUMsZUFBZSxDQUFDIn0=

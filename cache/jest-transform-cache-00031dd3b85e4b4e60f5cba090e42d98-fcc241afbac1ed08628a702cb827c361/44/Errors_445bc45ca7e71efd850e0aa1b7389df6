@@ -1,0 +1,135 @@
+0be46d23f4edc70172040230c082ef87
+"use strict";
+
+var __extends = void 0 && (void 0).__extends || function () {
+  var extendStatics = function (d, b) {
+    extendStatics = Object.setPrototypeOf || {
+      __proto__: []
+    } instanceof Array && function (d, b) {
+      d.__proto__ = b;
+    } || function (d, b) {
+      for (var p in b) if (b.hasOwnProperty(p)) d[p] = b[p];
+    };
+    return extendStatics(d, b);
+  };
+  return function (d, b) {
+    extendStatics(d, b);
+    function __() {
+      this.constructor = d;
+    }
+    d.prototype = b === null ? Object.create(b) : (__.prototype = b.prototype, new __());
+  };
+}();
+var __importDefault = void 0 && (void 0).__importDefault || function (mod) {
+  return mod && mod.__esModule ? mod : {
+    "default": mod
+  };
+};
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+var createLocation_1 = __importDefault(require("./cli/createLocation"));
+var GherkinException = /** @class */function (_super) {
+  __extends(GherkinException, _super);
+  function GherkinException(message) {
+    var _newTarget = this.constructor;
+    var _this = _super.call(this, message) || this;
+    var actualProto = _newTarget.prototype;
+    // https://stackoverflow.com/questions/41102060/typescript-extending-error-class
+    if (Object.setPrototypeOf) {
+      Object.setPrototypeOf(_this, actualProto);
+    } else {
+      // @ts-ignore
+      _this.__proto__ = actualProto;
+    }
+    return _this;
+  }
+  GherkinException._create = function (location, message) {
+    var column = location.column || 0;
+    var m = "(" + location.line + ":" + column + "): " + message;
+    var err = new this(m);
+    err.location = location;
+    return err;
+  };
+  return GherkinException;
+}(Error);
+var ParserException = /** @class */function (_super) {
+  __extends(ParserException, _super);
+  function ParserException() {
+    return _super !== null && _super.apply(this, arguments) || this;
+  }
+  return ParserException;
+}(GherkinException);
+exports.ParserException = ParserException;
+var CompositeParserException = /** @class */function (_super) {
+  __extends(CompositeParserException, _super);
+  function CompositeParserException() {
+    return _super !== null && _super.apply(this, arguments) || this;
+  }
+  CompositeParserException.create = function (errors) {
+    var message = 'Parser errors:\n' + errors.map(function (e) {
+      return e.message;
+    }).join('\n');
+    var err = new this(message);
+    err.errors = errors;
+    return err;
+  };
+  return CompositeParserException;
+}(GherkinException);
+exports.CompositeParserException = CompositeParserException;
+var UnexpectedTokenException = /** @class */function (_super) {
+  __extends(UnexpectedTokenException, _super);
+  function UnexpectedTokenException() {
+    return _super !== null && _super.apply(this, arguments) || this;
+  }
+  UnexpectedTokenException.create = function (token, expectedTokenTypes, stateComment) {
+    var message = "expected: " + expectedTokenTypes.join(', ') + ", got '" + token.getTokenValue().trim() + "'";
+    var location = tokenLocation(token);
+    return this._create(location, message);
+  };
+  return UnexpectedTokenException;
+}(GherkinException);
+exports.UnexpectedTokenException = UnexpectedTokenException;
+var UnexpectedEOFException = /** @class */function (_super) {
+  __extends(UnexpectedEOFException, _super);
+  function UnexpectedEOFException() {
+    return _super !== null && _super.apply(this, arguments) || this;
+  }
+  UnexpectedEOFException.create = function (token, expectedTokenTypes, stateComment) {
+    var message = "unexpected end of file, expected: " + expectedTokenTypes.join(', ');
+    var location = tokenLocation(token);
+    return this._create(location, message);
+  };
+  return UnexpectedEOFException;
+}(GherkinException);
+exports.UnexpectedEOFException = UnexpectedEOFException;
+var AstBuilderException = /** @class */function (_super) {
+  __extends(AstBuilderException, _super);
+  function AstBuilderException() {
+    return _super !== null && _super.apply(this, arguments) || this;
+  }
+  AstBuilderException.create = function (message, location) {
+    return this._create(location, message);
+  };
+  return AstBuilderException;
+}(GherkinException);
+exports.AstBuilderException = AstBuilderException;
+var NoSuchLanguageException = /** @class */function (_super) {
+  __extends(NoSuchLanguageException, _super);
+  function NoSuchLanguageException() {
+    return _super !== null && _super.apply(this, arguments) || this;
+  }
+  NoSuchLanguageException.create = function (language, location) {
+    var message = 'Language not supported: ' + language;
+    return this._create(location, message);
+  };
+  return NoSuchLanguageException;
+}(GherkinException);
+exports.NoSuchLanguageException = NoSuchLanguageException;
+function tokenLocation(token) {
+  return token.location && token.location.line && token.line && token.line.indent !== undefined ? createLocation_1.default({
+    line: token.location.line,
+    column: token.line.indent + 1
+  }) : token.location;
+}
+//# sourceMappingURL=data:application/json;charset=utf-8;base64,eyJ2ZXJzaW9uIjozLCJuYW1lcyI6WyJjcmVhdGVMb2NhdGlvbl8xIiwiX19pbXBvcnREZWZhdWx0IiwicmVxdWlyZSIsIkdoZXJraW5FeGNlcHRpb24iLCJfc3VwZXIiLCJfX2V4dGVuZHMiLCJtZXNzYWdlIiwiX3RoaXMiLCJjYWxsIiwiYWN0dWFsUHJvdG8iLCJfbmV3VGFyZ2V0IiwicHJvdG90eXBlIiwiT2JqZWN0Iiwic2V0UHJvdG90eXBlT2YiLCJfX3Byb3RvX18iLCJfY3JlYXRlIiwibG9jYXRpb24iLCJjb2x1bW4iLCJtIiwibGluZSIsImVyciIsIkVycm9yIiwiUGFyc2VyRXhjZXB0aW9uIiwiZXhwb3J0cyIsIkNvbXBvc2l0ZVBhcnNlckV4Y2VwdGlvbiIsImNyZWF0ZSIsImVycm9ycyIsIm1hcCIsImUiLCJqb2luIiwiVW5leHBlY3RlZFRva2VuRXhjZXB0aW9uIiwidG9rZW4iLCJleHBlY3RlZFRva2VuVHlwZXMiLCJzdGF0ZUNvbW1lbnQiLCJnZXRUb2tlblZhbHVlIiwidHJpbSIsInRva2VuTG9jYXRpb24iLCJVbmV4cGVjdGVkRU9GRXhjZXB0aW9uIiwiQXN0QnVpbGRlckV4Y2VwdGlvbiIsIk5vU3VjaExhbmd1YWdlRXhjZXB0aW9uIiwibGFuZ3VhZ2UiLCJpbmRlbnQiLCJ1bmRlZmluZWQiLCJkZWZhdWx0Il0sInNvdXJjZXMiOlsiLi4vLi4vc3JjL0Vycm9ycy50cyJdLCJzb3VyY2VzQ29udGVudCI6W251bGxdLCJtYXBwaW5ncyI6Ijs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7QUFFQSxJQUFBQSxnQkFBQSxHQUFBQyxlQUFBLENBQUFDLE9BQUE7QUFFQSxJQUFBQyxnQkFBQSwwQkFBQUMsTUFBQTtFQUErQkMsU0FBQSxDQUFBRixnQkFBQSxFQUFBQyxNQUFBO0VBSTdCLFNBQUFELGlCQUFZRyxPQUFlOztJQUEzQixJQUFBQyxLQUFBLEdBQ0VILE1BQUEsQ0FBQUksSUFBQSxPQUFNRixPQUFPLENBQUM7SUFFZCxJQUFNRyxXQUFXLEdBQUdDLFVBQUEsQ0FBV0MsU0FB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

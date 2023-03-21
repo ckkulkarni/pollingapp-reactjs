@@ -1,0 +1,1 @@
+{"version":3,"names":["module","exports","require"],"sources":["GetIntrinsic.js"],"sourcesContent":["'use strict';\n\n// TODO: remove, semver-major\n\nmodule.exports = require('get-intrinsic');\n"],"mappings":"AAAA,YAAY;;AAEZ;AAEAA,MAAM,CAACC,OAAO,GAAGC,OAAO,CAAC,eAAe,CAAC"}

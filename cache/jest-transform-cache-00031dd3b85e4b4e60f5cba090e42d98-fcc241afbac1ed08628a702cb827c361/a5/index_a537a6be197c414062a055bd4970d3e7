@@ -1,0 +1,7 @@
+84b5840e1a953f651112fa8395547522
+// full library entry point.
+
+"use strict";
+
+module.exports = require("./src/index");
+//# sourceMappingURL=data:application/json;charset=utf-8;base64,eyJ2ZXJzaW9uIjozLCJuYW1lcyI6WyJtb2R1bGUiLCJleHBvcnRzIiwicmVxdWlyZSJdLCJzb3VyY2VzIjpbImluZGV4LmpzIl0sInNvdXJjZXNDb250ZW50IjpbIi8vIGZ1bGwgbGlicmFyeSBlbnRyeSBwb2ludC5cblxuXCJ1c2Ugc3RyaWN0XCI7XG5tb2R1bGUuZXhwb3J0cyA9IHJlcXVpcmUoXCIuL3NyYy9pbmRleFwiKTtcbiJdLCJtYXBwaW5ncyI6IkFBQUE7O0FBRUEsWUFBWTs7QUFDWkEsTUFBTSxDQUFDQyxPQUFPLEdBQUdDLE9BQU8sQ0FBQyxhQUFhLENBQUMifQ==

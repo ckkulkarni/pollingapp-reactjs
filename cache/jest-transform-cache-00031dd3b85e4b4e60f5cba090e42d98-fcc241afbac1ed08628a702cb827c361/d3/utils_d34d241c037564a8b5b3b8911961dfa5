@@ -1,0 +1,128 @@
+801e6d00da0ef2bd2d185ca9c82257e4
+"use strict";
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+exports.isHtml = exports.cloneDom = exports.domEach = exports.cssCase = exports.camelCase = exports.isCheerio = exports.isTag = void 0;
+var domhandler_1 = require("domhandler");
+/**
+ * Check if the DOM element is a tag.
+ *
+ * `isTag(type)` includes `<script>` and `<style>` tags.
+ *
+ * @private
+ * @category Utils
+ * @param type - The DOM node to check.
+ * @returns Whether the node is a tag.
+ */
+var domhandler_2 = require("domhandler");
+Object.defineProperty(exports, "isTag", {
+  enumerable: true,
+  get: function () {
+    return domhandler_2.isTag;
+  }
+});
+/**
+ * Checks if an object is a Cheerio instance.
+ *
+ * @category Utils
+ * @param maybeCheerio - The object to check.
+ * @returns Whether the object is a Cheerio instance.
+ */
+function isCheerio(maybeCheerio) {
+  return maybeCheerio.cheerio != null;
+}
+exports.isCheerio = isCheerio;
+/**
+ * Convert a string to camel case notation.
+ *
+ * @private
+ * @category Utils
+ * @param str - The string to be converted.
+ * @returns String in camel case notation.
+ */
+function camelCase(str) {
+  return str.replace(/[_.-](\w|$)/g, function (_, x) {
+    return x.toUpperCase();
+  });
+}
+exports.camelCase = camelCase;
+/**
+ * Convert a string from camel case to "CSS case", where word boundaries are
+ * described by hyphens ("-") and all characters are lower-case.
+ *
+ * @private
+ * @category Utils
+ * @param str - The string to be converted.
+ * @returns String in "CSS case".
+ */
+function cssCase(str) {
+  return str.replace(/[A-Z]/g, '-$&').toLowerCase();
+}
+exports.cssCase = cssCase;
+/**
+ * Iterate over each DOM element without creating intermediary Cheerio instances.
+ *
+ * This is indented for use internally to avoid otherwise unnecessary memory
+ * pressure introduced by _make.
+ *
+ * @category Utils
+ * @param array - The array to iterate over.
+ * @param fn - Function to call.
+ * @returns The original instance.
+ */
+function domEach(array, fn) {
+  var len = array.length;
+  for (var i = 0; i < len; i++) fn(array[i], i);
+  return array;
+}
+exports.domEach = domEach;
+/**
+ * Create a deep copy of the given DOM structure. Sets the parents of the copies
+ * of the passed nodes to `null`.
+ *
+ * @private
+ * @category Utils
+ * @param dom - The domhandler-compliant DOM structure.
+ * @returns - The cloned DOM.
+ */
+function cloneDom(dom) {
+  var clone = 'length' in dom ? Array.prototype.map.call(dom, function (el) {
+    return (0, domhandler_1.cloneNode)(el, true);
+  }) : [(0, domhandler_1.cloneNode)(dom, true)];
+  // Add a root node around the cloned nodes
+  var root = new domhandler_1.Document(clone);
+  clone.forEach(function (node) {
+    node.parent = root;
+  });
+  return clone;
+}
+exports.cloneDom = cloneDom;
+var CharacterCodes;
+(function (CharacterCodes) {
+  CharacterCodes[CharacterCodes["LowerA"] = 97] = "LowerA";
+  CharacterCodes[CharacterCodes["LowerZ"] = 122] = "LowerZ";
+  CharacterCodes[CharacterCodes["UpperA"] = 65] = "UpperA";
+  CharacterCodes[CharacterCodes["UpperZ"] = 90] = "UpperZ";
+  CharacterCodes[CharacterCodes["Exclamation"] = 33] = "Exclamation";
+})(CharacterCodes || (CharacterCodes = {}));
+/**
+ * Check if string is HTML.
+ *
+ * Tests for a `<` within a string, immediate followed by a letter and
+ * eventually followed by a `>`.
+ *
+ * @private
+ * @category Utils
+ * @param str - The string to check.
+ * @returns Indicates if `str` is HTML.
+ */
+function isHtml(str) {
+  var tagStart = str.indexOf('<');
+  if (tagStart < 0 || tagStart > str.length - 3) return false;
+  var tagChar = str.charCodeAt(tagStart + 1);
+  return (tagChar >= CharacterCodes.LowerA && tagChar <= CharacterCodes.LowerZ || tagChar >= CharacterCodes.UpperA && tagChar <= CharacterCodes.UpperZ || tagChar === CharacterCodes.Exclamation) && str.includes('>', tagStart + 2);
+}
+exports.isHtml = isHtml;
+//# sourceMappingURL=data:application/json;charset=utf-8;base64,eyJ2ZXJzaW9uIjozLCJuYW1lcyI6WyJkb21oYW5kbGVyXzEiLCJyZXF1aXJlIiwiZG9taGFuZGxlcl8yIiwiT2JqZWN0IiwiZGVmaW5lUHJvcGVydHkiLCJleHBvcnRzIiwiZW51bWVyYWJsZSIsImdldCIsImlzVGFnIiwiaXNDaGVlcmlvIiwibWF5YmVDaGVlcmlvIiwiY2hlZXJpbyIsImNhbWVsQ2FzZSIsInN0ciIsInJlcGxhY2UiLCJfIiwieCIsInRvVXBwZXJDYXNlIiwiY3NzQ2FzZSIsInRvTG93ZXJDYXNlIiwiZG9tRWFjaCIsImFycmF5IiwiZm4iLCJsZW4iLCJsZW5ndGgiLCJpIiwiY2xvbmVEb20iLCJkb20iLCJjbG9uZSIsIkFycmF5IiwicHJvdG90eXBlIiwibWFwIiwiY2FsbCIsImVsIiwiY2xvbmVOb2RlIiwicm9vdCIsIkRvY3VtZW50IiwiZm9yRWFjaCIsIm5vZGUiLCJwYXJlbnQiLCJDaGFyYWN0ZXJDb2RlcyIsImlzSHRtbCIsInRhZ1N0YXJ0IiwiaW5kZXhPZiIsInRhZ0NoYXIiLCJjaGFyQ29kZUF0IiwiTG93ZXJBIiwiTG93ZXJaIiwiVXBwZXJBIiwiVXBwZXJaIiwiRXhjbGFtYXRpb24iLCJpbmNsdWRlcyJdLCJzb3VyY2VzIjpbImh0dHBzOi8vcmF3LmdpdGh1YnVzZXJjb250ZW50LmNvbS9jaGVlcmlvanMvY2hlZXJpby9kMWNiYzY2ZDUzMzkyY2U4YmY2Y2QwMDY4ZjY3NTgzNjM3MmQyYmYzL3NyYy91dGlscy50cyJdLCJzb3VyY2VzQ29udGVudCI6W251bGxdLCJtYXBwaW5ncyI6Ijs7Ozs7O0FBQUEsSUFBQUEsWUFBQSxHQUFBQyxPQUFBO0FBR0E7Ozs7Ozs7Ozs7QUFVQSxJQUFBQyxZQUFBLEdBQUFELE9BQUE7QUFBU0UsTUFBQSxDQUFBQyxjQUFBLENBQUFDLE9BQUE7RUFBQUMsVUFBQTtFQUFBQyxHQUFBLFdBQUFBLENBQUE7SUFBQSxPQUFBTCxZQUFBLENBQUFNLEtBQUs7RUFBQTtBQUFBO0FBRWQ7Ozs7Ozs7QUFPQSxTQUFnQkMsU0FBU0EsQ0FBSUMsWUFB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

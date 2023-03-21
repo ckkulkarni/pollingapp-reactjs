@@ -1,0 +1,18 @@
+ae2fe997ed815e80649c00332f11a583
+'use strict';
+
+var Type = require('./Type');
+
+// var modulo = require('./modulo');
+var $floor = Math.floor;
+
+// http://262.ecma-international.org/11.0/#eqn-floor
+
+module.exports = function floor(x) {
+  // return x - modulo(x, 1);
+  if (Type(x) === 'BigInt') {
+    return x;
+  }
+  return $floor(x);
+};
+//# sourceMappingURL=data:application/json;charset=utf-8;base64,eyJ2ZXJzaW9uIjozLCJuYW1lcyI6WyJUeXBlIiwicmVxdWlyZSIsIiRmbG9vciIsIk1hdGgiLCJmbG9vciIsIm1vZHVsZSIsImV4cG9ydHMiLCJ4Il0sInNvdXJjZXMiOlsiZmxvb3IuanMiXSwic291cmNlc0NvbnRlbnQiOlsiJ3VzZSBzdHJpY3QnO1xuXG52YXIgVHlwZSA9IHJlcXVpcmUoJy4vVHlwZScpO1xuXG4vLyB2YXIgbW9kdWxvID0gcmVxdWlyZSgnLi9tb2R1bG8nKTtcbnZhciAkZmxvb3IgPSBNYXRoLmZsb29yO1xuXG4vLyBodHRwOi8vMjYyLmVjbWEtaW50ZXJuYXRpb25hbC5vcmcvMTEuMC8jZXFuLWZsb29yXG5cbm1vZHVsZS5leHBvcnRzID0gZnVuY3Rpb24gZmxvb3IoeCkge1xuXHQvLyByZXR1cm4geCAtIG1vZHVsbyh4LCAxKTtcblx0aWYgKFR5cGUoeCkgPT09ICdCaWdJbnQnKSB7XG5cdFx0cmV0dXJuIHg7XG5cdH1cblx0cmV0dXJuICRmbG9vcih4KTtcbn07XG4iXSwibWFwcGluZ3MiOiJBQUFBLFlBQVk7O0FBRVosSUFBSUEsSUFBSSxHQUFHQyxPQUFPLENBQUMsUUFBUSxDQUFDOztBQUU1QjtBQUNBLElBQUlDLE1BQU0sR0FBR0MsSUFBSSxDQUFDQyxLQUFLOztBQUV2Qjs7QUFFQUMsTUFBTSxDQUFDQyxPQUFPLEdBQUcsU0FBU0YsS0FBS0EsQ0FBQ0csQ0FBQyxFQUFFO0VBQ2xDO0VBQ0EsSUFBSVAsSUFBSSxDQUFDTyxDQUFDLENBQUMsS0FBSyxRQUFRLEVBQUU7SUFDekIsT0FBT0EsQ0FBQztFQUNUO0VBQ0EsT0FBT0wsTUFBTSxDQUFDSyxDQUFDLENBQUM7QUFDakIsQ0FBQyJ9

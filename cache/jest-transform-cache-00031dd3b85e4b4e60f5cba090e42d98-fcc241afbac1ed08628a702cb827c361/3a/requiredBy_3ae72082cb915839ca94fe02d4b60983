@@ -1,0 +1,41 @@
+c447bc189fed4e51361bf98b704848e4
+"use strict";
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+exports["default"] = getRequiredBy;
+var _objectIs = _interopRequireDefault(require("object-is"));
+var _wrapValidator = _interopRequireDefault(require("./helpers/wrapValidator"));
+function _interopRequireDefault(obj) {
+  return obj && obj.__esModule ? obj : {
+    "default": obj
+  };
+}
+function getRequiredBy(requiredByPropName, propType) {
+  var defaultValue = arguments.length > 2 && arguments[2] !== undefined ? arguments[2] : null;
+  function requiredBy(props, propName, componentName) {
+    if (props[requiredByPropName]) {
+      var propValue = props[propName];
+      if ((0, _objectIs["default"])(propValue, defaultValue) || typeof propValue === 'undefined') {
+        return new TypeError("".concat(componentName, ": when ").concat(requiredByPropName, " is true, prop \u201C").concat(propName, "\u201D must be present."));
+      }
+    }
+    for (var _len = arguments.length, rest = new Array(_len > 3 ? _len - 3 : 0), _key = 3; _key < _len; _key++) {
+      rest[_key - 3] = arguments[_key];
+    }
+    return propType.apply(void 0, [props, propName, componentName].concat(rest));
+  }
+  requiredBy.isRequired = function requiredByRequired(props, propName, componentName) {
+    var propValue = props[propName];
+    if ((0, _objectIs["default"])(propValue, defaultValue)) {
+      return new TypeError("".concat(componentName, ": prop \u201C").concat(propName, "\u201D must be present."));
+    }
+    for (var _len2 = arguments.length, rest = new Array(_len2 > 3 ? _len2 - 3 : 0), _key2 = 3; _key2 < _len2; _key2++) {
+      rest[_key2 - 3] = arguments[_key2];
+    }
+    return propType.isRequired.apply(propType, [props, propName, componentName].concat(rest));
+  };
+  return (0, _wrapValidator["default"])(requiredBy, "requiredBy \u201C".concat(requiredByPropName, "\u201D"), [requiredByPropName, defaultValue]);
+}
+//# sourceMappingURL=data:application/json;charset=utf-8;base64,eyJ2ZXJzaW9uIjozLCJuYW1lcyI6WyJfb2JqZWN0SXMiLCJfaW50ZXJvcFJlcXVpcmVEZWZhdWx0IiwicmVxdWlyZSIsIl93cmFwVmFsaWRhdG9yIiwiZ2V0UmVxdWlyZWRCeSIsInJlcXVpcmVkQnlQcm9wTmFtZSIsInByb3BUeXBlIiwiZGVmYXVsdFZhbHVlIiwiYXJndW1lbnRzIiwibGVuZ3RoIiwidW5kZWZpbmVkIiwicmVxdWlyZWRCeSIsInByb3BzIiwicHJvcE5hbWUiLCJjb21wb25lbnROYW1lIiwicHJvcFZhbHVlIiwiVHlwZUVycm9yIiwiY29uY2F0IiwiX2xlbiIsInJlc3QiLCJBcnJheSIsIl9rZXkiLCJhcHBseSIsImlzUmVxdWlyZWQiLCJyZXF1aXJlZEJ5UmVxdWlyZWQiLCJfbGVuMiIsIl9rZXkyIl0sInNvdXJjZXMiOlsiLi4vc3JjL3JlcXVpcmVkQnkuanMiXSwic291cmNlc0NvbnRlbnQiOlsiaW1wb3J0IGlzIGZyb20gJ29iamVjdC1pcyc7XG5pbXBvcnQgd3JhcFZhbGlkYXRvciBmcm9tICcuL2hlbHBlcnMvd3JhcFZhbGlkYXRvcic7XG5cbmV4cG9ydCBkZWZhdWx0IGZ1bmN0aW9uIGdldFJlcXVpcmVkQnkocmVxdWlyZWRCeVByb3BOYW1lLCBwcm9wVHlwZSwgZGVmYXVsdFZhbHVlID0gbnVsbCkge1xuICBmdW5jdGlvbiByZXF1aXJlZEJ5KHByb3BzLCBwcm9wTmFtZSwgY29tcG9uZW50TmFtZSwgLi4ucmVzdCkge1xuICAgIGlmIChwcm9wc1tyZXF1aXJlZEJ5UHJvcE5hbWVdKSB7XG4gICAgICBjb25zdCB7IFtwcm9wTmFtZV06IHByb3BWYWx1ZSB9ID0gcHJvcHM7XG4gICAgICBpZiAoaXMocHJvcFZhbHVlLCBkZWZhdWx0VmFsdWUpIHx8IHR5cGVvZiBwcm9wVmFsdWUgPT09ICd1bmRlZmluZWQnKSB7XG4gICAgICAgIHJldHVybiBuZXcgVHlwZUVycm9yKFxuICAgICAgICAgIGAke2NvbXBvbmVudE5hbWV9OiB3aGVuICR7cmVxdWlyZWRCeVByb3BOYW1lfSBpcyB0cnVlLCBwcm9wIOKAnCR7cHJvcE5hbWV94oCdIG11c3QgYmUgcHJlc2VudC5gLFxuICAgICAgICApO1xuICAgICAgfVxuICAgIH1cbiAgICByZXR1cm4gcHJvcFR5cGUocHJvcHMsIHByb3BOYW1lLCBjb21wb25lbnROYW1lLCAuLi5yZXN0KTtcbiAgfVxuICByZXF1aXJlZEJ5LmlzUmVxdWlyZWQgPSBmdW5jdGlvbiByZXF1aXJlZEJ5UmVxdWlyZWQocHJvcHMsIHByb3BOYW1lLCBjb21wb25lbnROYW1lLCAuLi5yZXN0KSB7XG4gICAgY29uc3QgeyBbcHJvcE5hbWVdOiBwcm9wVmFsdWUgfSA9IHByb3BzO1xuICAgIGlmIChpcyhwcm9wVmFsdWUsIGRlZmF1bHRWYWx1ZSkpIHtcbiAgICAgIHJldHVybiBuZXcgVHlwZUVycm9yKGAke2NvbXBvbmVudE5hbWV9OiBwcm9wIOKAnCR7cHJvcE5hbWV94oCdIG11c3QgYmUgcHJlc2VudC5gKTtcbiAgICB9XG4gICAgcmV0dXJuIHByb3BUeXBlLmlzUmVxdWlyZWQocHJvcHMsIHByb3BOYW1lLCBjb21wb25lbnROYW1lLCAuLi5yZXN0KTtcbiAgfTtcblxuICByZXR1cm4gd3JhcFZhbGlkYXRvcihcbiAgICByZXF1aXJlZEJ5LFxuICAgIGByZXF1aXJlZEJ5IOKAnCR7cmVxdWlyZWRCeVByb3BOYW1lfeKAnWAsXG4gICAgW3JlcXVpcmVkQnlQcm9wTmFtZSwgZGVmYXVsdFZhbHVlXSxcbiAgKTtcbn1cbiJdLCJtYXBwaW5ncyI6Ijs7Ozs7O0FBQUEsSUFBQUEsU0FBQSxHQUFBQyxzQkFBQSxDQUFBQyxPQUFBO0FBQ0EsSUFBQUMsY0FBQSxHQUFBRixzQkFBQSxDQUFBQyxPQUFBOzs7Ozs7QUFFZSxTQUFTRSxhQUFUQSxDQUF1QkMsa0JBQXZCLEVBQTJDQyxRQUEzQyxFQUEwRTtFQUFBLElBQXJCQyxZQUFxQixHQUFBQyxTQUFBLENBQUFDLE1BQUEsUUFBQUQsU0FBQSxRQUFBRSxTQUFBLEdBQUFGLFNBQUEsTUFBTixJQUFNO0VBQ3ZGLFNBQVNHLFVBQVRBLENBQW9CQyxLQUFwQixFQUEyQkMsUUFBM0IsRUFBcUNDLGFBQXJDLEVBQTZEO0lBQzNELElBQUlGLEtBQUssQ0FBQ1Asa0JBQUQsQ0FBVCxFQUErQjtNQUFBLElBQ1RVLFNBRFMsR0FDS0gsS0FETCxDQUNwQkMsUUFEb0I7TUFFN0IsSUFBSSxJQUFBYixTQUFBLGFBQUdlLFNBQUgsRUFBY1IsWUFBZCxLQUErQixPQUFPUSxTQUFQLEtBQXFCLFdBQXhELEVBQXFFO1FBQ25FLE9BQU8sSUFBSUMsU0FBSixJQUFBQyxNQUFBLENBQ0ZILGFBREUsYUFBQUcsTUFBQSxDQUNxQlosa0JBRHJCLDJCQUFBWSxNQUFBLENBQzBESixRQUQxRCw2QkFBUDtNQUdEO0lBQ0Y7SUFSMEQsU0FBQUssSUFBQSxHQUFBVixTQUFBLENBQUFDLE1BQUEsRUFBTlUsSUFBTSxPQUFBQyxLQUFBLENBQUFGLElBQUEsT0FBQUEsSUFBQSxXQUFBRyxJQUFBLE1BQUFBLElBQUEsR0FBQUgsSUFBQSxFQUFBRyxJQUFBO01BQU5GLElBQU0sQ0FBQUUsSUFBQSxRQUFBYixTQUFBLENBQUFhLElBQUE7SUFBQTtJQVMzRCxPQUFPZixRQUFRLENBQUFnQixLQUFSLFVBQVNWLEtBQVQsRUFBZ0JDLFFBQWhCLEVBQTBCQyxhQUExQixFQUFBRyxNQUFBLENBQTRDRSxJQUE1QyxFQUFQO0VBQ0Q7RUFDRFIsVUFBVSxDQUFDWSxVQUFYLEdBQXdCLFNBQVNDLGtCQUFUQSxDQUE0QlosS0FBNUIsRUFBbUNDLFFBQW5DLEVBQTZDQyxhQUE3QyxFQUFxRTtJQUFBLElBQ3ZFQyxTQUR1RSxHQUN6REgsS0FEeUQsQ0FDbEZDLFFBRGtGO0lBRTNGLElBQUksSUFBQWIsU0FBQSxhQUFHZSxTQUFILEVBQWNSLFlBQWQsQ0FBSixFQUFpQztNQUMvQixPQUFPLElBQUlTLFNBQUosSUFBQUMsTUFBQSxDQUFpQkgsYUFBakIsbUJBQUFHLE1BQUEsQ0FBeUNKLFFBQXpDLDZCQUFQO0lBQ0Q7SUFKMEYsU0FBQVksS0FBQSxHQUFBakIsU0FBQSxDQUFBQyxNQUFBLEVBQU5VLElBQU0sT0FBQUMsS0FBQSxDQUFBSyxLQUFBLE9BQUFBLEtBQUEsV0FBQUMsS0FBQSxNQUFBQSxLQUFBLEdBQUFELEtBQUEsRUFBQUMsS0FBQTtNQUFOUCxJQUFNLENBQUFPLEtBQUEsUUFBQWxCLFNBQUEsQ0FBQWtCLEtBQUE7SUFBQTtJQUszRixPQUFPcEIsUUFBUSxDQUFDaUIsVUFBVCxDQUFBRCxLQUFBLENBQUFoQixRQUFRLEdBQVlNLEtBQVosRUFBbUJDLFFBQW5CLEVBQTZCQyxhQUE3QixFQUFBRyxNQUFBLENBQStDRSxJQUEvQyxFQUFmO0VBQ0QsQ0FORDtFQVFBLE9BQU8sSUFBQWhCLGNBQUEsYUFDTFEsVUFESyxzQkFBQU0sTUFBQSxDQUVVWixrQkFGVixhQUdMLENBQUNBLGtCQUFELEVBQXFCRSxZQUFyQixDQUhLLENBQVA7QUFLRCJ9

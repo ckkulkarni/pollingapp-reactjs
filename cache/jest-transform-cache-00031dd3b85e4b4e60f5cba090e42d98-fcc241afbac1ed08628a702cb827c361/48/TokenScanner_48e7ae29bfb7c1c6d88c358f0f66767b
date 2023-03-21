@@ -1,0 +1,41 @@
+b498e7cec9b5ffd9e946cd8e185ccb80
+"use strict";
+
+var __importDefault = void 0 && (void 0).__importDefault || function (mod) {
+  return mod && mod.__esModule ? mod : {
+    "default": mod
+  };
+};
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+var Token_1 = __importDefault(require("./Token"));
+var GherkinLine_1 = __importDefault(require("./GherkinLine"));
+var createLocation_1 = __importDefault(require("./cli/createLocation"));
+/**
+ * The scanner reads a gherkin doc (typically read from a .feature file) and creates a token for each line.
+ * The tokens are passed to the parser, which outputs an AST (Abstract Syntax Tree).
+ *
+ * If the scanner sees a `#` language header, it will reconfigure itself dynamically to look for
+ * Gherkin keywords for the associated language. The keywords are defined in gherkin-languages.json.
+ */
+var TokenScanner = /** @class */function () {
+  function TokenScanner(source) {
+    this.lineNumber = 0;
+    this.lines = source.split(/\r?\n/);
+    if (this.lines.length > 0 && this.lines[this.lines.length - 1].trim() === '') {
+      this.lines.pop();
+    }
+  }
+  TokenScanner.prototype.read = function () {
+    var line = this.lines[this.lineNumber++];
+    var location = createLocation_1.default({
+      line: this.lineNumber
+    });
+    location.column = undefined;
+    return line == null ? new Token_1.default(null, location) : new Token_1.default(new GherkinLine_1.default(line, this.lineNumber), location);
+  };
+  return TokenScanner;
+}();
+exports.default = TokenScanner;
+//# sourceMappingURL=data:application/json;charset=utf-8;base64,eyJ2ZXJzaW9uIjozLCJuYW1lcyI6WyJUb2tlbl8xIiwiX19pbXBvcnREZWZhdWx0IiwicmVxdWlyZSIsIkdoZXJraW5MaW5lXzEiLCJjcmVhdGVMb2NhdGlvbl8xIiwiVG9rZW5TY2FubmVyIiwic291cmNlIiwibGluZU51bWJlciIsImxpbmVzIiwic3BsaXQiLCJsZW5ndGgiLCJ0cmltIiwicG9wIiwicHJvdG90eXBlIiwicmVhZCIsImxpbmUiLCJsb2NhdGlvbiIsImRlZmF1bHQiLCJjb2x1bW4iLCJ1bmRlZmluZWQiXSwic291cmNlcyI6WyIuLi8uLi9zcmMvVG9rZW5TY2FubmVyLnRzIl0sInNvdXJjZXNDb250ZW50IjpbbnVsbF0sIm1hcHBpbmdzIjoiOzs7Ozs7Ozs7O0FBQUEsSUFBQUEsT0FBQSxHQUFBQyxlQUFBLENBQUFDLE9BQUE7QUFDQSxJQUFBQyxhQUFBLEdBQUFGLGVBQUEsQ0FBQUMsT0FBQTtBQUVBLElBQUFFLGdCQUFBLEdBQUFILGVBQUEsQ0FBQUMsT0FBQTtBQUVBOzs7Ozs7O0FBT0EsSUFBQUcsWUFBQTtFQUlFLFNBQUFBLGFBQVlDLE1BQWM7SUFIbEIsS0FBQUMsVUFBVSxHQUFHLENBQUM7SUFJcEIsSUFBSSxDQUFDQyxLQUFLLEdBQUdGLE1BQU0sQ0FBQ0csS0FBSyxDQUFDLE9BQU8sQ0FBQztJQUNsQyxJQUNFLElBQUksQ0FBQ0QsS0FBSyxDQUFDRSxNQUFNLEdBQUcsQ0FBQyxJQUNyQixJQUFJLENBQUNGLEtBQUssQ0FBQyxJQUFJLENBQUNBLEtBQUssQ0FBQ0UsTUFBTSxHQUFHLENBQUMsQ0FBQyxDQUFDQyxJQUFJLEVBQUUsS0FBSyxFQUFFLEVBQy9DO01BQ0EsSUFBSSxDQUFDSCxLQUFLLENBQUNJLEdBQUcsRUFBRTs7RUFFcEI7RUFFT1AsWUFBQSxDQUFBUSxTQUFBLENBQUFDLElBQUksR0FBWDtJQUNFLElBQU1DLElBQUksR0FBRyxJQUFJLENBQUNQLEtBQUssQ0FBQyxJQUFJLENBQUNELFVBQVUsRUFBRSxDQUFDO0lBQzFDLElBQU1TLFFBQVEsR0FBR1osZ0JBQUEsQ0FBQWEsT0FBYyxDQUFDO01BQzlCRixJQUFJLEVBQUUsSUFBSSxDQUFDUjtLQUNaLENBQUM7SUFDRlMsUUFBUSxDQUFDRSxNQUFNLEdBQUdDLFNBQVM7SUFDM0IsT0FBT0osSUFBSSxJQUFJLElBQUksR0FDZixJQUFJZixPQUFBLENBQUFpQixPQUFLLENBQUMsSUFBSSxFQUFFRCxRQUFRLENBQUMsR0FDekIsSUFBSWhCLE9BQUEsQ0FBQWlCLE9BQUssQ0FBQyxJQUFJZCxhQUFBLENBQUFjLE9BQVcsQ0FBQ0YsSUFBSSxFQUFFLElBQUksQ0FBQ1IsVUFBVSxDQUFDLEVBQUVTLFFBQVEsQ0FBQztFQUNqRSxDQUFDO0VBQ0gsT0FBQVgsWUFBQztBQUFELENBQUMsRUF4QkQifQ==

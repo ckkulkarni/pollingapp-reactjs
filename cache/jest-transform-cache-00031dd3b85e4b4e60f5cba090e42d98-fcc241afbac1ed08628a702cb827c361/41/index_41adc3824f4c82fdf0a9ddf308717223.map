@@ -1,0 +1,1 @@
+{"version":3,"names":["_index","_interopRequireDefault","require","obj","__esModule","default"],"sources":["index.js"],"sourcesContent":["import platform from './node/index.js';\n\nexport {platform as default}\n"],"mappings":";;;;;;;;;;;AAAA,IAAAA,MAAA,GAAAC,sBAAA,CAAAC,OAAA;AAAuC,SAAAD,uBAAAE,GAAA,WAAAA,GAAA,IAAAA,GAAA,CAAAC,UAAA,GAAAD,GAAA,KAAAE,OAAA,EAAAF,GAAA"}

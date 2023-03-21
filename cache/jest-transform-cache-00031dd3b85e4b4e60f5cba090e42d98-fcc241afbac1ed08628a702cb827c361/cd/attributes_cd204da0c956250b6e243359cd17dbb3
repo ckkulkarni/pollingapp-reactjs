@@ -1,0 +1,169 @@
+15e09816361574f6e85b5629f40da090
+"use strict";
+
+var __importDefault = void 0 && (void 0).__importDefault || function (mod) {
+  return mod && mod.__esModule ? mod : {
+    "default": mod
+  };
+};
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+exports.attributeRules = void 0;
+var boolbase_1 = __importDefault(require("boolbase"));
+/**
+ * All reserved characters in a regex, used for escaping.
+ *
+ * Taken from XRegExp, (c) 2007-2020 Steven Levithan under the MIT license
+ * https://github.com/slevithan/xregexp/blob/95eeebeb8fac8754d54eafe2b4743661ac1cf028/src/xregexp.js#L794
+ */
+var reChars = /[-[\]{}()*+?.,\\^$|#\s]/g;
+function escapeRegex(value) {
+  return value.replace(reChars, "\\$&");
+}
+/**
+ * Attributes that are case-insensitive in HTML.
+ *
+ * @private
+ * @see https://html.spec.whatwg.org/multipage/semantics-other.html#case-sensitivity-of-selectors
+ */
+var caseInsensitiveAttributes = new Set(["accept", "accept-charset", "align", "alink", "axis", "bgcolor", "charset", "checked", "clear", "codetype", "color", "compact", "declare", "defer", "dir", "direction", "disabled", "enctype", "face", "frame", "hreflang", "http-equiv", "lang", "language", "link", "media", "method", "multiple", "nohref", "noresize", "noshade", "nowrap", "readonly", "rel", "rev", "rules", "scope", "scrolling", "selected", "shape", "target", "text", "type", "valign", "valuetype", "vlink"]);
+function shouldIgnoreCase(selector, options) {
+  return typeof selector.ignoreCase === "boolean" ? selector.ignoreCase : selector.ignoreCase === "quirks" ? !!options.quirksMode : !options.xmlMode && caseInsensitiveAttributes.has(selector.name);
+}
+/**
+ * Attribute selectors
+ */
+exports.attributeRules = {
+  equals: function (next, data, options) {
+    var adapter = options.adapter;
+    var name = data.name;
+    var value = data.value;
+    if (shouldIgnoreCase(data, options)) {
+      value = value.toLowerCase();
+      return function (elem) {
+        var attr = adapter.getAttributeValue(elem, name);
+        return attr != null && attr.length === value.length && attr.toLowerCase() === value && next(elem);
+      };
+    }
+    return function (elem) {
+      return adapter.getAttributeValue(elem, name) === value && next(elem);
+    };
+  },
+  hyphen: function (next, data, options) {
+    var adapter = options.adapter;
+    var name = data.name;
+    var value = data.value;
+    var len = value.length;
+    if (shouldIgnoreCase(data, options)) {
+      value = value.toLowerCase();
+      return function hyphenIC(elem) {
+        var attr = adapter.getAttributeValue(elem, name);
+        return attr != null && (attr.length === len || attr.charAt(len) === "-") && attr.substr(0, len).toLowerCase() === value && next(elem);
+      };
+    }
+    return function hyphen(elem) {
+      var attr = adapter.getAttributeValue(elem, name);
+      return attr != null && (attr.length === len || attr.charAt(len) === "-") && attr.substr(0, len) === value && next(elem);
+    };
+  },
+  element: function (next, data, options) {
+    var adapter = options.adapter;
+    var name = data.name,
+      value = data.value;
+    if (/\s/.test(value)) {
+      return boolbase_1.default.falseFunc;
+    }
+    var regex = new RegExp("(?:^|\\s)".concat(escapeRegex(value), "(?:$|\\s)"), shouldIgnoreCase(data, options) ? "i" : "");
+    return function element(elem) {
+      var attr = adapter.getAttributeValue(elem, name);
+      return attr != null && attr.length >= value.length && regex.test(attr) && next(elem);
+    };
+  },
+  exists: function (next, _a, _b) {
+    var name = _a.name;
+    var adapter = _b.adapter;
+    return function (elem) {
+      return adapter.hasAttrib(elem, name) && next(elem);
+    };
+  },
+  start: function (next, data, options) {
+    var adapter = options.adapter;
+    var name = data.name;
+    var value = data.value;
+    var len = value.length;
+    if (len === 0) {
+      return boolbase_1.default.falseFunc;
+    }
+    if (shouldIgnoreCase(data, options)) {
+      value = value.toLowerCase();
+      return function (elem) {
+        var attr = adapter.getAttributeValue(elem, name);
+        return attr != null && attr.length >= len && attr.substr(0, len).toLowerCase() === value && next(elem);
+      };
+    }
+    return function (elem) {
+      var _a;
+      return !!((_a = adapter.getAttributeValue(elem, name)) === null || _a === void 0 ? void 0 : _a.startsWith(value)) && next(elem);
+    };
+  },
+  end: function (next, data, options) {
+    var adapter = options.adapter;
+    var name = data.name;
+    var value = data.value;
+    var len = -value.length;
+    if (len === 0) {
+      return boolbase_1.default.falseFunc;
+    }
+    if (shouldIgnoreCase(data, options)) {
+      value = value.toLowerCase();
+      return function (elem) {
+        var _a;
+        return ((_a = adapter.getAttributeValue(elem, name)) === null || _a === void 0 ? void 0 : _a.substr(len).toLowerCase()) === value && next(elem);
+      };
+    }
+    return function (elem) {
+      var _a;
+      return !!((_a = adapter.getAttributeValue(elem, name)) === null || _a === void 0 ? void 0 : _a.endsWith(value)) && next(elem);
+    };
+  },
+  any: function (next, data, options) {
+    var adapter = options.adapter;
+    var name = data.name,
+      value = data.value;
+    if (value === "") {
+      return boolbase_1.default.falseFunc;
+    }
+    if (shouldIgnoreCase(data, options)) {
+      var regex_1 = new RegExp(escapeRegex(value), "i");
+      return function anyIC(elem) {
+        var attr = adapter.getAttributeValue(elem, name);
+        return attr != null && attr.length >= value.length && regex_1.test(attr) && next(elem);
+      };
+    }
+    return function (elem) {
+      var _a;
+      return !!((_a = adapter.getAttributeValue(elem, name)) === null || _a === void 0 ? void 0 : _a.includes(value)) && next(elem);
+    };
+  },
+  not: function (next, data, options) {
+    var adapter = options.adapter;
+    var name = data.name;
+    var value = data.value;
+    if (value === "") {
+      return function (elem) {
+        return !!adapter.getAttributeValue(elem, name) && next(elem);
+      };
+    } else if (shouldIgnoreCase(data, options)) {
+      value = value.toLowerCase();
+      return function (elem) {
+        var attr = adapter.getAttributeValue(elem, name);
+        return (attr == null || attr.length !== value.length || attr.toLowerCase() !== value) && next(elem);
+      };
+    }
+    return function (elem) {
+      return adapter.getAttributeValue(elem, name) !== value && next(elem);
+    };
+  }
+};
+//# sourceMappingURL=data:application/json;charset=utf-8;base64,eyJ2ZXJzaW9uIjozLCJuYW1lcyI6WyJib29sYmFzZV8xIiwiX19pbXBvcnREZWZhdWx0IiwicmVxdWlyZSIsInJlQ2hhcnMiLCJlc2NhcGVSZWdleCIsInZhbHVlIiwicmVwbGFjZSIsImNhc2VJbnNlbnNpdGl2ZUF0dHJpYnV0ZXMiLCJTZXQiLCJzaG91bGRJZ25vcmVDYXNlIiwic2VsZWN0b3IiLCJvcHRpb25zIiwiaWdub3JlQ2FzZSIsInF1aXJrc01vZGUiLCJ4bWxNb2RlIiwiaGFzIiwibmFtZSIsImV4cG9ydHMiLCJhdHRyaWJ1dGVSdWxlcyIsImVxdWFscyIsIm5leHQiLCJkYXRhIiwiYWRhcHRlciIsInRvTG93ZXJDYXNlIiwiZWxlbSIsImF0dHIiLCJnZXRBdHRyaWJ1dGVWYWx1ZSIsImxlbmd0aCIsImh5cGhlbiIsImxlbiIsImh5cGhlbklDIiwiY2hhckF0Iiwic3Vic3RyIiwiZWxlbWVudCIsInRlc3QiLCJkZWZhdWx0IiwiZmFsc2VGdW5jIiwicmVnZXgiLCJSZWdFeHAiLCJjb25jYXQiLCJleGlzdHMiLCJfYSIsIl9iIiwiaGFzQXR0cmliIiwic3RhcnQiLCJzdGFydHNXaXRoIiwiZW5kIiwiZW5kc1dpdGgiLCJhbnkiLCJyZWdleF8xIiwiYW55SUMiLCJpbmNsdWRlcyIsIm5vdCJdLCJzb3VyY2VzIjpbImh0dHBzOi8vcmF3LmdpdGh1YnVzZXJjb250ZW50LmNvbS9mYjU1L2Nzcy1zZWxlY3QvMGYwNzI1YTlkZmVkZGQyZmRiNTRlZGE5NjU2Y2RiYWI1YmJmNmJlNi9zcmMvYXR0cmlidXRlcy50cyJdLCJzb3VyY2VzQ29udGVudCI6W251bGxdLCJtYXBwaW5ncyI6Ijs7Ozs7Ozs7Ozs7QUFBQSxJQUFBQSxVQUFBLEdBQUFDLGVBQUEsQ0FBQUMsT0FBQTtBQUlBOzs7Ozs7QUFNQSxJQUFNQyxPQUFPLEdBQUcsMEJBQTBCO0FBQzFDLFNBQVNDLFdBQVdBLENBQUNDLEtBQWE7RUFDOUIsT0FBT0EsS0FBSyxDQUFDQyxPQUFPLENBQUNILE9BQU8sRUFBRSxNQUFNLENBQUM7QUFDekM7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

@@ -1,0 +1,347 @@
+06e227ff7e92d4fffaf77b580c4e1bc9
+"use strict";
+
+var __assign = void 0 && (void 0).__assign || function () {
+  __assign = Object.assign || function (t) {
+    for (var s, i = 1, n = arguments.length; i < n; i++) {
+      s = arguments[i];
+      for (var p in s) if (Object.prototype.hasOwnProperty.call(s, p)) t[p] = s[p];
+    }
+    return t;
+  };
+  return __assign.apply(this, arguments);
+};
+var __createBinding = void 0 && (void 0).__createBinding || (Object.create ? function (o, m, k, k2) {
+  if (k2 === undefined) k2 = k;
+  var desc = Object.getOwnPropertyDescriptor(m, k);
+  if (!desc || ("get" in desc ? !m.__esModule : desc.writable || desc.configurable)) {
+    desc = {
+      enumerable: true,
+      get: function () {
+        return m[k];
+      }
+    };
+  }
+  Object.defineProperty(o, k2, desc);
+} : function (o, m, k, k2) {
+  if (k2 === undefined) k2 = k;
+  o[k2] = m[k];
+});
+var __setModuleDefault = void 0 && (void 0).__setModuleDefault || (Object.create ? function (o, v) {
+  Object.defineProperty(o, "default", {
+    enumerable: true,
+    value: v
+  });
+} : function (o, v) {
+  o["default"] = v;
+});
+var __importStar = void 0 && (void 0).__importStar || function (mod) {
+  if (mod && mod.__esModule) return mod;
+  var result = {};
+  if (mod != null) for (var k in mod) if (k !== "default" && Object.prototype.hasOwnProperty.call(mod, k)) __createBinding(result, mod, k);
+  __setModuleDefault(result, mod);
+  return result;
+};
+var __spreadArray = void 0 && (void 0).__spreadArray || function (to, from, pack) {
+  if (pack || arguments.length === 2) for (var i = 0, l = from.length, ar; i < l; i++) {
+    if (ar || !(i in from)) {
+      if (!ar) ar = Array.prototype.slice.call(from, 0, i);
+      ar[i] = from[i];
+    }
+  }
+  return to.concat(ar || Array.prototype.slice.call(from));
+};
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+exports.select = exports.filter = exports.some = exports.is = exports.aliases = exports.pseudos = exports.filters = void 0;
+var css_what_1 = require("css-what");
+var css_select_1 = require("css-select");
+var DomUtils = __importStar(require("domutils"));
+var boolbase = __importStar(require("boolbase"));
+var helpers_js_1 = require("./helpers.js");
+var positionals_js_1 = require("./positionals.js");
+// Re-export pseudo extension points
+var css_select_2 = require("css-select");
+Object.defineProperty(exports, "filters", {
+  enumerable: true,
+  get: function () {
+    return css_select_2.filters;
+  }
+});
+Object.defineProperty(exports, "pseudos", {
+  enumerable: true,
+  get: function () {
+    return css_select_2.pseudos;
+  }
+});
+Object.defineProperty(exports, "aliases", {
+  enumerable: true,
+  get: function () {
+    return css_select_2.aliases;
+  }
+});
+var UNIVERSAL_SELECTOR = {
+  type: css_what_1.SelectorType.Universal,
+  namespace: null
+};
+var SCOPE_PSEUDO = {
+  type: css_what_1.SelectorType.Pseudo,
+  name: "scope",
+  data: null
+};
+function is(element, selector, options) {
+  if (options === void 0) {
+    options = {};
+  }
+  return some([element], selector, options);
+}
+exports.is = is;
+function some(elements, selector, options) {
+  if (options === void 0) {
+    options = {};
+  }
+  if (typeof selector === "function") return elements.some(selector);
+  var _a = (0, helpers_js_1.groupSelectors)((0, css_what_1.parse)(selector)),
+    plain = _a[0],
+    filtered = _a[1];
+  return plain.length > 0 && elements.some((0, css_select_1._compileToken)(plain, options)) || filtered.some(function (sel) {
+    return filterBySelector(sel, elements, options).length > 0;
+  });
+}
+exports.some = some;
+function filterByPosition(filter, elems, data, options) {
+  var num = typeof data === "string" ? parseInt(data, 10) : NaN;
+  switch (filter) {
+    case "first":
+    case "lt":
+      // Already done in `getLimit`
+      return elems;
+    case "last":
+      return elems.length > 0 ? [elems[elems.length - 1]] : elems;
+    case "nth":
+    case "eq":
+      return isFinite(num) && Math.abs(num) < elems.length ? [num < 0 ? elems[elems.length + num] : elems[num]] : [];
+    case "gt":
+      return isFinite(num) ? elems.slice(num + 1) : [];
+    case "even":
+      return elems.filter(function (_, i) {
+        return i % 2 === 0;
+      });
+    case "odd":
+      return elems.filter(function (_, i) {
+        return i % 2 === 1;
+      });
+    case "not":
+      {
+        var filtered_1 = new Set(filterParsed(data, elems, options));
+        return elems.filter(function (e) {
+          return !filtered_1.has(e);
+        });
+      }
+  }
+}
+function filter(selector, elements, options) {
+  if (options === void 0) {
+    options = {};
+  }
+  return filterParsed((0, css_what_1.parse)(selector), elements, options);
+}
+exports.filter = filter;
+/**
+ * Filter a set of elements by a selector.
+ *
+ * Will return elements in the original order.
+ *
+ * @param selector Selector to filter by.
+ * @param elements Elements to filter.
+ * @param options Options for selector.
+ */
+function filterParsed(selector, elements, options) {
+  if (elements.length === 0) return [];
+  var _a = (0, helpers_js_1.groupSelectors)(selector),
+    plainSelectors = _a[0],
+    filteredSelectors = _a[1];
+  var found;
+  if (plainSelectors.length) {
+    var filtered = filterElements(elements, plainSelectors, options);
+    // If there are no filters, just return
+    if (filteredSelectors.length === 0) {
+      return filtered;
+    }
+    // Otherwise, we have to do some filtering
+    if (filtered.length) {
+      found = new Set(filtered);
+    }
+  }
+  for (var i = 0; i < filteredSelectors.length && (found === null || found === void 0 ? void 0 : found.size) !== elements.length; i++) {
+    var filteredSelector = filteredSelectors[i];
+    var missing = found ? elements.filter(function (e) {
+      return DomUtils.isTag(e) && !found.has(e);
+    }) : elements;
+    if (missing.length === 0) break;
+    var filtered = filterBySelector(filteredSelector, elements, options);
+    if (filtered.length) {
+      if (!found) {
+        /*
+         * If we haven't found anything before the last selector,
+         * just return what we found now.
+         */
+        if (i === filteredSelectors.length - 1) {
+          return filtered;
+        }
+        found = new Set(filtered);
+      } else {
+        filtered.forEach(function (el) {
+          return found.add(el);
+        });
+      }
+    }
+  }
+  return typeof found !== "undefined" ? found.size === elements.length ? elements :
+  // Filter elements to preserve order
+  elements.filter(function (el) {
+    return found.has(el);
+  }) : [];
+}
+function filterBySelector(selector, elements, options) {
+  var _a;
+  if (selector.some(css_what_1.isTraversal)) {
+    /*
+     * Get root node, run selector with the scope
+     * set to all of our nodes.
+     */
+    var root = (_a = options.root) !== null && _a !== void 0 ? _a : (0, helpers_js_1.getDocumentRoot)(elements[0]);
+    var opts = __assign(__assign({}, options), {
+      context: elements,
+      relativeSelector: false
+    });
+    selector.push(SCOPE_PSEUDO);
+    return findFilterElements(root, selector, opts, true, elements.length);
+  }
+  // Performance optimization: If we don't have to traverse, just filter set.
+  return findFilterElements(elements, selector, options, false, elements.length);
+}
+function select(selector, root, options, limit) {
+  if (options === void 0) {
+    options = {};
+  }
+  if (limit === void 0) {
+    limit = Infinity;
+  }
+  if (typeof selector === "function") {
+    return find(root, selector);
+  }
+  var _a = (0, helpers_js_1.groupSelectors)((0, css_what_1.parse)(selector)),
+    plain = _a[0],
+    filtered = _a[1];
+  var results = filtered.map(function (sel) {
+    return findFilterElements(root, sel, options, true, limit);
+  });
+  // Plain selectors can be queried in a single go
+  if (plain.length) {
+    results.push(findElements(root, plain, options, limit));
+  }
+  if (results.length === 0) {
+    return [];
+  }
+  // If there was only a single selector, just return the result
+  if (results.length === 1) {
+    return results[0];
+  }
+  // Sort results, filtering for duplicates
+  return DomUtils.uniqueSort(results.reduce(function (a, b) {
+    return __spreadArray(__spreadArray([], a, true), b, true);
+  }));
+}
+exports.select = select;
+/**
+ *
+ * @param root Element(s) to search from.
+ * @param selector Selector to look for.
+ * @param options Options for querying.
+ * @param queryForSelector Query multiple levels deep for the initial selector, even if it doesn't contain a traversal.
+ */
+function findFilterElements(root, selector, options, queryForSelector, totalLimit) {
+  var filterIndex = selector.findIndex(positionals_js_1.isFilter);
+  var sub = selector.slice(0, filterIndex);
+  var filter = selector[filterIndex];
+  // If we are at the end of the selector, we can limit the number of elements to retrieve.
+  var partLimit = selector.length - 1 === filterIndex ? totalLimit : Infinity;
+  /*
+   * Set the number of elements to retrieve.
+   * Eg. for :first, we only have to get a single element.
+   */
+  var limit = (0, positionals_js_1.getLimit)(filter.name, filter.data, partLimit);
+  if (limit === 0) return [];
+  /*
+   * Skip `findElements` call if our selector starts with a positional
+   * pseudo.
+   */
+  var elemsNoLimit = sub.length === 0 && !Array.isArray(root) ? DomUtils.getChildren(root).filter(DomUtils.isTag) : sub.length === 0 ? (Array.isArray(root) ? root : [root]).filter(DomUtils.isTag) : queryForSelector || sub.some(css_what_1.isTraversal) ? findElements(root, [sub], options, limit) : filterElements(root, [sub], options);
+  var elems = elemsNoLimit.slice(0, limit);
+  var result = filterByPosition(filter.name, elems, filter.data, options);
+  if (result.length === 0 || selector.length === filterIndex + 1) {
+    return result;
+  }
+  var remainingSelector = selector.slice(filterIndex + 1);
+  var remainingHasTraversal = remainingSelector.some(css_what_1.isTraversal);
+  if (remainingHasTraversal) {
+    if ((0, css_what_1.isTraversal)(remainingSelector[0])) {
+      var type = remainingSelector[0].type;
+      if (type === css_what_1.SelectorType.Sibling || type === css_what_1.SelectorType.Adjacent) {
+        // If we have a sibling traversal, we need to also look at the siblings.
+        result = (0, css_select_1.prepareContext)(result, DomUtils, true);
+      }
+      // Avoid a traversal-first selector error.
+      remainingSelector.unshift(UNIVERSAL_SELECTOR);
+    }
+    options = __assign(__assign({}, options), {
+      // Avoid absolutizing the selector
+      relativeSelector: false,
+      /*
+       * Add a custom root func, to make sure traversals don't match elements
+       * that aren't a part of the considered tree.
+       */
+      rootFunc: function (el) {
+        return result.includes(el);
+      }
+    });
+  } else if (options.rootFunc && options.rootFunc !== boolbase.trueFunc) {
+    options = __assign(__assign({}, options), {
+      rootFunc: boolbase.trueFunc
+    });
+  }
+  /*
+   * If we have another filter, recursively call `findFilterElements`,
+   * with the `recursive` flag disabled. We only have to look for more
+   * elements when we see a traversal.
+   *
+   * Otherwise,
+   */
+  return remainingSelector.some(positionals_js_1.isFilter) ? findFilterElements(result, remainingSelector, options, false, totalLimit) : remainingHasTraversal ?
+  // Query existing elements to resolve traversal.
+  findElements(result, [remainingSelector], options, totalLimit) :
+  // If we don't have any more traversals, simply filter elements.
+  filterElements(result, [remainingSelector], options);
+}
+function findElements(root, sel, options, limit) {
+  var query = (0, css_select_1._compileToken)(sel, options, root);
+  return find(root, query, limit);
+}
+function find(root, query, limit) {
+  if (limit === void 0) {
+    limit = Infinity;
+  }
+  var elems = (0, css_select_1.prepareContext)(root, DomUtils, query.shouldTestNextSiblings);
+  return DomUtils.find(function (node) {
+    return DomUtils.isTag(node) && query(node);
+  }, elems, true, limit);
+}
+function filterElements(elements, sel, options) {
+  var els = (Array.isArray(elements) ? elements : [elements]).filter(DomUtils.isTag);
+  if (els.length === 0) return els;
+  var query = (0, css_select_1._compileToken)(sel, options);
+  return query === boolbase.trueFunc ? els : els.filter(query);
+}
+//# sourceMappingURL=data:application/json;charset=utf-8;base64,eyJ2ZXJzaW9uIjozLCJuYW1lcyI6WyJjc3Nfd2hhdF8xIiwicmVxdWlyZSIsImNzc19zZWxlY3RfMSIsIkRvbVV0aWxzIiwiX19pbXBvcnRTdGFyIiwiYm9vbGJhc2UiLCJoZWxwZXJzX2pzXzEiLCJwb3NpdGlvbmFsc19qc18xIiwiY3NzX3NlbGVjdF8yIiwiT2JqZWN0IiwiZGVmaW5lUHJvcGVydHkiLCJleHBvcnRzIiwiZW51bWVyYWJsZSIsImdldCIsImZpbHRlcnMiLCJwc2V1ZG9zIiwiYWxpYXNlcyIsIlVOSVZFUlNBTF9TRUxFQ1RPUiIsInR5cGUiLCJTZWxlY3RvclR5cGUiLCJVbml2ZXJzYWwiLCJuYW1lc3BhY2UiLCJTQ09QRV9QU0VVRE8iLCJQc2V1ZG8iLCJuYW1lIiwiZGF0YSIsImlzIiwiZWxlbWVudCIsInNlbGVjdG9yIiwib3B0aW9ucyIsInNvbWUiLCJlbGVtZW50cyIsIl9hIiwiZ3JvdXBTZWxlY3RvcnMiLCJwYXJzZSIsInBsYWluIiwiZmlsdGVyZWQiLCJsZW5ndGgiLCJfY29tcGlsZVRva2VuIiwic2VsIiwiZmlsdGVyQnlTZWxlY3RvciIsImZpbHRlckJ5UG9zaXRpb24iLCJmaWx0ZXIiLCJlbGVtcyIsIm51bSIsInBhcnNlSW50IiwiTmFOIiwiaXNGaW5pdGUiLCJNYXRoIiwiYWJzIiwic2xpY2UiLCJfIiwiaSIsImZpbHRlcmVkXzEiLCJTZXQiLCJmaWx0ZXJQYXJzZWQiLCJlIiwiaGFzIiwicGxhaW5TZWxlY3RvcnMiLCJmaWx0ZXJlZFNlbGVjdG9ycyIsImZvdW5kIiwiZmlsdGVyRWxlbWVudHMiLCJzaXplIiwiZmlsdGVyZWRTZWxlY3RvciIsIm1pc3NpbmciLCJpc1RhZyIsImZvckVhY2giLCJlbCIsImFkZCIsImlzVHJhdmVyc2FsIiwicm9vdCIsImdldERvY3VtZW50Um9vdCIsIm9wdHMiLCJfX2Fzc2lnbiIsImNvbnRleHQiLCJyZWxhdGl2ZVNlbGVjdG9yIiwicHVzaCIsImZpbmRGaWx0ZXJFbGVtZW50cyIsInNlbGVjdCIsImxpbWl0IiwiSW5maW5pdHkiLCJmaW5kIiwicmVzdWx0cyIsIm1hcCIsImZpbmRFbGVtZW50cyIsInVuaXF1ZVNvcnQiLCJyZWR1Y2UiLCJhIiwiYiIsIl9fc3ByZWFkQXJyYXkiLCJxdWVyeUZvclNlbGVjdG9yIiwidG90YWxMaW1pdCIsImZpbHRlckluZGV4IiwiZmluZEluZGV4IiwiaXNGaWx0ZXIiLCJzdWIiLCJwYXJ0TGltaXQiLCJnZXRMaW1pdCIsImVsZW1zTm9MaW1pdCIsIkFycmF5IiwiaXNBcnJheSIsImdldENoaWxkcmVuIiwicmVzdWx0IiwicmVtYWluaW5nU2VsZWN0b3IiLCJyZW1haW5pbmdIYXNUcmF2ZXJzYWwiLCJTaWJsaW5nIiwiQWRqYWNlbnQiLCJwcmVwYXJlQ29udGV4dCIsInVuc2hpZnQiLCJyb290RnVuYyIsImluY2x1ZGVzIiwidHJ1ZUZ1bmMiLCJxdWVyeSIsInNob3VsZFRlc3ROZXh0U2libGluZ3MiLCJub2RlIiwiZWxzIl0sInNvdXJjZXMiOlsiaHR0cHM6Ly9yYXcuZ2l0aHVidXNlcmNvbnRlbnQuY29tL2NoZWVyaW9qcy9jaGVlcmlvLXNlbGVjdC9lZjA2M2E2Y2E0YzNmMGQwMmQyZmMzNTA1ZTc1MGI2ZmI4MWM0NDhkL3NyYy9pbmRleC50cyJdLCJzb3VyY2VzQ29udGVudCI6W251bGxdLCJtYXBwaW5ncyI6Ijs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7QUFBQSxJQUFBQSxVQUFBLEdBQUFDLE9BQUE7QUFDQSxJQUFBQyxZQUFBLEdBQUFELE9BQUE7QUFLQSxJQUFBRSxRQUFBLEdBQUFDLFlBQUEsQ0FBQUgsT0FBQTtBQUNBLElBQUFJLFFBQUEsR0FBQUQsWUFBQSxDQUFBSCxPQUFBO0FBRUEsSUFBQUssWUFBQSxHQUFBTCxPQUFBO0FBQ0EsSUFBQU0sZ0JBQUEsR0FBQU4sT0FBQTtBQU9BO0FBQ0EsSUFBQU8sWUFBQSxHQUFBUCxPQUFBO0FBQVNRLE1BQUEsQ0FBQUMsY0FBQSxDQUFBQyxPQUFBO0VBQUFDLFVBQUE7RUFBQUMsR0FBQSxXQUFBQSxDQUFBO0lBQUEsT0FBQUwsWUFBQSxDQUFBTSxPQUFPO0VBQUE7QUFBQTtBQUFFTCxNQUFBLENBQUFDLGNBQUEsQ0FBQUMsT0FBQTtFQUFBQyxVQUFBO0VBQUFDLEdBQUEsV0FBQUEsQ0FBQTtJQUFBLE9BQUFMLFlBQUEsQ0FBQU8sT0FBTztFQUFBO0FBQUE7QUFBRU4sTUFBQSxDQUFBQyxjQUFBLENBQUFDLE9BQUE7RUFBQUMsVUFBQTtFQUFBQyxHQUFBLFdBQUFBLENBQUE7SUFBQSxPQUFBTCxZQUFBLENBQUFRLE9BQU87RUFBQTtBQUFBO0FBRWxDLElBQU1DLGtCQUFrQixHQUFhO0VBQ2pDQyxJQUFJLEVBQUVsQixVQUFBLENBQUFtQixZQUFZLENBQUNDLFNBQVM7RUFDNUJDLFNBQVMsRUFBRTtDQUNkO0FBQ0QsSUFBTUMsWUFBWSxHQUFhO0VBQzNCSixJQUFJLEVBQUVsQixVQUFBLENBQUFtQixZQUFZLENBQUNJLE1BQU07RUFDekJDLElBQUksRUFBRSxPQUFPO0VBQ2JDLElBQUksRUFBRTtDQUNUO0FBT0QsU0FBZ0JDLEVBQUVBLENBQ2RDLE9BQWdCLEVBQ2hCQyxRQUE2QyxFQUM3Q0MsT0FBcUI7RUFBckIsSUFBQUEsT0FBQTtJQUFBQSxPQUFBLEtBQXFCO0VBQUE7RUFFckIsT0FBT0MsSUFBSSxDQUFDLENBQUNILE9BQU8sQ0FBQyxFQUFFQyxRQUFRLEVBQUVDLE9BQU8sQ0FBQztBQUM3QztBQU5BbEIsT0FBQSxDQUFBZSxFQUFBLEdBQUFBLEVBQUE7QUFRQSxTQUFnQkksSUFBSUEsQ0FDaEJDLFFBQW1CLEVBQ25CSCxRQUE2QyxFQUM3Q0MsT0FBcUI7RUFBckIsSUFBQUEsT0FBQTtJQUFBQSxPQUFBLEtBQXFCO0VBQUE7RUFFckIsSUFBSSxPQUFPRCxRQUFRLEtBQUssVUFBVSxFQUFFLE9BQU9HLFFBQVEsQ0FBQ0QsSUFBSSxDQUFDRixRQUFRLENBQUM7RUFFNUQsSUFBQUksRUFBQSxHQUFvQixJQUFBMUIsWUFBQSxDQUFBMkIsY0FBYyxFQUFDLElBQUFqQyxVQUFBLENBQUFrQyxLQUFLLEVBQUNOLFFBQVEsQ0FBQyxDQUFDO0lBQWxETyxLQUFLLEdBQUFILEVBQUE7SUFBRUksUUFBUSxHQUFBSixFQUFBLEdBQW1DO0VBRXpELE9BQ0tHLEtBQUssQ0FBQ0UsTUFBTSxHQUFHLENBQUMsSUFBSU4sUUFBUSxDQUFDRCxJQUFJLENBQUMsSUFBQTVCLFlBQUEsQ0FBQW9DLGFBQVksRUFBQ0gsS0FBSyxFQUFFTixPQUFPLENBQUMsQ0FBQyxJQUNoRU8sUUFBUSxDQUFDTixJQUFJLENBQ1QsVUFBQ1MsR0FBRztJQUFLLE9BQUFDLGdCQUFnQixDQUFDRCxHQUFHLEVBQUVSLFFBQVEsRUFBRUYsT0FBTyxDQUFDLENBQUNRLE1BQU0sR0FBRyxDQUFDO0VBQW5ELENBQW1ELENBQy9EO0FBRVQ7QUFmQTFCLE9BQUEsQ0FBQW1CLElBQUEsR0FBQUEsSUFBQTtBQWlCQSxTQUFTVyxnQkFBZ0JBLENBQ3JCQyxNQUFjLEVBQ2RDLEtBQWdCLEVBQ2hCbEIsSUFBa0MsRUFDbENJLE9BQWdCO0VBRWhCLElBQU1lLEdBQUcsR0FBRyxPQUFPbkIsSUFBSSxLQUFLLFFBQVEsR0FBR29CLFFBQVEsQ0FBQ3BCLElBQUksRUFBRSxFQUFFLENBQUMsR0FBR3FCLEdBQUc7RUFFL0QsUUFBUUosTUFBTTtJQUNWLEtBQUssT0FBTztJQUNaLEtBQUssSUFBSTtNQUNMO01BQ0EsT0FBT0MsS0FBSztJQUNoQixLQUFLLE1BQU07TUFDUCxPQUFPQSxLQUFLLENBQUNOLE1BQU0sR0FBRyxDQUFDLEdBQUcsQ0FBQ00sS0FBSyxDQUFDQSxLQUFLLENBQUNOLE1BQU0sR0FBRyxDQUFDLENBQUMsQ0FBQyxHQUFHTSxLQUFLO0lBQy9ELEtBQUssS0FBSztJQUNWLEtBQUssSUFBSTtNQUNMLE9BQU9JLFFBQVEsQ0FBQ0gsR0FBRyxDQUFDLElBQUlJLElBQUksQ0FBQ0MsR0FBRyxDQUFDTCxHQUFHLENBQUMsR0FBR0QsS0FBSyxDQUFDTixNQUFNLEdBQzlDLENBQUNPLEdBQUcsR0FBRyxDQUFDLEdBQUdELEtBQUssQ0FBQ0EsS0FBSyxDQUFDTixNQUFNLEdBQUdPLEdBQUcsQ0FBQyxHQUFHRCxLQUFLLENBQUNDLEdBQUcsQ0FBQyxDQUFDLEdBQ2xELEVBQUU7SUFDWixLQUFLLElBQUk7TUFDTCxPQUFPRyxRQUFRLENBQUNILEdBQUcsQ0FBQyxHQUFHRCxLQUFLLENBQUNPLEtBQUssQ0FBQ04sR0FBRyxHQUFHLENBQUMsQ0FBQyxHQUFHLEVBQUU7SUFDcEQsS0FBSyxNQUFNO01BQ1AsT0FBT0QsS0FBSyxDQUFDRCxNQUFNLENBQUMsVUFBQ1MsQ0FBQyxFQUFFQyxDQUFDO1FBQUssT0FBQUEsQ0FBQyxHQUFHLENBQUMsS0FBSyxDQUFDO01BQVgsQ0FBVyxDQUFDO0lBQzlDLEtBQUssS0FBSztNQUNOLE9BQU9ULEtBQUssQ0FBQ0QsTUFBTSxDQUFDLFVBQUNTLENBQUMsRUFBRUMsQ0FBQztRQUFLLE9BQUFBLENBQUMsR0FBRyxDQUFDLEtBQUssQ0FBQztNQUFYLENBQVcsQ0FBQztJQUM5QyxLQUFLLEtBQUs7TUFBRTtRQUNSLElBQU1DLFVBQVEsR0FBRyxJQUFJQyxHQUFHLENBQ3BCQyxZQUFZLENBQUM5QixJQUFvQixFQUFFa0IsS0FBSyxFQUFFZCxPQUFPLENBQUMsQ0FDckQ7UUFFRCxPQUFPYyxLQUFLLENBQUNELE1BQU0sQ0FBQyxVQUFDYyxDQUFDO1VBQUssUUFBQ0gsVUFBUSxDQUFDSSxHQUFHLENBQUNELENBQUMsQ0FBQztRQUFoQixDQUFnQixDQUFDOztFQUMvQztBQUVUO0FBRUEsU0FBZ0JkLE1BQU1BLENBQ2xCZCxRQUFnQixFQUNoQkcsUUFBbUIsRUFDbkJGLE9BQXFCO0VBQXJCLElBQUFBLE9BQUE7SUFBQUEsT0FBQSxLQUFxQjtFQUFBO0VBRXJCLE9BQU8wQixZQUFZLENBQUMsSUFBQXZELFVBQUEsQ0FBQWtDLEtBQUssRUFBQ04sUUFBUSxDQUFDLEVBQUVHLFFBQVEsRUFBRUYsT0FBTyxDQUFDO0FBQzNEO0FBTkFsQixPQUFBLENBQUErQixNQUFBLEdBQUFBLE1BQUE7QUFRQTs7Ozs7Ozs7O0FBU0EsU0FBU2EsWUFBWUEsQ0FDakIzQixRQUFzQixFQUN0QkcsUUFBbUIsRUFDbkJGLE9BQWdCO0VBRWhCLElBQUlFLFFBQVEsQ0FBQ00sTUFBTSxLQUFLLENBQUMsRUFBRSxPQUFPLEVBQUU7RUFFOUIsSUFBQUwsRUFBQSxHQUFzQyxJQUFBMUIsWUFBQSxDQUFBMkIsY0FBYyxFQUFDTCxRQUFRLENBQUM7SUFBN0Q4QixjQUFjLEdBQUExQixFQUFBO0lBQUUyQixpQkFBaUIsR0FBQTNCLEVBQUEsR0FBNEI7RUFDcEUsSUFBSTRCLEtBQStCO0VBRW5DLElBQUlGLGNBQWMsQ0FBQ3JCLE1BQU0sRUFBRTtJQUN2QixJQUFNRCxRQUFRLEdBQUd5QixjQUFjLENBQUM5QixRQUFRLEVBQUUyQixjQUFjLEVBQUU3QixPQUFPLENBQUM7SUFFbEU7SUFDQSxJQUFJOEIsaUJBQWlCLENBQUN0QixNQUFNLEtBQUssQ0FBQyxFQUFFO01BQ2hDLE9BQU9ELFFBQVE7O0lBR25CO0lBQ0EsSUFBSUEsUUFBUSxDQUFDQyxNQUFNLEVBQUU7TUFDakJ1QixLQUFLLEdBQUcsSUFBSU4sR0FBRyxDQUFDbEIsUUFBUSxDQUFDOzs7RUFJakMsS0FDSSxJQUFJZ0IsQ0FBQyxHQUFHLENBQUMsRUFDVEEsQ0FBQyxHQUFHTyxpQkFBaUIsQ0FBQ3RCLE1BQU0sSUFBSSxDQUFBdUIsS0FBSyxhQUFMQSxLQUFLLHVCQUFMQSxLQUFLLENBQUVFLElBQUksTUFBSy9CLFFBQVEsQ0FBQ00sTUFBTSxFQUMvRGUsQ0FBQyxFQUFFLEVBQ0w7SUFDRSxJQUFNVyxnQkFBZ0IsR0FBR0osaUJBQWlCLENBQUNQLENBQUMsQ0FBQztJQUM3QyxJQUFNWSxPQUFPLEdBQUdKLEtBQUssR0FDZjdCLFFBQVEsQ0FBQ1csTUFBTSxDQUFDLFVBQUNjLENBQUM7TUFBSyxPQUFBckQsUUFBUSxDQUFDOEQsS0FBSyxDQUFDVCxDQUFDLENBQUMsSUFBSSxDQUFDSSxLQUFNLENBQUNILEdBQUcsQ0FBQ0QsQ0FBQyxDQUFDO0lBQW5DLENBQW1DLENBQUMsR0FDM0R6QixRQUFRO0lBRWQsSUFBSWlDLE9BQU8sQ0FBQzNCLE1BQU0sS0FBSyxDQUFDLEVBQUU7SUFDMUIsSUFBTUQsUUFBUSxHQUFHSSxnQkFBZ0IsQ0FBQ3VCLGdCQUFnQixFQUFFaEMsUUFBUSxFQUFFRixPQUFPLENBQUM7SUFFdEUsSUFBSU8sUUFBUSxDQUFDQyxNQUFNLEVBQUU7TUFDakIsSUFBSSxDQUFDdUIsS0FBSyxFQUFFO1FBQ1I7Ozs7UUFJQSxJQUFJUixDQUFDLEtBQUtPLGlCQUFpQixDQUFDdEIsTUFBTSxHQUFHLENBQUMsRUFBRTtVQUNwQyxPQUFPRCxRQUFROztRQUduQndCLEtBQUssR0FBRyxJQUFJTixHQUFHLENBQUNsQixRQUFRLENBQUM7T0FDNUIsTUFBTTtRQUNIQSxRQUFRLENBQUM4QixPQUFPLENBQUMsVUFBQ0MsRUFBRTtVQUFLLE9BQUFQLEtBQU0sQ0FBQ1EsR0FBRyxDQUFDRCxFQUFFLENBQUM7UUFBZCxDQUFjLENBQUM7Ozs7RUFLcEQsT0FBTyxPQUFPUCxLQUFLLEtBQUssV0FBVyxHQUMzQkEsS0FBSyxDQUFDRSxJQUFJLEtBQUsvQixRQUFRLENBQUNNLE1BQU0sR0FDMUJOLFFBQVE7RUFDUjtFQUNBQSxRQUFRLENBQUNXLE1BQU0sQ0FBQyxVQUFDeUIsRUFBRTtJQUNmLE9BQUNQLEtBQXNCLENBQUNILEdBQUcsQ0FBQ1UsRUFBRSxDQUFDO0VBQS9CLENBQStCLENBQ2xDLEdBQ1AsRUFBRTtBQUNaO0FBRUEsU0FBUzNCLGdCQUFnQkEsQ0FDckJaLFFBQW9CLEVBQ3BCRyxRQUFtQixFQUNuQkYsT0FBZ0I7O0VBRWhCLElBQUlELFFBQVEsQ0FBQ0UsSUFBSSxDQUFDOUIsVUFBQSxDQUFBcUUsV0FBVyxDQUFDLEVBQUU7SUFDNUI7Ozs7SUFJQSxJQUFNQyxJQUFJLEdBQUcsQ0FBQXRDLEVBQUEsR0FBQUgsT0FBTyxDQUFDeUMsSUFBSSxjQUFBdEMsRUFBQSxjQUFBQSxFQUFBLEdBQUksSUFBQTFCLFlBQUEsQ0FBQWlFLGVBQWUsRUFBQ3hDLFFBQVEsQ0FBQyxDQUFDLENBQUMsQ0FBQztJQUN6RCxJQUFNeUMsSUFBSSxHQUFBQyxRQUFBLENBQUFBLFFBQUEsS0FBUTVDLE9BQU87TUFBRTZDLE9BQU8sRUFBRTNDLFFBQVE7TUFBRTRDLGdCQUFnQixFQUFFO0lBQUssRUFBRTtJQUN2RS9DLFFBQVEsQ0FBQ2dELElBQUksQ0FBQ3RELFlBQVksQ0FBQztJQUMzQixPQUFPdUQsa0JBQWtCLENBQUNQLElBQUksRUFBRTFDLFFBQVEsRUFBRTRDLElBQUksRUFBRSxJQUFJLEVBQUV6QyxRQUFRLENBQUNNLE1BQU0sQ0FBQzs7RUFFMUU7RUFDQSxPQUFPd0Msa0JBQWtCLENBQ3JCOUMsUUFBUSxFQUNSSCxRQUFRLEVBQ1JDLE9BQU8sRUFDUCxLQUFLLEVBQ0xFLFFBQVEsQ0FBQ00sTUFBTSxDQUNsQjtBQUNMO0FBRUEsU0FBZ0J5QyxNQUFNQSxDQUNsQmxELFFBQTZDLEVBQzdDMEMsSUFBeUIsRUFDekJ6QyxPQUFxQixFQUNyQmtELEtBQWdCO0VBRGhCLElBQUFsRCxPQUFBO0lBQUFBLE9BQUEsS0FBcUI7RUFBQTtFQUNyQixJQUFBa0QsS0FBQTtJQUFBQSxLQUFBLEdBQUFDLFFBQWdCO0VBQUE7RUFFaEIsSUFBSSxPQUFPcEQsUUFBUSxLQUFLLFVBQVUsRUFBRTtJQUNoQyxPQUFPcUQsSUFBSSxDQUFDWCxJQUFJLEVBQUUxQyxRQUFRLENBQUM7O0VBR3pCLElBQUFJLEVBQUEsR0FBb0IsSUFBQTFCLFlBQUEsQ0FBQTJCLGNBQWMsRUFBQyxJQUFBakMsVUFBQSxDQUFBa0MsS0FBSyxFQUFDTixRQUFRLENBQUMsQ0FBQztJQUFsRE8sS0FBSyxHQUFBSCxFQUFBO0lBQUVJLFFBQVEsR0FBQUosRUFBQSxHQUFtQztFQUV6RCxJQUFNa0QsT0FBTyxHQUFnQjlDLFFBQVEsQ0FBQytDLEdBQUcsQ0FBQyxVQUFDNUMsR0FBRztJQUMxQyxPQUFBc0Msa0JBQWtCLENBQUNQLElBQUksRUFBRS9CLEdBQUcsRUFBRVYsT0FBTyxFQUFFLElBQUksRUFBRWtELEtBQUssQ0FBQztFQUFuRCxDQUFtRCxDQUN0RDtFQUVEO0VBQ0EsSUFBSTVDLEtBQUssQ0FBQ0UsTUFBTSxFQUFFO0lBQ2Q2QyxPQUFPLENBQUNOLElBQUksQ0FBQ1EsWUFBWSxDQUFDZCxJQUFJLEVBQUVuQyxLQUFLLEVBQUVOLE9BQU8sRUFBRWtELEtBQUssQ0FBQyxDQUFDOztFQUczRCxJQUFJRyxPQUFPLENBQUM3QyxNQUFNLEtBQUssQ0FBQyxFQUFFO0lBQ3RCLE9BQU8sRUFBRTs7RUFHYjtFQUNBLElBQUk2QyxPQUFPLENBQUM3QyxNQUFNLEtBQUssQ0FBQyxFQUFFO0lBQ3RCLE9BQU82QyxPQUFPLENBQUMsQ0FBQyxDQUFDOztFQUdyQjtFQUNBLE9BQU8vRSxRQUFRLENBQUNrRixVQUFVLENBQUNILE9BQU8sQ0FBQ0ksTUFBTSxDQUFDLFVBQUNDLENBQUMsRUFBRUMsQ0FBQztJQUFLLE9BQUFDLGFBQUEsQ0FBQUEsYUFBQSxLQUFJRixDQUFDLFNBQUtDLENBQUM7RUFBWCxDQUFZLENBQUMsQ0FBQztBQUN0RTtBQWhDQTdFLE9BQUEsQ0FBQW1FLE1BQUEsR0FBQUEsTUFBQTtBQWtDQTs7Ozs7OztBQU9BLFNBQVNELGtCQUFrQkEsQ0FDdkJQLElBQXlCLEVBQ3pCMUMsUUFBb0IsRUFDcEJDLE9BQWdCLEVBQ2hCNkQsZ0JBQXlCLEVBQ3pCQyxVQUFrQjtFQUVsQixJQUFNQyxXQUFXLEdBQUdoRSxRQUFRLENBQUNpRSxTQUFTLENBQUN0RixnQkFBQSxDQUFBdUYsUUFBUSxDQUFDO0VBQ2hELElBQU1DLEdBQUcsR0FBR25FLFFBQVEsQ0FBQ3NCLEtBQUssQ0FBQyxDQUFDLEVBQUUwQyxXQUFXLENBQUM7RUFDMUMsSUFBTWxELE1BQU0sR0FBR2QsUUFBUSxDQUFDZ0UsV0FBVyxDQUFvQjtFQUN2RDtFQUNBLElBQU1JLFNBQVMsR0FDWHBFLFFBQVEsQ0FBQ1MsTUFBTSxHQUFHLENBQUMsS0FBS3VELFdBQVcsR0FBR0QsVUFBVSxHQUFHWCxRQUFRO0VBRS9EOzs7O0VBSUEsSUFBTUQsS0FBSyxHQUFHLElBQUF4RSxnQkFBQSxDQUFBMEYsUUFBUSxFQUFDdkQsTUFBTSxDQUFDbEIsSUFBSSxFQUFFa0IsTUFBTSxDQUFDakIsSUFBSSxFQUFFdUUsU0FBUyxDQUFDO0VBRTNELElBQUlqQixLQUFLLEtBQUssQ0FBQyxFQUFFLE9BQU8sRUFBRTtFQUUxQjs7OztFQUlBLElBQU1tQixZQUFZLEdBQ2RILEdBQUcsQ0FBQzFELE1BQU0sS0FBSyxDQUFDLElBQUksQ0FBQzhELEtBQUssQ0FBQ0MsT0FBTyxDQUFDOUIsSUFBSSxDQUFDLEdBQ2xDbkUsUUFBUSxDQUFDa0csV0FBVyxDQUFDL0IsSUFBSSxDQUFDLENBQUM1QixNQUFNLENBQUN2QyxRQUFRLENBQUM4RCxLQUFLLENBQUMsR0FDakQ4QixHQUFHLENBQUMxRCxNQUFNLEtBQUssQ0FBQyxHQUNoQixDQUFDOEQsS0FBSyxDQUFDQyxPQUFPLENBQUM5QixJQUFJLENBQUMsR0FBR0EsSUFBSSxHQUFHLENBQUNBLElBQUksQ0FBQyxFQUFFNUIsTUFBTSxDQUFDdkMsUUFBUSxDQUFDOEQsS0FBSyxDQUFDLEdBQzVEeUIsZ0JBQWdCLElBQUlLLEdBQUcsQ0FBQ2pFLElBQUksQ0FBQzlCLFVBQUEsQ0FBQXFFLFdBQVcsQ0FBQyxHQUN6Q2UsWUFBWSxDQUFDZCxJQUFJLEVBQUUsQ0FBQ3lCLEdBQUcsQ0FBQyxFQUFFbEUsT0FBTyxFQUFFa0QsS0FBSyxDQUFDLEdBQ3pDbEIsY0FBYyxDQUFDUyxJQUFJLEVBQUUsQ0FBQ3lCLEdBQUcsQ0FBQyxFQUFFbEUsT0FBTyxDQUFDO0VBRTlDLElBQU1jLEtBQUssR0FBR3VELFlBQVksQ0FBQ2hELEtBQUssQ0FBQyxDQUFDLEVBQUU2QixLQUFLLENBQUM7RUFFMUMsSUFBSXVCLE1BQU0sR0FBRzdELGdCQUFnQixDQUFDQyxNQUFNLENBQUNsQixJQUFJLEVBQUVtQixLQUFLLEVBQUVELE1BQU0sQ0FBQ2pCLElBQUksRUFBRUksT0FBTyxDQUFDO0VBRXZFLElBQUl5RSxNQUFNLENBQUNqRSxNQUFNLEtBQUssQ0FBQyxJQUFJVCxRQUFRLENBQUNTLE1BQU0sS0FBS3VELFdBQVcsR0FBRyxDQUFDLEVBQUU7SUFDNUQsT0FBT1UsTUFBTTs7RUFHakIsSUFBTUMsaUJBQWlCLEdBQUczRSxRQUFRLENBQUNzQixLQUFLLENBQUMwQyxXQUFXLEdBQUcsQ0FBQyxDQUFDO0VBQ3pELElBQU1ZLHFCQUFxQixHQUFHRCxpQkFBaUIsQ0FBQ3pFLElBQUksQ0FBQzlCLFVBQUEsQ0FBQXFFLFdBQVcsQ0FBQztFQUVqRSxJQUFJbUMscUJBQXFCLEVBQUU7SUFDdkIsSUFBSSxJQUFBeEcsVUFBQSxDQUFBcUUsV0FBVyxFQUFDa0MsaUJBQWlCLENBQUMsQ0FBQyxDQUFDLENBQUMsRUFBRTtNQUMzQixJQUFBckYsSUFBSSxHQUFLcUYsaUJBQWlCLENBQUMsQ0FBQyxDQUFDLENBQUFyRixJQUF6QjtNQUVaLElBQ0lBLElBQUksS0FBS2xCLFVBQUEsQ0FBQW1CLFlBQVksQ0FBQ3NGLE9BQU8sSUFDN0J2RixJQUFJLEtBQUtsQixVQUFBLENBQUFtQixZQUFZLENBQUN1RixRQUFRLEVBQ2hDO1FBQ0U7UUFDQUosTUFBTSxHQUFHLElBQUFwRyxZQUFBLENBQUF5RyxjQUFjLEVBQUNMLE1BQU0sRUFBRW5HLFFBQVEsRUFBRSxJQUFJLENBQWM7O01BR2hFO01BQ0FvRyxpQkFBaUIsQ0FBQ0ssT0FBTyxDQUFDM0Ysa0JBQWtCLENBQUM7O0lBR2pEWSxPQUFPLEdBQUE0QyxRQUFBLENBQUFBLFFBQUEsS0FDQTVDLE9BQU87TUFDVjtNQUNBOEMsZ0JBQWdCLEVBQUUsS0FBSztNQUN2Qjs7OztNQUlBa0MsUUFBUSxFQUFFLFNBQUFBLENBQUMxQyxFQUFXO1FBQUssT0FBQW1DLE1BQU0sQ0FBQ1EsUUFBUSxDQUFDM0MsRUFBRSxDQUFDO01BQW5CO0lBQW1CLEVBQ2pEO0dBQ0osTUFBTSxJQUFJdEMsT0FBTyxDQUFDZ0YsUUFBUSxJQUFJaEYsT0FBTyxDQUFDZ0YsUUFBUSxLQUFLeEcsUUFBUSxDQUFDMEcsUUFBUSxFQUFFO0lBQ25FbEYsT0FBTyxHQUFBNEMsUUFBQSxDQUFBQSxRQUFBLEtBQVE1QyxPQUFPO01BQUVnRixRQUFRLEVBQUV4RyxRQUFRLENBQUMwRztJQUFRLEVBQUU7O0VBR3pEOzs7Ozs7O0VBT0EsT0FBT1IsaUJBQWlCLENBQUN6RSxJQUFJLENBQUN2QixnQkFBQSxDQUFBdUYsUUFBUSxDQUFDLEdBQ2pDakIsa0JBQWtCLENBQ2R5QixNQUFNLEVBQ05DLGlCQUFpQixFQUNqQjFFLE9BQU8sRUFDUCxLQUFLLEVBQ0w4RCxVQUFVLENBQ2IsR0FDRGEscUJBQXFCO0VBQ3JCO0VBQ0FwQixZQUFZLENBQUNrQixNQUFNLEVBQUUsQ0FBQ0MsaUJBQWlCLENBQUMsRUFBRTFFLE9BQU8sRUFBRThELFVBQVUsQ0FBQztFQUM5RDtFQUNBOUIsY0FBYyxDQUFDeUMsTUFBTSxFQUFFLENBQUNDLGlCQUFpQixDQUFDLEVBQUUxRSxPQUFPLENBQUM7QUFDOUQ7QUFPQSxTQUFTdUQsWUFBWUEsQ0FDakJkLElBQXlCLEVBQ3pCL0IsR0FBaUIsRUFDakJWLE9BQWdCLEVBQ2hCa0QsS0FBYTtFQUViLElBQU1pQyxLQUFLLEdBQWtCLElBQUE5RyxZQUFBLENBQUFvQyxhQUFZLEVBQ3JDQyxHQUFHLEVBQ0hWLE9BQU8sRUFDUHlDLElBQUksQ0FDUDtFQUVELE9BQU9XLElBQUksQ0FBQ1gsSUFBSSxFQUFFMEMsS0FBSyxFQUFFakMsS0FBSyxDQUFDO0FBQ25DO0FBRUEsU0FBU0UsSUFBSUEsQ0FDVFgsSUFBeUIsRUFDekIwQyxLQUFvQixFQUNwQmpDLEtBQWdCO0VBQWhCLElBQUFBLEtBQUE7SUFBQUEsS0FBQSxHQUFBQyxRQUFnQjtFQUFBO0VBRWhCLElBQU1yQyxLQUFLLEdBQUcsSUFBQXpDLFlBQUEsQ0FBQXlHLGNBQWMsRUFDeEJyQyxJQUFJLEVBQ0puRSxRQUFRLEVBQ1I2RyxLQUFLLENBQUNDLHNCQUFzQixDQUMvQjtFQUVELE9BQU85RyxRQUFRLENBQUM4RSxJQUFJLENBQ2hCLFVBQUNpQyxJQUFhO0lBQUssT0FBQS9HLFFBQVEsQ0FBQzhELEtBQUssQ0FBQ2lELElBQUksQ0FBQyxJQUFJRixLQUFLLENBQUNFLElBQUksQ0FBQztFQUFuQyxDQUFtQyxFQUN0RHZFLEtBQUssRUFDTCxJQUFJLEVBQ0pvQyxLQUFLLENBQ0s7QUFDbEI7QUFFQSxTQUFTbEIsY0FBY0EsQ0FDbkI5QixRQUE2QixFQUM3QlEsR0FBaUIsRUFDakJWLE9BQWdCO0VBRWhCLElBQU1zRixHQUFHLEdBQUcsQ0FBQ2hCLEtBQUssQ0FBQ0MsT0FBTyxDQUFDckUsUUFBUSxDQUFDLEdBQUdBLFFBQVEsR0FBRyxDQUFDQSxRQUFRLENBQUMsRUFBRVcsTUFBTSxDQUNoRXZDLFFBQVEsQ0FBQzhELEtBQUssQ0FDakI7RUFFRCxJQUFJa0QsR0FBRyxDQUFDOUUsTUFBTSxLQUFLLENBQUMsRUFBRSxPQUFPOEUsR0FBRztFQUVoQyxJQUFNSCxLQUFLLEdBQUcsSUFBQTlHLFlBQUEsQ0FBQW9DLGFBQVksRUFBbUJDLEdBQUcsRUFBRVYsT0FBTyxDQUFDO0VBQzFELE9BQU9tRixLQUFLLEtBQUszRyxRQUFRLENBQUMwRyxRQUFRLEdBQUdJLEdBQUcsR0FBR0EsR0FBRyxDQUFDekUsTUFBTSxDQUFDc0UsS0FBSyxDQUFDO0FBQ2hFIn0=

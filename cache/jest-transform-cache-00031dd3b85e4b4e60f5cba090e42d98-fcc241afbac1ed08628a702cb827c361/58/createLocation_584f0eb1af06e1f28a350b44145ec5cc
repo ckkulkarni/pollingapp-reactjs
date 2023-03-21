@@ -1,0 +1,19 @@
+cc826a344648cfc8b3081dae69c08e2f
+"use strict";
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+var cucumber_messages_1 = require("cucumber-messages");
+function createLocation(props) {
+  var location = cucumber_messages_1.messages.Location.create(props);
+  if (location.line === 0) {
+    location.line = undefined;
+  }
+  if (location.column === 0) {
+    location.column = undefined;
+  }
+  return location;
+}
+exports.default = createLocation;
+//# sourceMappingURL=data:application/json;charset=utf-8;base64,eyJ2ZXJzaW9uIjozLCJuYW1lcyI6WyJjdWN1bWJlcl9tZXNzYWdlc18xIiwicmVxdWlyZSIsImNyZWF0ZUxvY2F0aW9uIiwicHJvcHMiLCJsb2NhdGlvbiIsIm1lc3NhZ2VzIiwiTG9jYXRpb24iLCJjcmVhdGUiLCJsaW5lIiwidW5kZWZpbmVkIiwiY29sdW1uIiwiZXhwb3J0cyIsImRlZmF1bHQiXSwic291cmNlcyI6WyIuLi8uLi8uLi9zcmMvY2xpL2NyZWF0ZUxvY2F0aW9uLnRzIl0sInNvdXJjZXNDb250ZW50IjpbbnVsbF0sIm1hcHBpbmdzIjoiOzs7OztBQUFBLElBQUFBLG1CQUFBLEdBQUFDLE9BQUE7QUFFQSxTQUF3QkMsY0FBY0EsQ0FBQ0MsS0FHdEM7RUFDQyxJQUFNQyxRQUFRLEdBQUdKLG1CQUFBLENBQUFLLFFBQVEsQ0FBQ0MsUUFBUSxDQUFDQyxNQUFNLENBQUNKLEtBQUssQ0FBQztFQUNoRCxJQUFJQyxRQUFRLENBQUNJLElBQUksS0FBSyxDQUFDLEVBQUU7SUFDdkJKLFFBQVEsQ0FBQ0ksSUFBSSxHQUFHQyxTQUFTOztFQUUzQixJQUFJTCxRQUFRLENBQUNNLE1BQU0sS0FBSyxDQUFDLEVBQUU7SUFDekJOLFFBQVEsQ0FBQ00sTUFBTSxHQUFHRCxTQUFTOztFQUc3QixPQUFPTCxRQUFRO0FBQ2pCO0FBYkFPLE9BQUEsQ0FBQUMsT0FBQSxHQUFBVixjQUFBIn0=

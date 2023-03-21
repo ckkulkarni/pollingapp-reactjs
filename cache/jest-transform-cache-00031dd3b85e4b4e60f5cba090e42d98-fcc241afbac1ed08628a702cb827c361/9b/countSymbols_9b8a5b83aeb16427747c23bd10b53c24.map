@@ -1,0 +1,1 @@
+{"version":3,"names":["regexAstralSymbols","countSymbols","s","replace","length","exports","default"],"sources":["../../src/countSymbols.ts"],"sourcesContent":[null],"mappings":";;;;;AAAA;AACA,IAAMA,kBAAkB,GAAG,iCAAiC;AAE5D,SAAwBC,YAAYA,CAACC,CAAS;EAC5C,OAAOA,CAAC,CAACC,OAAO,CAACH,kBAAkB,EAAE,GAAG,CAAC,CAACI,MAAM;AAClD;AAFAC,OAAA,CAAAC,OAAA,GAAAL,YAAA"}

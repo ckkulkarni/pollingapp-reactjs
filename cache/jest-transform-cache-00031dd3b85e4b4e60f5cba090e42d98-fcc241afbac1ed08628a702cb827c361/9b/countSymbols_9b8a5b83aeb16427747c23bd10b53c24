@@ -1,0 +1,13 @@
+9899298c78db65a5bc9cbb3c0e9e18c7
+"use strict";
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+// https://mathiasbynens.be/notes/javascript-unicode
+var regexAstralSymbols = /[\uD800-\uDBFF][\uDC00-\uDFFF]/g;
+function countSymbols(s) {
+  return s.replace(regexAstralSymbols, '_').length;
+}
+exports.default = countSymbols;
+//# sourceMappingURL=data:application/json;charset=utf-8;base64,eyJ2ZXJzaW9uIjozLCJuYW1lcyI6WyJyZWdleEFzdHJhbFN5bWJvbHMiLCJjb3VudFN5bWJvbHMiLCJzIiwicmVwbGFjZSIsImxlbmd0aCIsImV4cG9ydHMiLCJkZWZhdWx0Il0sInNvdXJjZXMiOlsiLi4vLi4vc3JjL2NvdW50U3ltYm9scy50cyJdLCJzb3VyY2VzQ29udGVudCI6W251bGxdLCJtYXBwaW5ncyI6Ijs7Ozs7QUFBQTtBQUNBLElBQU1BLGtCQUFrQixHQUFHLGlDQUFpQztBQUU1RCxTQUF3QkMsWUFBWUEsQ0FBQ0MsQ0FBUztFQUM1QyxPQUFPQSxDQUFDLENBQUNDLE9BQU8sQ0FBQ0gsa0JBQWtCLEVBQUUsR0FBRyxDQUFDLENBQUNJLE1BQU07QUFDbEQ7QUFGQUMsT0FBQSxDQUFBQyxPQUFBLEdBQUFMLFlBQUEifQ==

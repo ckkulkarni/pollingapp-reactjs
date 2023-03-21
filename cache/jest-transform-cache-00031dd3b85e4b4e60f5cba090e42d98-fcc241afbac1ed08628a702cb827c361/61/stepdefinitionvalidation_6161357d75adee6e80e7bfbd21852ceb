@@ -1,0 +1,55 @@
+a5055e94729e1e59fb3479dc50018930
+"use strict";
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+exports.ensureFeatureFileAndStepDefinitionScenarioHaveSameSteps = exports.matchSteps = void 0;
+var scenario_generation_1 = require("../code-generation/scenario-generation");
+var step_generation_1 = require("../code-generation/step-generation");
+exports.matchSteps = function (stepFromFeatureFile, stepMatcher) {
+  if (typeof stepMatcher === 'string') {
+    return stepFromFeatureFile.toLocaleLowerCase() === stepMatcher.toLocaleLowerCase();
+  } else if (stepMatcher instanceof RegExp) {
+    return stepFromFeatureFile.match(stepMatcher);
+  } else {
+    return false;
+  }
+};
+exports.ensureFeatureFileAndStepDefinitionScenarioHaveSameSteps = function (options, parsedScenario, scenarioFromStepDefinitions) {
+  if (options && options.errors === false) {
+    return;
+  }
+  if (!parsedScenario) {
+    return;
+  }
+  var errors = [];
+  var parsedScenarioSteps = [];
+  if (parsedScenario.scenarios) {
+    var parsedScenarioOutlineScenarios = parsedScenario.scenarios;
+    if (parsedScenarioOutlineScenarios && parsedScenarioOutlineScenarios.length) {
+      parsedScenarioSteps = parsedScenarioOutlineScenarios[0].steps;
+    } else {
+      parsedScenarioSteps = [];
+    }
+  } else if (parsedScenario.steps) {
+    parsedScenarioSteps = parsedScenario.steps;
+  }
+  var parsedStepCount = parsedScenarioSteps.length;
+  var stepDefinitionCount = scenarioFromStepDefinitions.steps.length;
+  if (parsedStepCount !== stepDefinitionCount && options.errors) {
+    // tslint:disable-next-line:max-line-length
+    errors.push("Scenario \"" + parsedScenario.title + "\" has " + parsedStepCount + " step(s) in the feature file, but " + stepDefinitionCount + " step definition(s) defined. Try adding the following code:\n\n" + scenario_generation_1.generateScenarioCode(parsedScenario));
+  }
+  parsedScenarioSteps.forEach(function (parsedStep, index) {
+    var stepFromStepDefinitions = scenarioFromStepDefinitions.steps[index];
+    if (!stepFromStepDefinitions || !exports.matchSteps(parsedStep.stepText, stepFromStepDefinitions.stepMatcher)) {
+      // tslint:disable-next-line:max-line-length
+      errors.push("Expected step #" + (index + 1) + " in scenario \"" + parsedScenario.title + "\" to match \"" + parsedStep.stepText + "\". Try adding the following code:\n\n" + step_generation_1.generateStepCode(parsedScenario.steps, index));
+    }
+  });
+  if (errors.length) {
+    throw new Error(errors.join('\n\n'));
+  }
+};
+//# sourceMappingURL=data:application/json;charset=utf-8;base64,eyJ2ZXJzaW9uIjozLCJuYW1lcyI6WyJzY2VuYXJpb19nZW5lcmF0aW9uXzEiLCJyZXF1aXJlIiwic3RlcF9nZW5lcmF0aW9uXzEiLCJleHBvcnRzIiwibWF0Y2hTdGVwcyIsInN0ZXBGcm9tRmVhdHVyZUZpbGUiLCJzdGVwTWF0Y2hlciIsInRvTG9jYWxlTG93ZXJDYXNlIiwiUmVnRXhwIiwibWF0Y2giLCJlbnN1cmVGZWF0dXJlRmlsZUFuZFN0ZXBEZWZpbml0aW9uU2NlbmFyaW9IYXZlU2FtZVN0ZXBzIiwib3B0aW9ucyIsInBhcnNlZFNjZW5hcmlvIiwic2NlbmFyaW9Gcm9tU3RlcERlZmluaXRpb25zIiwiZXJyb3JzIiwicGFyc2VkU2NlbmFyaW9TdGVwcyIsInNjZW5hcmlvcyIsInBhcnNlZFNjZW5hcmlvT3V0bGluZVNjZW5hcmlvcyIsImxlbmd0aCIsInN0ZXBzIiwicGFyc2VkU3RlcENvdW50Iiwic3RlcERlZmluaXRpb25Db3VudCIsInB1c2giLCJ0aXRsZSIsImdlbmVyYXRlU2NlbmFyaW9Db2RlIiwiZm9yRWFjaCIsInBhcnNlZFN0ZXAiLCJpbmRleCIsInN0ZXBGcm9tU3RlcERlZmluaXRpb25zIiwic3RlcFRleHQiLCJnZW5lcmF0ZVN0ZXBDb2RlIiwiRXJyb3IiLCJqb2luIl0sInNvdXJjZXMiOlsiLi4vLi4vLi4vc3JjL3ZhbGlkYXRpb24vc3RlcC1kZWZpbml0aW9uLXZhbGlkYXRpb24udHMiXSwic291cmNlc0NvbnRlbnQiOltudWxsXSwibWFwcGluZ3MiOiI7Ozs7OztBQUNBLElBQUFBLHFCQUFBLEdBQUFDLE9BQUE7QUFDQSxJQUFBQyxpQkFBQSxHQUFBRCxPQUFBO0FBRWFFLE9BQUEsQ0FBQUMsVUFBVSxHQUFHLFVBQUNDLG1CQUEyQixFQUFFQyxXQUE0QjtFQUNoRixJQUFJLE9BQU9BLFdBQVcsS0FBSyxRQUFRLEVBQUU7SUFDakMsT0FBT0QsbUJBQW1CLENBQUNFLGlCQUFpQixFQUFFLEtBQUtELFdBQVcsQ0FBQ0MsaUJBQWlCLEVBQUU7R0FDckYsTUFBTSxJQUFJRCxXQUFXLFlBQVlFLE1BQU0sRUFBRTtJQUN0QyxPQUFPSCxtQkFBbUIsQ0FBQ0ksS0FBSyxDQUFDSCxXQUFXLENBQUM7R0FDaEQsTUFBTTtJQUNILE9BQU8sS0FBSzs7QUFFcEIsQ0FBQztBQUVZSCxPQUFBLENBQUFPLHVEQUF1RCxHQUFHLFVBQ25FQyxPQUFnQixFQUNoQkMsY0FBc0QsRUFDdERDLDJCQUF3RDtFQUV4RCxJQUFJRixPQUFPLElBQUlBLE9BQU8sQ0FBQ0csTUFBTSxLQUFLLEtBQUssRUFBRTtJQUNyQzs7RUFHSixJQUFJLENBQUNGLGNBQWMsRUFBRTtJQUNqQjs7RUFHSixJQUFNRSxNQUFNLEdBQWEsRUFBRTtFQUUzQixJQUFJQyxtQkFBbUIsR0FBaUIsRUFBRTtFQUUxQyxJQUFLSCxjQUF3QyxDQUFDSSxTQUFTLEVBQUU7SUFDckQsSUFBTUMsOEJBQThCLEdBQUlMLGNBQXdDLENBQUNJLFNBQVM7SUFFMUYsSUFBSUMsOEJBQThCLElBQUlBLDhCQUE4QixDQUFDQyxNQUFNLEVBQUU7TUFDekVILG1CQUFtQixHQUFHRSw4QkFBOEIsQ0FBQyxDQUFDLENBQUMsQ0FBQ0UsS0FBSztLQUNoRSxNQUFNO01BQ0hKLG1CQUFtQixHQUFHLEVBQUU7O0dBRS9CLE1BQU0sSUFBS0gsY0FBaUMsQ0FBQ08sS0FBSyxFQUFFO0lBQ2pESixtQkFBbUIsR0FBSUgsY0FBaUMsQ0FBQ08sS0FBSzs7RUFHbEUsSUFBTUMsZUFBZSxHQUFHTCxtQkFBbUIsQ0FBQ0csTUFBTTtFQUNsRCxJQUFNRyxtQkFBbUIsR0FBR1IsMkJBQTJCLENBQUNNLEtBQUssQ0FBQ0QsTUFBTTtFQUVwRSxJQUFJRSxlQUFlLEtBQUtDLG1CQUFtQixJQUFJVixPQUFPLENBQUNHLE1BQU0sRUFBRTtJQUMzRDtJQUNBQSxNQUFNLENBQUNRLElBQUksQ0FBQyxnQkFBYVYsY0FBYyxDQUFDVyxLQUFLLGVBQVNILGVBQWUsMENBQXFDQyxtQkFBbUIsdUVBQWtFckIscUJBQUEsQ0FBQXdCLG9CQUFvQixDQUFDWixjQUFjLENBQUcsQ0FBQzs7RUFHMU9HLG1CQUFtQixDQUFDVSxPQUFPLENBQUMsVUFBQ0MsVUFBVSxFQUFFQyxLQUFLO0lBQzFDLElBQU1DLHVCQUF1QixHQUFHZiwyQkFBMkIsQ0FBQ00sS0FBSyxDQUFDUSxLQUFLLENBQUM7SUFFeEUsSUFBSSxDQUFDQyx1QkFBdUIsSUFBSSxDQUFDekIsT0FBQSxDQUFBQyxVQUFVLENBQUNzQixVQUFVLENBQUNHLFFBQVEsRUFBRUQsdUJBQXVCLENBQUN0QixXQUFXLENBQUMsRUFBRTtNQUNuRztNQUNBUSxNQUFNLENBQUNRLElBQUksQ0FBQyxxQkFBa0JLLEtBQUssR0FBRyxDQUFDLHdCQUFpQmYsY0FBYyxDQUFDVyxLQUFLLHNCQUFlRyxVQUFVLENBQUNHLFFBQVEsOENBQXdDM0IsaUJBQUEsQ0FBQTRCLGdCQUFnQixDQUFDbEIsY0FBYyxDQUFDTyxLQUFLLEVBQUVRLEtBQUssQ0FBRyxDQUFDOztFQUU5TSxDQUFDLENBQUM7RUFFRixJQUFJYixNQUFNLENBQUNJLE1BQU0sRUFBRTtJQUNmLE1BQU0sSUFBSWEsS0FBSyxDQUFDakIsTUFBTSxDQUFDa0IsSUFBSSxDQUFDLE1BQU0sQ0FBQyxDQUFDOztBQUU1QyxDQUFDIn0=

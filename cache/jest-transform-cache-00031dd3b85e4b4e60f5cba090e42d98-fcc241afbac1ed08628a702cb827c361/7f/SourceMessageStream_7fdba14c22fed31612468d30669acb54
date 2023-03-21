@@ -1,0 +1,60 @@
+53195123a5eed939d80efd5204f66c6c
+"use strict";
+
+var __extends = void 0 && (void 0).__extends || function () {
+  var extendStatics = function (d, b) {
+    extendStatics = Object.setPrototypeOf || {
+      __proto__: []
+    } instanceof Array && function (d, b) {
+      d.__proto__ = b;
+    } || function (d, b) {
+      for (var p in b) if (b.hasOwnProperty(p)) d[p] = b[p];
+    };
+    return extendStatics(d, b);
+  };
+  return function (d, b) {
+    extendStatics(d, b);
+    function __() {
+      this.constructor = d;
+    }
+    d.prototype = b === null ? Object.create(b) : (__.prototype = b.prototype, new __());
+  };
+}();
+var __importDefault = void 0 && (void 0).__importDefault || function (mod) {
+  return mod && mod.__esModule ? mod : {
+    "default": mod
+  };
+};
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+var stream_1 = require("stream");
+var makeSourceEnvelope_1 = __importDefault(require("./makeSourceEnvelope"));
+/**
+ * Stream that reads a string and writes a single Source message.
+ */
+var SourceMessageStream = /** @class */function (_super) {
+  __extends(SourceMessageStream, _super);
+  function SourceMessageStream(uri) {
+    var _this = _super.call(this, {
+      readableObjectMode: true,
+      writableObjectMode: false
+    }) || this;
+    _this.uri = uri;
+    _this.buffer = Buffer.alloc(0);
+    return _this;
+  }
+  SourceMessageStream.prototype._transform = function (chunk, encoding, callback) {
+    this.buffer = Buffer.concat([this.buffer, chunk]);
+    callback();
+  };
+  SourceMessageStream.prototype._flush = function (callback) {
+    var data = this.buffer.toString('UTF-8');
+    var chunk = makeSourceEnvelope_1.default(data, this.uri);
+    this.push(chunk);
+    callback();
+  };
+  return SourceMessageStream;
+}(stream_1.Transform);
+exports.default = SourceMessageStream;
+//# sourceMappingURL=data:application/json;charset=utf-8;base64,eyJ2ZXJzaW9uIjozLCJuYW1lcyI6WyJzdHJlYW1fMSIsInJlcXVpcmUiLCJtYWtlU291cmNlRW52ZWxvcGVfMSIsIl9faW1wb3J0RGVmYXVsdCIsIlNvdXJjZU1lc3NhZ2VTdHJlYW0iLCJfc3VwZXIiLCJfX2V4dGVuZHMiLCJ1cmkiLCJfdGhpcyIsImNhbGwiLCJyZWFkYWJsZU9iamVjdE1vZGUiLCJ3cml0YWJsZU9iamVjdE1vZGUiLCJidWZmZXIiLCJCdWZmZXIiLCJhbGxvYyIsInByb3RvdHlwZSIsIl90cmFuc2Zvcm0iLCJjaHVuayIsImVuY29kaW5nIiwiY2FsbGJhY2siLCJjb25jYXQiLCJfZmx1c2giLCJkYXRhIiwidG9TdHJpbmciLCJkZWZhdWx0IiwicHVzaCIsIlRyYW5zZm9ybSJdLCJzb3VyY2VzIjpbIi4uLy4uLy4uL3NyYy9zdHJlYW0vU291cmNlTWVzc2FnZVN0cmVhbS50cyJdLCJzb3VyY2VzQ29udGVudCI6W251bGxdLCJtYXBwaW5ncyI6Ijs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7QUFBQSxJQUFBQSxRQUFBLEdBQUFDLE9BQUE7QUFDQSxJQUFBQyxvQkFBQSxHQUFBQyxlQUFBLENBQUFGLE9BQUE7QUFFQTs7O0FBR0EsSUFBQUcsbUJBQUEsMEJBQUFDLE1BQUE7RUFBaURDLFNBQUEsQ0FBQUYsbUJBQUEsRUFBQUMsTUFBQTtFQUcvQyxTQUFBRCxvQkFBNkJHLEdBQVc7SUFBeEMsSUFBQUMsS0FBQSxHQUNFSCxNQUFBLENBQUFJLElBQUEsT0FBTTtNQUFFQyxrQkFBa0IsRUFBRSxJQUFJO01BQUVDLGtCQUFrQixFQUFFO0lBQUssQ0FBRSxDQUFDO0lBRG5DSCxLQUFBLENBQUFELEdBQUcsR0FBSEEsR0FBRztJQUZ4QkMsS0FBQSxDQUFBSSxNQUFNLEdBQUdDLE1BQU0sQ0FBQ0MsS0FBSyxDQUFDLENBQUMsQ0FBQzs7RUFJaEM7RUFFT1YsbUJBQUEsQ0FBQVcsU0FBQSxDQUFBQyxVQUFVLEdBQWpCLFVBQ0VDLEtBQWEsRUFDYkMsUUFBZ0IsRUFDaEJDLFFBQTJCO0lBRTNCLElBQUksQ0FBQ1AsTUFBTSxHQUFHQyxNQUFNLENBQUNPLE1BQU0sQ0FBQyxDQUFDLElBQUksQ0FBQ1IsTUFBTSxFQUFFSyxLQUFLLENBQUMsQ0FBQztJQUNqREUsUUFBUSxFQUFFO0VBQ1osQ0FBQztFQUVNZixtQkFBQSxDQUFBVyxTQUFBLENBQUFNLE1BQU0sR0FBYixVQUFjRixRQUEyQjtJQUN2QyxJQUFNRyxJQUFJLEdBQUcsSUFBSSxDQUFDVixNQUFNLENBQUNXLFFBQVEsQ0FBQyxPQUFPLENBQUM7SUFDMUMsSUFBTU4sS0FBSyxHQUFHZixvQkFBQSxDQUFBc0IsT0FBa0IsQ0FBQ0YsSUFBSSxFQUFFLElBQUksQ0FBQ2YsR0FBRyxDQUFDO0lBQ2hELElBQUksQ0FBQ2tCLElBQUksQ0FBQ1IsS0FBSyxDQUFDO0lBQ2hCRSxRQUFRLEVBQUU7RUFDWixDQUFDO0VBQ0gsT0FBQWYsbUJBQUM7QUFBRCxDQUFDLENBdEJnREosUUFBQSxDQUFBMEIsU0FBUyJ9

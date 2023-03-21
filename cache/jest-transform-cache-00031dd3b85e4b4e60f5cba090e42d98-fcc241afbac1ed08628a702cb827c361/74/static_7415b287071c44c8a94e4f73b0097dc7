@@ -1,0 +1,233 @@
+be85d82e0370571a43e4a13c1348561e
+"use strict";
+
+var __assign = void 0 && (void 0).__assign || function () {
+  __assign = Object.assign || function (t) {
+    for (var s, i = 1, n = arguments.length; i < n; i++) {
+      s = arguments[i];
+      for (var p in s) if (Object.prototype.hasOwnProperty.call(s, p)) t[p] = s[p];
+    }
+    return t;
+  };
+  return __assign.apply(this, arguments);
+};
+var __createBinding = void 0 && (void 0).__createBinding || (Object.create ? function (o, m, k, k2) {
+  if (k2 === undefined) k2 = k;
+  var desc = Object.getOwnPropertyDescriptor(m, k);
+  if (!desc || ("get" in desc ? !m.__esModule : desc.writable || desc.configurable)) {
+    desc = {
+      enumerable: true,
+      get: function () {
+        return m[k];
+      }
+    };
+  }
+  Object.defineProperty(o, k2, desc);
+} : function (o, m, k, k2) {
+  if (k2 === undefined) k2 = k;
+  o[k2] = m[k];
+});
+var __setModuleDefault = void 0 && (void 0).__setModuleDefault || (Object.create ? function (o, v) {
+  Object.defineProperty(o, "default", {
+    enumerable: true,
+    value: v
+  });
+} : function (o, v) {
+  o["default"] = v;
+});
+var __importStar = void 0 && (void 0).__importStar || function (mod) {
+  if (mod && mod.__esModule) return mod;
+  var result = {};
+  if (mod != null) for (var k in mod) if (k !== "default" && Object.prototype.hasOwnProperty.call(mod, k)) __createBinding(result, mod, k);
+  __setModuleDefault(result, mod);
+  return result;
+};
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+exports.merge = exports.contains = exports.root = exports.parseHTML = exports.text = exports.xml = exports.html = void 0;
+var domutils_1 = require("domutils");
+var options_js_1 = __importStar(require("./options.js"));
+/**
+ * Helper function to render a DOM.
+ *
+ * @param that - Cheerio instance to render.
+ * @param dom - The DOM to render. Defaults to `that`'s root.
+ * @param options - Options for rendering.
+ * @returns The rendered document.
+ */
+function render(that, dom, options) {
+  if (!that) return '';
+  return that(dom !== null && dom !== void 0 ? dom : that._root.children, null, undefined, options).toString();
+}
+/**
+ * Checks if a passed object is an options object.
+ *
+ * @param dom - Object to check if it is an options object.
+ * @returns Whether the object is an options object.
+ */
+function isOptions(dom, options) {
+  return !options && typeof dom === 'object' && dom != null && !('length' in dom) && !('type' in dom);
+}
+function html(dom, options) {
+  /*
+   * Be flexible about parameters, sometimes we call html(),
+   * with options as only parameter
+   * check dom argument for dom element specific properties
+   * assume there is no 'length' or 'type' properties in the options object
+   */
+  var toRender = isOptions(dom) ? (options = dom, undefined) : dom;
+  /*
+   * Sometimes `$.html()` is used without preloading html,
+   * so fallback non-existing options to the default ones.
+   */
+  var opts = __assign(__assign(__assign({}, options_js_1.default), this === null || this === void 0 ? void 0 : this._options), (0, options_js_1.flatten)(options !== null && options !== void 0 ? options : {}));
+  return render(this, toRender, opts);
+}
+exports.html = html;
+/**
+ * Render the document as XML.
+ *
+ * @param dom - Element to render.
+ * @returns THe rendered document.
+ */
+function xml(dom) {
+  var options = __assign(__assign({}, this._options), {
+    xmlMode: true
+  });
+  return render(this, dom, options);
+}
+exports.xml = xml;
+/**
+ * Render the document as text.
+ *
+ * This returns the `textContent` of the passed elements. The result will
+ * include the contents of `script` and `stype` elements. To avoid this, use
+ * `.prop('innerText')` instead.
+ *
+ * @param elements - Elements to render.
+ * @returns The rendered document.
+ */
+function text(elements) {
+  var elems = elements ? elements : this ? this.root() : [];
+  var ret = '';
+  for (var i = 0; i < elems.length; i++) {
+    ret += (0, domutils_1.textContent)(elems[i]);
+  }
+  return ret;
+}
+exports.text = text;
+function parseHTML(data, context, keepScripts) {
+  if (keepScripts === void 0) {
+    keepScripts = typeof context === 'boolean' ? context : false;
+  }
+  if (!data || typeof data !== 'string') {
+    return null;
+  }
+  if (typeof context === 'boolean') {
+    keepScripts = context;
+  }
+  var parsed = this.load(data, options_js_1.default, false);
+  if (!keepScripts) {
+    parsed('script').remove();
+  }
+  /*
+   * The `children` array is used by Cheerio internally to group elements that
+   * share the same parents. When nodes created through `parseHTML` are
+   * inserted into previously-existing DOM structures, they will be removed
+   * from the `children` array. The results of `parseHTML` should remain
+   * constant across these operations, so a shallow copy should be returned.
+   */
+  return parsed.root()[0].children.slice();
+}
+exports.parseHTML = parseHTML;
+/**
+ * Sometimes you need to work with the top-level root element. To query it, you
+ * can use `$.root()`.
+ *
+ * @example
+ *
+ * ```js
+ * $.root().append('<ul id="vegetables"></ul>').html();
+ * //=> <ul id="fruits">...</ul><ul id="vegetables"></ul>
+ * ```
+ *
+ * @returns Cheerio instance wrapping the root node.
+ * @alias Cheerio.root
+ */
+function root() {
+  return this(this._root);
+}
+exports.root = root;
+/**
+ * Checks to see if the `contained` DOM element is a descendant of the
+ * `container` DOM element.
+ *
+ * @param container - Potential parent node.
+ * @param contained - Potential child node.
+ * @returns Indicates if the nodes contain one another.
+ * @alias Cheerio.contains
+ * @see {@link https://api.jquery.com/jQuery.contains/}
+ */
+function contains(container, contained) {
+  // According to the jQuery API, an element does not "contain" itself
+  if (contained === container) {
+    return false;
+  }
+  /*
+   * Step up the descendants, stopping when the root element is reached
+   * (signaled by `.parent` returning a reference to the same object)
+   */
+  var next = contained;
+  while (next && next !== next.parent) {
+    next = next.parent;
+    if (next === container) {
+      return true;
+    }
+  }
+  return false;
+}
+exports.contains = contains;
+/**
+ * $.merge().
+ *
+ * @param arr1 - First array.
+ * @param arr2 - Second array.
+ * @returns `arr1`, with elements of `arr2` inserted.
+ * @alias Cheerio.merge
+ * @see {@link https://api.jquery.com/jQuery.merge/}
+ */
+function merge(arr1, arr2) {
+  if (!isArrayLike(arr1) || !isArrayLike(arr2)) {
+    return;
+  }
+  var newLength = arr1.length;
+  var len = +arr2.length;
+  for (var i = 0; i < len; i++) {
+    arr1[newLength++] = arr2[i];
+  }
+  arr1.length = newLength;
+  return arr1;
+}
+exports.merge = merge;
+/**
+ * Checks if an object is array-like.
+ *
+ * @param item - Item to check.
+ * @returns Indicates if the item is array-like.
+ */
+function isArrayLike(item) {
+  if (Array.isArray(item)) {
+    return true;
+  }
+  if (typeof item !== 'object' || !Object.prototype.hasOwnProperty.call(item, 'length') || typeof item.length !== 'number' || item.length < 0) {
+    return false;
+  }
+  for (var i = 0; i < item.length; i++) {
+    if (!(i in item)) {
+      return false;
+    }
+  }
+  return true;
+}
+//# sourceMappingURL=data:application/json;charset=utf-8;base64,eyJ2ZXJzaW9uIjozLCJuYW1lcyI6WyJkb211dGlsc18xIiwicmVxdWlyZSIsIm9wdGlvbnNfanNfMSIsIl9faW1wb3J0U3RhciIsInJlbmRlciIsInRoYXQiLCJkb20iLCJvcHRpb25zIiwiX3Jvb3QiLCJjaGlsZHJlbiIsInVuZGVmaW5lZCIsInRvU3RyaW5nIiwiaXNPcHRpb25zIiwiaHRtbCIsInRvUmVuZGVyIiwib3B0cyIsIl9fYXNzaWduIiwiZGVmYXVsdCIsIl9vcHRpb25zIiwiZmxhdHRlbiIsImV4cG9ydHMiLCJ4bWwiLCJ4bWxNb2RlIiwidGV4dCIsImVsZW1lbnRzIiwiZWxlbXMiLCJyb290IiwicmV0IiwiaSIsImxlbmd0aCIsInRleHRDb250ZW50IiwicGFyc2VIVE1MIiwiZGF0YSIsImNvbnRleHQiLCJrZWVwU2NyaXB0cyIsInBhcnNlZCIsImxvYWQiLCJyZW1vdmUiLCJzbGljZSIsImNvbnRhaW5zIiwiY29udGFpbmVyIiwiY29udGFpbmVkIiwibmV4dCIsInBhcmVudCIsIm1lcmdlIiwiYXJyMSIsImFycjIiLCJpc0FycmF5TGlrZSIsIm5ld0xlbmd0aCIsImxlbiIsIml0ZW0iLCJBcnJheSIsImlzQXJyYXkiLCJPYmplY3QiLCJwcm90b3R5cGUiLCJoYXNPd25Qcm9wZXJ0eSIsImNhbGwiXSwic291cmNlcyI6WyJodHRwczovL3Jhdy5naXRodWJ1c2VyY29udGVudC5jb20vY2hlZXJpb2pzL2NoZWVyaW8vZDFjYmM2NmQ1MzM5MmNlOGJmNmNkMDA2OGY2NzU4MzYzNzJkMmJmMy9zcmMvc3RhdGljLnRzIl0sInNvdXJjZXNDb250ZW50IjpbbnVsbF0sIm1hcHBpbmdzIjoiOzs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7OztBQUdBLElBQUFBLFVBQUEsR0FBQUMsT0FBQTtBQUNBLElBQUFDLFlBQUEsR0FBQUMsWUFBQSxDQUFBRixPQUFBO0FBT0E7Ozs7Ozs7O0FBUUEsU0FBU0csTUFBTUEsQ0FDYkMsSUFBZ0IsRUFDaEJDLEdBQTRDLEVBQzVD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

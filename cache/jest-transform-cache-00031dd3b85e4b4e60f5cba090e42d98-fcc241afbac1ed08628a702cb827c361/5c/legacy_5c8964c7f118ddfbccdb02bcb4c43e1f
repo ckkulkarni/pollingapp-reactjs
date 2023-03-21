@@ -1,0 +1,161 @@
+36735ed210623724899eb37ec76762c4
+"use strict";
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+exports.getElementsByTagType = exports.getElementsByTagName = exports.getElementById = exports.getElements = exports.testElement = void 0;
+var domhandler_1 = require("domhandler");
+var querying_js_1 = require("./querying.js");
+var Checks = {
+  tag_name: function (name) {
+    if (typeof name === "function") {
+      return function (elem) {
+        return (0, domhandler_1.isTag)(elem) && name(elem.name);
+      };
+    } else if (name === "*") {
+      return domhandler_1.isTag;
+    }
+    return function (elem) {
+      return (0, domhandler_1.isTag)(elem) && elem.name === name;
+    };
+  },
+  tag_type: function (type) {
+    if (typeof type === "function") {
+      return function (elem) {
+        return type(elem.type);
+      };
+    }
+    return function (elem) {
+      return elem.type === type;
+    };
+  },
+  tag_contains: function (data) {
+    if (typeof data === "function") {
+      return function (elem) {
+        return (0, domhandler_1.isText)(elem) && data(elem.data);
+      };
+    }
+    return function (elem) {
+      return (0, domhandler_1.isText)(elem) && elem.data === data;
+    };
+  }
+};
+/**
+ * @param attrib Attribute to check.
+ * @param value Attribute value to look for.
+ * @returns A function to check whether the a node has an attribute with a
+ *   particular value.
+ */
+function getAttribCheck(attrib, value) {
+  if (typeof value === "function") {
+    return function (elem) {
+      return (0, domhandler_1.isTag)(elem) && value(elem.attribs[attrib]);
+    };
+  }
+  return function (elem) {
+    return (0, domhandler_1.isTag)(elem) && elem.attribs[attrib] === value;
+  };
+}
+/**
+ * @param a First function to combine.
+ * @param b Second function to combine.
+ * @returns A function taking a node and returning `true` if either of the input
+ *   functions returns `true` for the node.
+ */
+function combineFuncs(a, b) {
+  return function (elem) {
+    return a(elem) || b(elem);
+  };
+}
+/**
+ * @param options An object describing nodes to look for.
+ * @returns A function executing all checks in `options` and returning `true` if
+ *   any of them match a node.
+ */
+function compileTest(options) {
+  var funcs = Object.keys(options).map(function (key) {
+    var value = options[key];
+    return Object.prototype.hasOwnProperty.call(Checks, key) ? Checks[key](value) : getAttribCheck(key, value);
+  });
+  return funcs.length === 0 ? null : funcs.reduce(combineFuncs);
+}
+/**
+ * @category Legacy Query Functions
+ * @param options An object describing nodes to look for.
+ * @param node The element to test.
+ * @returns Whether the element matches the description in `options`.
+ */
+function testElement(options, node) {
+  var test = compileTest(options);
+  return test ? test(node) : true;
+}
+exports.testElement = testElement;
+/**
+ * @category Legacy Query Functions
+ * @param options An object describing nodes to look for.
+ * @param nodes Nodes to search through.
+ * @param recurse Also consider child nodes.
+ * @param limit Maximum number of nodes to return.
+ * @returns All nodes that match `options`.
+ */
+function getElements(options, nodes, recurse, limit) {
+  if (limit === void 0) {
+    limit = Infinity;
+  }
+  var test = compileTest(options);
+  return test ? (0, querying_js_1.filter)(test, nodes, recurse, limit) : [];
+}
+exports.getElements = getElements;
+/**
+ * @category Legacy Query Functions
+ * @param id The unique ID attribute value to look for.
+ * @param nodes Nodes to search through.
+ * @param recurse Also consider child nodes.
+ * @returns The node with the supplied ID.
+ */
+function getElementById(id, nodes, recurse) {
+  if (recurse === void 0) {
+    recurse = true;
+  }
+  if (!Array.isArray(nodes)) nodes = [nodes];
+  return (0, querying_js_1.findOne)(getAttribCheck("id", id), nodes, recurse);
+}
+exports.getElementById = getElementById;
+/**
+ * @category Legacy Query Functions
+ * @param tagName Tag name to search for.
+ * @param nodes Nodes to search through.
+ * @param recurse Also consider child nodes.
+ * @param limit Maximum number of nodes to return.
+ * @returns All nodes with the supplied `tagName`.
+ */
+function getElementsByTagName(tagName, nodes, recurse, limit) {
+  if (recurse === void 0) {
+    recurse = true;
+  }
+  if (limit === void 0) {
+    limit = Infinity;
+  }
+  return (0, querying_js_1.filter)(Checks["tag_name"](tagName), nodes, recurse, limit);
+}
+exports.getElementsByTagName = getElementsByTagName;
+/**
+ * @category Legacy Query Functions
+ * @param type Element type to look for.
+ * @param nodes Nodes to search through.
+ * @param recurse Also consider child nodes.
+ * @param limit Maximum number of nodes to return.
+ * @returns All nodes with the supplied `type`.
+ */
+function getElementsByTagType(type, nodes, recurse, limit) {
+  if (recurse === void 0) {
+    recurse = true;
+  }
+  if (limit === void 0) {
+    limit = Infinity;
+  }
+  return (0, querying_js_1.filter)(Checks["tag_type"](type), nodes, recurse, limit);
+}
+exports.getElementsByTagType = getElementsByTagType;
+//# sourceMappingURL=data:application/json;charset=utf-8;base64,eyJ2ZXJzaW9uIjozLCJuYW1lcyI6WyJkb21oYW5kbGVyXzEiLCJyZXF1aXJlIiwicXVlcnlpbmdfanNfMSIsIkNoZWNrcyIsInRhZ19uYW1lIiwibmFtZSIsImVsZW0iLCJpc1RhZyIsInRhZ190eXBlIiwidHlwZSIsInRhZ19jb250YWlucyIsImRhdGEiLCJpc1RleHQiLCJnZXRBdHRyaWJDaGVjayIsImF0dHJpYiIsInZhbHVlIiwiYXR0cmlicyIsImNvbWJpbmVGdW5jcyIsImEiLCJiIiwiY29tcGlsZVRlc3QiLCJvcHRpb25zIiwiZnVuY3MiLCJPYmplY3QiLCJrZXlzIiwibWFwIiwia2V5IiwicHJvdG90eXBlIiwiaGFzT3duUHJvcGVydHkiLCJjYWxsIiwibGVuZ3RoIiwicmVkdWNlIiwidGVzdEVsZW1lbnQiLCJub2RlIiwidGVzdCIsImV4cG9ydHMiLCJnZXRFbGVtZW50cyIsIm5vZGVzIiwicmVjdXJzZSIsImxpbWl0IiwiSW5maW5pdHkiLCJmaWx0ZXIiLCJnZXRFbGVtZW50QnlJZCIsImlkIiwiQXJyYXkiLCJpc0FycmF5IiwiZmluZE9uZSIsImdldEVsZW1lbnRzQnlUYWdOYW1lIiwidGFnTmFtZSIsImdldEVsZW1lbnRzQnlUYWdUeXBlIl0sInNvdXJjZXMiOlsiaHR0cHM6Ly9yYXcuZ2l0aHVidXNlcmNvbnRlbnQuY29tL2ZiNTUvZG9tdXRpbHMvZjdlMzU3YjVjMjEwYjY3MzFjMmE2MGUwYjdiM2NmYWExZjk2YjcwNi9zcmMvbGVnYWN5LnRzIl0sInNvdXJjZXNDb250ZW50IjpbbnVsbF0sIm1hcHBpbmdzIjoiOzs7Ozs7QUFBQSxJQUFBQSxZQUFBLEdBQUFDLE9BQUE7QUFFQSxJQUFBQyxhQUFBLEdBQUFELE9BQUE7QUFxQkEsSUFBTUUsTUFBTSxHQUdSO0VBQ0FDLFFBQVEsRUFBUixTQUFBQSxDQUFTQyxJQUFJO0lBQ1QsSUFBSSxPQUFPQSxJQUFJLEtBQUssVUFBVSxFQUFFO01BQzVCLE9BQU8sVUFBQ0MsSUFBYTtRQUFLLFdBQUFOLFlBQUEsQ0FBQU8sS0FBSyxFQUFDRCxJQUFJLENBQUMsSUFBSUQsSUFBSSxDQUFDQyxJQUFJLENBQUNELElBQUksQ0FBQztNQUE5QixDQUE4QjtLQUMzRCxNQUFNLElBQUlBLElBQUksS0FBSyxHQUFHLEVBQUU7TUFDckIsT0FBT0wsWUFBQSxDQUFBTyxLQUFLOztJQUVoQixPQUFPLFVBQUNELElBQWE7TUFBSyxXQUFBTixZQUFBLENBQUFPLEtBQUssRUFBQ0QsSUFBSSxDQUFDLElBQUlBLElBQUksQ0FBQ0QsSUFBSSxLQUFLQSxJQUFJO0lBQWpDLENBQWlDO0VBQy9ELENBQUM7RUFDREcsUUFBUSxFQUFSLFNBQUFBLENBQVNDLElBQUk7SUFDVCxJQUFJLE9BQU9BLElBQUksS0FBSyxVQUFVLEVBQUU7TUFDNUIsT0FBTyxVQUFDSCxJQUFhO1FBQUssT0FBQUcsSUFBSSxDQUFDSCxJQUFJLENBQUNHLElBQUksQ0FBQztNQUFmLENBQWU7O0lBRTdDLE9BQU8sVUFBQ0gsSUFBYTtNQUFLLE9BQUFBLElBQUksQ0FBQ0csSUFBSSxLQUFLQSxJQUFJO0lBQWxCLENBQWtCO0VBQ2hELENBQUM7RUFDREMsWUFBWSxFQUFaLFNBQUFBLENBQWFDLElBQUk7SUFDYixJQUFJLE9BQU9BLElBQUksS0FBSyxVQUFVLEVBQUU7TUFDNUIsT0FBTyxVQUFDTCxJQUFhO1FBQUssV0FBQU4sWUFBQSxDQUFBWSxNQUFNLEVBQUNOLElBQUksQ0FBQyxJQUFJSyxJQUFJLENBQUNMLElBQUksQ0FBQ0ssSUFBSSxDQUFDO01BQS9CLENBQStCOztJQUU3RCxPQUFPLFVBQUNMLElBQWE7TUFBSyxXQUFBTixZQUFBLENBQUFZLE1BQU0sRUFBQ04sSUFBSSxDQUFDLElBQUlBLElBQUksQ0FBQ0ssSUFBSSxLQUFLQSxJQUFJO0lBQWxDLENBQWtDO0VBQ2hFO0NBQ0g7QUFFRDs7Ozs7O0FBTUEsU0FBU0UsY0FBY0EsQ0FDbkJDLE1BQWMsRUFDZEMsS0FBd0Q7RUFFeEQsSUFBSSxPQUFPQSxLQUFLLEtBQUssVUFBVSxFQUFFO0lBQzdCLE9BQU8sVUFBQ1QsSUFBYTtNQUFLLFdBQUFOLFlBQUEsQ0FBQU8sS0FBSyxFQUFDRCxJQUFJLENBQUMsSUFBSVMsS0FBSyxDQUFDVCxJQUFJLENBQUNVLE9BQU8sQ0FBQ0YsTUFBTSxDQUFDLENBQUM7SUFBMUMsQ0FBMEM7O0VBRXhFLE9BQU8sVUFBQ1IsSUFBYTtJQUFLLFdBQUFOLFlBQUEsQ0FBQU8sS0FBSyxFQUFDRCxJQUFJLENBQUMsSUFBSUEsSUFBSSxDQUFDVSxPQUFPLENBQUNGLE1BQU0sQ0FBQyxLQUFLQyxLQUFLO0VBQTdDLENBQTZDO0FBQzNFO0FBRUE7Ozs7OztBQU1BLFNBQVNFLFlBQVlBLENBQUNDLENBQVcsRUFBRUMsQ0FBVztFQUMxQyxPQUFPLFVBQUNiLElBQWE7SUFBSyxPQUFBWSxDQUFDLENBQUNaLElBQUksQ0FBQyxJQUFJYSxDQUFDLENBQUNiLElBQUksQ0FBQztFQUFsQixDQUFrQjtBQUNoRDtBQUVBOzs7OztBQUtBLFNBQVNjLFdBQVdBLENBQUNDLE9BQXdCO0VBQ3pDLElBQU1DLEtBQUssR0FBR0MsTUFBTSxDQUFDQyxJQUFJLENBQUNILE9BQU8sQ0FBQyxDQUFDSSxHQUFHLENBQUMsVUFBQ0MsR0FBRztJQUN2QyxJQUFNWCxLQUFLLEdBQUdNLE9BQU8sQ0FBQ0ssR0FBRyxDQUFDO0lBQzFCLE9BQU9ILE1BQU0sQ0FBQ0ksU0FBUyxDQUFDQyxjQUFjLENBQUNDLElBQUksQ0FBQzFCLE1BQU0sRUFBRXVCLEdBQUcsQ0FBQyxHQUNsRHZCLE1BQU0sQ0FBQ3VCLEdBQUcsQ0FBQyxDQUFDWCxLQUFLLENBQUMsR0FDbEJGLGNBQWMsQ0FBQ2EsR0FBRyxFQUFFWCxLQUFLLENBQUM7RUFDcEMsQ0FBQyxDQUFDO0VBRUYsT0FBT08sS0FBSyxDQUFDUSxNQUFNLEtBQUssQ0FBQyxHQUFHLElBQUksR0FBR1IsS0FBSyxDQUFDUyxNQUFNLENBQUNkLFlBQVksQ0FBQztBQUNqRTtBQUVBOzs7Ozs7QUFNQSxTQUFnQmUsV0FBV0EsQ0FBQ1gsT0FBd0IsRUFBRVksSUFBYTtFQUMvRCxJQUFNQyxJQUFJLEdBQUdkLFdBQVcsQ0FBQ0MsT0FBTyxDQUFDO0VBQ2pDLE9BQU9hLElBQUksR0FBR0EsSUFBSSxDQUFDRCxJQUFJLENBQUMsR0FBRyxJQUFJO0FBQ25DO0FBSEFFLE9BQUEsQ0FBQUgsV0FBQSxHQUFBQSxXQUFBO0FBS0E7Ozs7Ozs7O0FBUUEsU0FBZ0JJLFdBQVdBLENBQ3ZCZixPQUF3QixFQUN4QmdCLEtBQTBCLEVBQzFCQyxPQUFnQixFQUNoQkMsS0FBZ0I7RUFBaEIsSUFBQUEsS0FBQTtJQUFBQSxLQUFBLEdBQUFDLFFBQWdCO0VBQUE7RUFFaEIsSUFBTU4sSUFBSSxHQUFHZCxXQUFXLENBQUNDLE9BQU8sQ0FBQztFQUNqQyxPQUFPYSxJQUFJLEdBQUcsSUFBQWhDLGFBQUEsQ0FBQXVDLE1BQU0sRUFBQ1AsSUFBSSxFQUFFRyxLQUFLLEVBQUVDLE9BQU8sRUFBRUMsS0FBSyxDQUFDLEdBQUcsRUFBRTtBQUMxRDtBQVJBSixPQUFBLENBQUFDLFdBQUEsR0FBQUEsV0FBQTtBQVVBOzs7Ozs7O0FBT0EsU0FBZ0JNLGNBQWNBLENBQzFCQyxFQUFzQyxFQUN0Q04sS0FBMEIsRUFDMUJDLE9BQWM7RUFBZCxJQUFBQSxPQUFBO0lBQUFBLE9BQUEsT0FBYztFQUFBO0VBRWQsSUFBSSxDQUFDTSxLQUFLLENBQUNDLE9BQU8sQ0FBQ1IsS0FBSyxDQUFDLEVBQUVBLEtBQUssR0FBRyxDQUFDQSxLQUFLLENBQUM7RUFDMUMsT0FBTyxJQUFBbkMsYUFBQSxDQUFBNEMsT0FBTyxFQUFDakMsY0FBYyxDQUFDLElBQUksRUFBRThCLEVBQUUsQ0FBQyxFQUFFTixLQUFLLEVBQUVDLE9BQU8sQ0FBQztBQUM1RDtBQVBBSCxPQUFBLENBQUFPLGNBQUEsR0FBQUEsY0FBQTtBQVNBOzs7Ozs7OztBQVFBLFNBQWdCSyxvQkFBb0JBLENBQ2hDQyxPQUE2QyxFQUM3Q1gsS0FBMEIsRUFDMUJDLE9BQWMsRUFDZEMsS0FBZ0I7RUFEaEIsSUFBQUQsT0FBQTtJQUFBQSxPQUFBLE9BQWM7RUFBQTtFQUNkLElBQUFDLEtBQUE7SUFBQUEsS0FBQSxHQUFBQyxRQUFnQjtFQUFBO0VBRWhCLE9BQU8sSUFBQXRDLGFBQUEsQ0FBQXVDLE1BQU0sRUFDVHRDLE1BQU0sQ0FBQyxVQUFVLENBQUMsQ0FBQzZDLE9BQU8sQ0FBQyxFQUMzQlgsS0FBSyxFQUNMQyxPQUFPLEVBQ1BDLEtBQUssQ0FDSztBQUNsQjtBQVpBSixPQUFBLENBQUFZLG9CQUFBLEdBQUFBLG9CQUFBO0FBY0E7Ozs7Ozs7O0FBUUEsU0FBZ0JFLG9CQUFvQkEsQ0FDaEN4QyxJQUFvRCxFQUNwRDRCLEtBQTBCLEVBQzFCQyxPQUFjLEVBQ2RDLEtBQWdCO0VBRGhCLElBQUFELE9BQUE7SUFBQUEsT0FBQSxPQUFjO0VBQUE7RUFDZCxJQUFBQyxLQUFBO0lBQUFBLEtBQUEsR0FBQUMsUUFBZ0I7RUFBQTtFQUVoQixPQUFPLElBQUF0QyxhQUFBLENBQUF1QyxNQUFNLEVBQUN0QyxNQUFNLENBQUMsVUFBVSxDQUFDLENBQUNNLElBQWMsQ0FBQyxFQUFFNEIsS0FBSyxFQUFFQyxPQUFPLEVBQUVDLEtBQUssQ0FBQztBQUM1RTtBQVBBSixPQUFBLENBQUFjLG9CQUFBLEdBQUFBLG9CQUFBIn0=

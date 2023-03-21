@@ -1,0 +1,181 @@
+f896125d95cef6d1f1325ddfead10df1
+"use strict";
+
+var __createBinding = void 0 && (void 0).__createBinding || (Object.create ? function (o, m, k, k2) {
+  if (k2 === undefined) k2 = k;
+  var desc = Object.getOwnPropertyDescriptor(m, k);
+  if (!desc || ("get" in desc ? !m.__esModule : desc.writable || desc.configurable)) {
+    desc = {
+      enumerable: true,
+      get: function () {
+        return m[k];
+      }
+    };
+  }
+  Object.defineProperty(o, k2, desc);
+} : function (o, m, k, k2) {
+  if (k2 === undefined) k2 = k;
+  o[k2] = m[k];
+});
+var __setModuleDefault = void 0 && (void 0).__setModuleDefault || (Object.create ? function (o, v) {
+  Object.defineProperty(o, "default", {
+    enumerable: true,
+    value: v
+  });
+} : function (o, v) {
+  o["default"] = v;
+});
+var __importStar = void 0 && (void 0).__importStar || function (mod) {
+  if (mod && mod.__esModule) return mod;
+  var result = {};
+  if (mod != null) for (var k in mod) if (k !== "default" && Object.prototype.hasOwnProperty.call(mod, k)) __createBinding(result, mod, k);
+  __setModuleDefault(result, mod);
+  return result;
+};
+var __importDefault = void 0 && (void 0).__importDefault || function (mod) {
+  return mod && mod.__esModule ? mod : {
+    "default": mod
+  };
+};
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+exports.aliases = exports.pseudos = exports.filters = exports.is = exports.selectOne = exports.selectAll = exports.prepareContext = exports._compileToken = exports._compileUnsafe = exports.compile = void 0;
+var DomUtils = __importStar(require("domutils"));
+var boolbase_1 = __importDefault(require("boolbase"));
+var compile_js_1 = require("./compile.js");
+var subselects_js_1 = require("./pseudo-selectors/subselects.js");
+var defaultEquals = function (a, b) {
+  return a === b;
+};
+var defaultOptions = {
+  adapter: DomUtils,
+  equals: defaultEquals
+};
+function convertOptionFormats(options) {
+  var _a, _b, _c, _d;
+  /*
+   * We force one format of options to the other one.
+   */
+  // @ts-expect-error Default options may have incompatible `Node` / `ElementNode`.
+  var opts = options !== null && options !== void 0 ? options : defaultOptions;
+  // @ts-expect-error Same as above.
+  (_a = opts.adapter) !== null && _a !== void 0 ? _a : opts.adapter = DomUtils;
+  // @ts-expect-error `equals` does not exist on `Options`
+  (_b = opts.equals) !== null && _b !== void 0 ? _b : opts.equals = (_d = (_c = opts.adapter) === null || _c === void 0 ? void 0 : _c.equals) !== null && _d !== void 0 ? _d : defaultEquals;
+  return opts;
+}
+function wrapCompile(func) {
+  return function addAdapter(selector, options, context) {
+    var opts = convertOptionFormats(options);
+    return func(selector, opts, context);
+  };
+}
+/**
+ * Compiles the query, returns a function.
+ */
+exports.compile = wrapCompile(compile_js_1.compile);
+exports._compileUnsafe = wrapCompile(compile_js_1.compileUnsafe);
+exports._compileToken = wrapCompile(compile_js_1.compileToken);
+function getSelectorFunc(searchFunc) {
+  return function select(query, elements, options) {
+    var opts = convertOptionFormats(options);
+    if (typeof query !== "function") {
+      query = (0, compile_js_1.compileUnsafe)(query, opts, elements);
+    }
+    var filteredElements = prepareContext(elements, opts.adapter, query.shouldTestNextSiblings);
+    return searchFunc(query, filteredElements, opts);
+  };
+}
+function prepareContext(elems, adapter, shouldTestNextSiblings) {
+  if (shouldTestNextSiblings === void 0) {
+    shouldTestNextSiblings = false;
+  }
+  /*
+   * Add siblings if the query requires them.
+   * See https://github.com/fb55/css-select/pull/43#issuecomment-225414692
+   */
+  if (shouldTestNextSiblings) {
+    elems = appendNextSiblings(elems, adapter);
+  }
+  return Array.isArray(elems) ? adapter.removeSubsets(elems) : adapter.getChildren(elems);
+}
+exports.prepareContext = prepareContext;
+function appendNextSiblings(elem, adapter) {
+  // Order matters because jQuery seems to check the children before the siblings
+  var elems = Array.isArray(elem) ? elem.slice(0) : [elem];
+  var elemsLength = elems.length;
+  for (var i = 0; i < elemsLength; i++) {
+    var nextSiblings = (0, subselects_js_1.getNextSiblings)(elems[i], adapter);
+    elems.push.apply(elems, nextSiblings);
+  }
+  return elems;
+}
+/**
+ * @template Node The generic Node type for the DOM adapter being used.
+ * @template ElementNode The Node type for elements for the DOM adapter being used.
+ * @param elems Elements to query. If it is an element, its children will be queried..
+ * @param query can be either a CSS selector string or a compiled query function.
+ * @param [options] options for querying the document.
+ * @see compile for supported selector queries.
+ * @returns All matching elements.
+ *
+ */
+exports.selectAll = getSelectorFunc(function (query, elems, options) {
+  return query === boolbase_1.default.falseFunc || !elems || elems.length === 0 ? [] : options.adapter.findAll(query, elems);
+});
+/**
+ * @template Node The generic Node type for the DOM adapter being used.
+ * @template ElementNode The Node type for elements for the DOM adapter being used.
+ * @param elems Elements to query. If it is an element, its children will be queried..
+ * @param query can be either a CSS selector string or a compiled query function.
+ * @param [options] options for querying the document.
+ * @see compile for supported selector queries.
+ * @returns the first match, or null if there was no match.
+ */
+exports.selectOne = getSelectorFunc(function (query, elems, options) {
+  return query === boolbase_1.default.falseFunc || !elems || elems.length === 0 ? null : options.adapter.findOne(query, elems);
+});
+/**
+ * Tests whether or not an element is matched by query.
+ *
+ * @template Node The generic Node type for the DOM adapter being used.
+ * @template ElementNode The Node type for elements for the DOM adapter being used.
+ * @param elem The element to test if it matches the query.
+ * @param query can be either a CSS selector string or a compiled query function.
+ * @param [options] options for querying the document.
+ * @see compile for supported selector queries.
+ * @returns
+ */
+function is(elem, query, options) {
+  var opts = convertOptionFormats(options);
+  return (typeof query === "function" ? query : (0, compile_js_1.compile)(query, opts))(elem);
+}
+exports.is = is;
+/**
+ * Alias for selectAll(query, elems, options).
+ * @see [compile] for supported selector queries.
+ */
+exports.default = exports.selectAll;
+// Export filters, pseudos and aliases to allow users to supply their own.
+/** @deprecated Use the `pseudos` option instead. */
+var index_js_1 = require("./pseudo-selectors/index.js");
+Object.defineProperty(exports, "filters", {
+  enumerable: true,
+  get: function () {
+    return index_js_1.filters;
+  }
+});
+Object.defineProperty(exports, "pseudos", {
+  enumerable: true,
+  get: function () {
+    return index_js_1.pseudos;
+  }
+});
+Object.defineProperty(exports, "aliases", {
+  enumerable: true,
+  get: function () {
+    return index_js_1.aliases;
+  }
+});
+//# sourceMappingURL=data:application/json;charset=utf-8;base64,eyJ2ZXJzaW9uIjozLCJuYW1lcyI6WyJEb21VdGlscyIsIl9faW1wb3J0U3RhciIsInJlcXVpcmUiLCJib29sYmFzZV8xIiwiX19pbXBvcnREZWZhdWx0IiwiY29tcGlsZV9qc18xIiwic3Vic2VsZWN0c19qc18xIiwiZGVmYXVsdEVxdWFscyIsImEiLCJiIiwiZGVmYXVsdE9wdGlvbnMiLCJhZGFwdGVyIiwiZXF1YWxzIiwiY29udmVydE9wdGlvbkZvcm1hdHMiLCJvcHRpb25zIiwib3B0cyIsIl9hIiwiX2IiLCJfZCIsIl9jIiwid3JhcENvbXBpbGUiLCJmdW5jIiwiYWRkQWRhcHRlciIsInNlbGVjdG9yIiwiY29udGV4dCIsImV4cG9ydHMiLCJjb21waWxlIiwiX2NvbXBpbGVVbnNhZmUiLCJjb21waWxlVW5zYWZlIiwiX2NvbXBpbGVUb2tlbiIsImNvbXBpbGVUb2tlbiIsImdldFNlbGVjdG9yRnVuYyIsInNlYXJjaEZ1bmMiLCJzZWxlY3QiLCJxdWVyeSIsImVsZW1lbnRzIiwiZmlsdGVyZWRFbGVtZW50cyIsInByZXBhcmVDb250ZXh0Iiwic2hvdWxkVGVzdE5leHRTaWJsaW5ncyIsImVsZW1zIiwiYXBwZW5kTmV4dFNpYmxpbmdzIiwiQXJyYXkiLCJpc0FycmF5IiwicmVtb3ZlU3Vic2V0cyIsImdldENoaWxkcmVuIiwiZWxlbSIsInNsaWNlIiwiZWxlbXNMZW5ndGgiLCJsZW5ndGgiLCJpIiwibmV4dFNpYmxpbmdzIiwiZ2V0TmV4dFNpYmxpbmdzIiwicHVzaCIsImFwcGx5Iiwic2VsZWN0QWxsIiwiZGVmYXVsdCIsImZhbHNlRnVuYyIsImZpbmRBbGwiLCJzZWxlY3RPbmUiLCJmaW5kT25lIiwiaXMiLCJpbmRleF9qc18xIiwiT2JqZWN0IiwiZGVmaW5lUHJvcGVydHkiLCJlbnVtZXJhYmxlIiwiZ2V0IiwiZmlsdGVycyIsInBzZXVkb3MiLCJhbGlhc2VzIl0sInNvdXJjZXMiOlsiaHR0cHM6Ly9yYXcuZ2l0aHVidXNlcmNvbnRlbnQuY29tL2ZiNTUvY3NzLXNlbGVjdC8wZjA3MjVhOWRmZWRkZDJmZGI1NGVkYTk2NTZjZGJhYjViYmY2YmU2L3NyYy9pbmRleC50cyJdLCJzb3VyY2VzQ29udGVudCI6W251bGxdLCJtYXBwaW5ncyI6Ijs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7O0FBQUEsSUFBQUEsUUFBQSxHQUFBQyxZQUFBLENBQUFDLE9BQUE7QUFDQSxJQUFBQyxVQUFBLEdBQUFDLGVBQUEsQ0FBQUYsT0FBQTtBQUtBLElBQUFHLFlBQUEsR0FBQUgsT0FBQTtBQWFBLElBQUFJLGVBQUEsR0FBQUosT0FBQTtBQUlBLElBQU1LLGFBQWEsR0FBRyxTQUFBQSxDQUFPQyxDQUFPLEVBQUVDLENBQU87RUFBSyxPQUFBRCxDQUFDLEtBQUtDLENBQUM7QUFBUCxDQUFPO0FBQ3pELElBQU1DLGNBQWMsR0FBdUQ7RUFDdkVDLE9BQU8sRUFBRVgsUUFBUTtFQUNqQlksTUFBTSxFQUFFTDtDQUNYO0FBRUQsU0FBU00sb0JBQW9CQSxDQUN6QkMsT0FBb0M7O0VBRXBDOzs7RUFHQTtFQUNBLElBQU1DLElBQUksR0FBK0JELE9BQU8sYUFBUEEsT0FBTyxjQUFQQSxPQUFPLEdBQUlKLGNBQWM7RUFDbEU7RUFDQSxDQUFBTSxFQUFBLEdBQUFELElBQUksQ0FBQ0osT0FBTyxjQUFBSyxFQUFBLGNBQUFBLEVBQUEsR0FBWkQsSUFBSSxDQUFDSixPQUFPLEdBQUtYLFFBQVE7RUFDekI7RUFDQSxDQUFBaUIsRUFBQSxHQUFBRixJQUFJLENBQUNILE1BQU0sY0FBQUssRUFBQSxjQUFBQSxFQUFBLEdBQVhGLElBQUksQ0FBQ0gsTUFBTSxHQUFLLENBQUFNLEVBQUEsSUFBQUMsRUFBQSxHQUFBSixJQUFJLENBQUNKLE9BQU8sY0FBQVEsRUFBQSx1QkFBQUEsRUFBQSxDQUFFUCxNQUFNLGNBQUFNLEVBQUEsY0FBQUEsRUFBQSxHQUFJWCxhQUFhO0VBRXJELE9BQU9RLElBQTBDO0FBQ3JEO0FBRUEsU0FBU0ssV0FBV0EsQ0FDaEJDLElBSXFCO0VBRXJCLE9BQU8sU0FBU0MsVUFBVUEsQ0FD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

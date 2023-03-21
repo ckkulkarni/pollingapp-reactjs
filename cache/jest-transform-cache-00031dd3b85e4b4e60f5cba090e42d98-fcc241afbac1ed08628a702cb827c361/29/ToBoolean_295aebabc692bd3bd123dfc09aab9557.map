@@ -1,0 +1,1 @@
+{"version":3,"names":["module","exports","ToBoolean","value"],"sources":["ToBoolean.js"],"sourcesContent":["'use strict';\n\n// http://262.ecma-international.org/5.1/#sec-9.2\n\nmodule.exports = function ToBoolean(value) { return !!value; };\n"],"mappings":"AAAA,YAAY;;AAEZ;AAEAA,MAAM,CAACC,OAAO,GAAG,SAASC,SAASA,CAACC,KAAK,EAAE;EAAE,OAAO,CAAC,CAACA,KAAK;AAAE,CAAC"}

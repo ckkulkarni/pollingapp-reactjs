@@ -1,0 +1,99 @@
+ba2596fe685ade845e1cb1df5914c057
+"use strict";
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+exports.serializeArray = exports.serialize = void 0;
+var utils_js_1 = require("../utils.js");
+/*
+ * https://github.com/jquery/jquery/blob/2.1.3/src/manipulation/var/rcheckableType.js
+ * https://github.com/jquery/jquery/blob/2.1.3/src/serialize.js
+ */
+var submittableSelector = 'input,select,textarea,keygen';
+var r20 = /%20/g;
+var rCRLF = /\r?\n/g;
+/**
+ * Encode a set of form elements as a string for submission.
+ *
+ * @category Forms
+ * @example
+ *
+ * ```js
+ * $('<form><input name="foo" value="bar" /></form>').serialize();
+ * //=> 'foo=bar'
+ * ```
+ *
+ * @returns The serialized form.
+ * @see {@link https://api.jquery.com/serialize/}
+ */
+function serialize() {
+  // Convert form elements into name/value objects
+  var arr = this.serializeArray();
+  // Serialize each element into a key/value string
+  var retArr = arr.map(function (data) {
+    return "".concat(encodeURIComponent(data.name), "=").concat(encodeURIComponent(data.value));
+  });
+  // Return the resulting serialization
+  return retArr.join('&').replace(r20, '+');
+}
+exports.serialize = serialize;
+/**
+ * Encode a set of form elements as an array of names and values.
+ *
+ * @category Forms
+ * @example
+ *
+ * ```js
+ * $('<form><input name="foo" value="bar" /></form>').serializeArray();
+ * //=> [ { name: 'foo', value: 'bar' } ]
+ * ```
+ *
+ * @returns The serialized form.
+ * @see {@link https://api.jquery.com/serializeArray/}
+ */
+function serializeArray() {
+  var _this = this;
+  // Resolve all form elements from either forms or collections of form elements
+  return this.map(function (_, elem) {
+    var $elem = _this._make(elem);
+    if ((0, utils_js_1.isTag)(elem) && elem.name === 'form') {
+      return $elem.find(submittableSelector).toArray();
+    }
+    return $elem.filter(submittableSelector).toArray();
+  }).filter(
+  // Verify elements have a name (`attr.name`) and are not disabled (`:enabled`)
+  '[name!=""]:enabled' +
+  // And cannot be clicked (`[type=submit]`) or are used in `x-www-form-urlencoded` (`[type=file]`)
+  ':not(:submit, :button, :image, :reset, :file)' +
+  // And are either checked/don't have a checkable state
+  ':matches([checked], :not(:checkbox, :radio))'
+  // Convert each of the elements to its value(s)
+  ).map(function (_, elem) {
+    var _a;
+    var $elem = _this._make(elem);
+    var name = $elem.attr('name'); // We have filtered for elements with a name before.
+    // If there is no value set (e.g. `undefined`, `null`), then default value to empty
+    var value = (_a = $elem.val()) !== null && _a !== void 0 ? _a : '';
+    // If we have an array of values (e.g. `<select multiple>`), return an array of key/value pairs
+    if (Array.isArray(value)) {
+      return value.map(function (val) {
+        /*
+         * We trim replace any line endings (e.g. `\r` or `\r\n` with `\r\n`) to guarantee consistency across platforms
+         * These can occur inside of `<textarea>'s`
+         */
+        return {
+          name: name,
+          value: val.replace(rCRLF, '\r\n')
+        };
+      });
+    }
+    // Otherwise (e.g. `<input type="text">`, return only one key/value pair
+    return {
+      name: name,
+      value: value.replace(rCRLF, '\r\n')
+    };
+  }).toArray();
+}
+exports.serializeArray = serializeArray;
+//# sourceMappingURL=data:application/json;charset=utf-8;base64,eyJ2ZXJzaW9uIjozLCJuYW1lcyI6WyJ1dGlsc19qc18xIiwicmVxdWlyZSIsInN1Ym1pdHRhYmxlU2VsZWN0b3IiLCJyMjAiLCJyQ1JMRiIsInNlcmlhbGl6ZSIsImFyciIsInNlcmlhbGl6ZUFycmF5IiwicmV0QXJyIiwibWFwIiwiZGF0YSIsImNvbmNhdCIsImVuY29kZVVSSUNvbXBvbmVudCIsIm5hbWUiLCJ2YWx1ZSIsImpvaW4iLCJyZXBsYWNlIiwiZXhwb3J0cyIsIl90aGlzIiwiXyIsImVsZW0iLCIkZWxlbSIsIl9tYWtlIiwiaXNUYWciLCJmaW5kIiwidG9BcnJheSIsImZpbHRlciIsImF0dHIiLCJfYSIsInZhbCIsIkFycmF5IiwiaXNBcnJheSJdLCJzb3VyY2VzIjpbImh0dHBzOi8vcmF3LmdpdGh1YnVzZXJjb250ZW50LmNvbS9jaGVlcmlvanMvY2hlZXJpby9kMWNiYzY2ZDUzMzkyY2U4YmY2Y2QwMDY4ZjY3NTgzNjM3MmQyYmYzL3NyYy9hcGkvZm9ybXMudHMiXSwic291cmNlc0NvbnRlbnQiOltudWxsXSwibWFwcGluZ3MiOiI7Ozs7OztBQUVBLElBQUFBLFVBQUEsR0FBQUMsT0FBQTtBQUVBOzs7O0FBSUEsSUFBTUMsbUJBQW1CLEdBQUcsOEJBQThCO0FBQzFELElBQU1DLEdBQUcsR0FBRyxNQUFNO0FBQ2xCLElBQU1DLEtBQUssR0FBRyxRQUFRO0FBRXRCOzs7Ozs7Ozs7Ozs7OztBQWNBLFNBQWdCQyxTQUFTQSxDQUFBO0VBQ3ZCO0VBQ0EsSUFBTUMsR0FBRyxHQUFHLElBQUksQ0FBQ0MsY0FBYyxFQUFFO0VBRWpDO0VBQ0EsSUFBTUMsTUFBTSxHQUFHRixHQUFHLENBQUNHLEdBQUcsQ0FDcEIsVUFBQ0MsSUFBSTtJQUNILFVBQUFDLE1BQUEsQ0FBR0Msa0JBQWtCLENBQUNGLElBQUksQ0FBQ0csSUFBSSxDQUFDLE9BQUFGLE1BQUEsQ0FBSUMsa0JBQWtCLENBQUNGLElBQUksQ0FBQ0ksS0FBSyxDQUFDLENBQUU7RUFBcEUsQ0FBb0UsQ0FDdkU7RUFFRDtFQUNBLE9BQU9OLE1BQU0sQ0FBQ08sSUFBSSxDQUFDLEdBQUcsQ0FBQyxDQUFDQyxPQUFPLENBQUNiLEdBQUcsRUFBRSxHQUFHLENBQUM7QUFDM0M7QUFaQWMsT0FBQSxDQUFBWixTQUFBLEdBQUFBLFNBQUE7QUFtQkE7Ozs7Ozs7Ozs7Ozs7O0FBY0EsU0FBZ0JFLGNBQWNBLENBQUE7RUFBOUIsSUFBQVcsS0FBQTtFQUdFO0VBQ0EsT0FBTyxJQUFJLENBQUNULEdBQUcsQ0FBQyxVQUFDVSxDQUFDLEVBQUVDLElBQUk7SUFDdEIsSUFBTUMsS0FBSyxHQUFHSCxLQUFJLENBQUNJLEtBQUssQ0FBQ0YsSUFBSSxDQUFDO0lBQzlCLElBQUksSUFBQXBCLFVBQUEsQ0FBQXVCLEtBQUssRUFBQ0gsSUFBSSxDQUFDLElBQUlBLElBQUksQ0FBQ1AsSUFBSSxLQUFLLE1BQU0sRUFBRTtNQUN2QyxPQUFPUSxLQUFLLENBQUNHLElBQUksQ0FBQ3RCLG1CQUFtQixDQUFDLENBQUN1QixPQUFPLEVBQUU7O0lBRWxELE9BQU9KLEtBQUssQ0FBQ0ssTUFBTSxDQUFDeEIsbUJBQW1CLENBQUMsQ0FBQ3VCLE9BQU8sRUFBRTtFQUNwRCxDQUFDLENBQUMsQ0FDQ0MsTUFBTTtFQUNMO0VBQ0Esb0JBQW9CO0VBQ2xCO0VBQ0EsK0NBQStDO0VBQy9DO0VBQ0E7RUFDRjtFQUFBLENBQ0QsQ0FDQWpCLEdBQUcsQ0FBMkIsVUFBQ1UsQ0FBQyxFQUFFQyxJQUFJOztJQUNyQyxJQUFNQyxLQUFLLEdBQUdILEtBQUksQ0FBQ0ksS0FBSyxDQUFDRixJQUFJLENBQUM7SUFDOUIsSUFBTVAsSUFBSSxHQUFHUSxLQUFLLENBQUNNLElBQUksQ0FBQyxNQUFNLENBQVcsQ0FBQyxDQUFDO0lBQzNDO0lBQ0EsSUFBTWIsS0FBSyxHQUFHLENBQUFjLEVBQUEsR0FBQVAsS0FBSyxDQUFDUSxHQUFHLEVBQUUsY0FBQUQsRUFBQSxjQUFBQSxFQUFBLEdBQUksRUFBRTtJQUUvQjtJQUNBLElBQUlFLEtBQUssQ0FBQ0MsT0FBTyxDQUFDakIsS0FBSyxDQUFDLEVBQUU7TUFDeEIsT0FBT0EsS0FBSyxDQUFDTCxHQUFHLENBQUMsVUFBQ29CLEdBQUc7UUFDbkI7Ozs7UUFJQSxPQUFDO1VBQUVoQixJQUFJLEVBQUFBLElBQUE7VUFBRUMsS0FBSyxFQUFFZSxHQUFHLENBQUNiLE9BQU8sQ0FBQ1osS0FBSyxFQUFFLE1BQU07UUFBQyxDQUFFO01BQTVDLENBQTZDLENBQzlDOztJQUVIO0lBQ0EsT0FBTztNQUFFUyxJQUFJLEVBQUFBLElBQUE7TUFBRUMsS0FBSyxFQUFFQSxLQUFLLENBQUNFLE9BQU8sQ0FBQ1osS0FBSyxFQUFFLE1BQU07SUFBQyxDQUFFO0VBQ3RELENBQUMsQ0FBQyxDQUNEcUIsT0FBTyxFQUFFO0FBQ2Q7QUF4Q0FSLE9BQUEsQ0FBQVYsY0FBQSxHQUFBQSxjQUFBIn0=

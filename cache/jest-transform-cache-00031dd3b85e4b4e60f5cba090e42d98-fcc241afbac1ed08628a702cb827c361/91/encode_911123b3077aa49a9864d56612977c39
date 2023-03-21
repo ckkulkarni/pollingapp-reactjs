@@ -1,0 +1,78 @@
+9a33b895ada12b02fa66e4704509e2a0
+"use strict";
+
+var __importDefault = void 0 && (void 0).__importDefault || function (mod) {
+  return mod && mod.__esModule ? mod : {
+    "default": mod
+  };
+};
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+exports.encodeNonAsciiHTML = exports.encodeHTML = void 0;
+var encode_html_js_1 = __importDefault(require("./generated/encode-html.js"));
+var escape_js_1 = require("./escape.js");
+var htmlReplacer = /[\t\n!-,./:-@[-`\f{-}$\x80-\uFFFF]/g;
+/**
+ * Encodes all characters in the input using HTML entities. This includes
+ * characters that are valid ASCII characters in HTML documents, such as `#`.
+ *
+ * To get a more compact output, consider using the `encodeNonAsciiHTML`
+ * function, which will only encode characters that are not valid in HTML
+ * documents, as well as non-ASCII characters.
+ *
+ * If a character has no equivalent entity, a numeric hexadecimal reference
+ * (eg. `&#xfc;`) will be used.
+ */
+function encodeHTML(data) {
+  return encodeHTMLTrieRe(htmlReplacer, data);
+}
+exports.encodeHTML = encodeHTML;
+/**
+ * Encodes all non-ASCII characters, as well as characters not valid in HTML
+ * documents using HTML entities. This function will not encode characters that
+ * are valid in HTML documents, such as `#`.
+ *
+ * If a character has no equivalent entity, a numeric hexadecimal reference
+ * (eg. `&#xfc;`) will be used.
+ */
+function encodeNonAsciiHTML(data) {
+  return encodeHTMLTrieRe(escape_js_1.xmlReplacer, data);
+}
+exports.encodeNonAsciiHTML = encodeNonAsciiHTML;
+function encodeHTMLTrieRe(regExp, str) {
+  var ret = "";
+  var lastIdx = 0;
+  var match;
+  while ((match = regExp.exec(str)) !== null) {
+    var i = match.index;
+    ret += str.substring(lastIdx, i);
+    var char = str.charCodeAt(i);
+    var next = encode_html_js_1.default.get(char);
+    if (typeof next === "object") {
+      // We are in a branch. Try to match the next char.
+      if (i + 1 < str.length) {
+        var nextChar = str.charCodeAt(i + 1);
+        var value = typeof next.n === "number" ? next.n === nextChar ? next.o : undefined : next.n.get(nextChar);
+        if (value !== undefined) {
+          ret += value;
+          lastIdx = regExp.lastIndex += 1;
+          continue;
+        }
+      }
+      next = next.v;
+    }
+    // We might have a tree node without a value; skip and use a numeric entitiy.
+    if (next !== undefined) {
+      ret += next;
+      lastIdx = i + 1;
+    } else {
+      var cp = (0, escape_js_1.getCodePoint)(str, i);
+      ret += "&#x".concat(cp.toString(16), ";");
+      // Increase by 1 if we have a surrogate pair
+      lastIdx = regExp.lastIndex += Number(cp !== char);
+    }
+  }
+  return ret + str.substr(lastIdx);
+}
+//# sourceMappingURL=data:application/json;charset=utf-8;base64,eyJ2ZXJzaW9uIjozLCJuYW1lcyI6WyJlbmNvZGVfaHRtbF9qc18xIiwiX19pbXBvcnREZWZhdWx0IiwicmVxdWlyZSIsImVzY2FwZV9qc18xIiwiaHRtbFJlcGxhY2VyIiwiZW5jb2RlSFRNTCIsImRhdGEiLCJlbmNvZGVIVE1MVHJpZVJlIiwiZXhwb3J0cyIsImVuY29kZU5vbkFzY2lpSFRNTCIsInhtbFJlcGxhY2VyIiwicmVnRXhwIiwic3RyIiwicmV0IiwibGFzdElkeCIsIm1hdGNoIiwiZXhlYyIsImkiLCJpbmRleCIsInN1YnN0cmluZyIsImNoYXIiLCJjaGFyQ29kZUF0IiwibmV4dCIsImRlZmF1bHQiLCJnZXQiLCJsZW5ndGgiLCJuZXh0Q2hhciIsInZhbHVlIiwibiIsIm8iLCJ1bmRlZmluZWQiLCJsYXN0SW5kZXgiLCJ2IiwiY3AiLCJnZXRDb2RlUG9pbnQiLCJjb25jYXQiLCJ0b1N0cmluZyIsIk51bWJlciIsInN1YnN0ciJdLCJzb3VyY2VzIjpbImh0dHBzOi8vcmF3LmdpdGh1YnVzZXJjb250ZW50LmNvbS9mYjU1L2VudGl0aWVzLzg2N2FjNzA5YmE0ODJhNTZhOThiN2MzNWY0OWNhODMzYzc0ZGMxOTMvc3JjL2VuY29kZS50cyJdLCJzb3VyY2VzQ29udGVudCI6W251bGxdLCJtYXBwaW5ncyI6Ijs7Ozs7Ozs7Ozs7QUFBQSxJQUFBQSxnQkFBQSxHQUFBQyxlQUFBLENBQUFDLE9BQUE7QUFDQSxJQUFBQyxXQUFBLEdBQUFELE9BQUE7QUFFQSxJQUFNRSxZQUFZLEdBQUcscUNBQXFDO0FBRTFEOzs7Ozs7Ozs7OztBQVdBLFNBQWdCQyxVQUFVQSxDQUFDQyxJQUFZO0VBQ25DLE9BQU9DLGdCQUFnQixDQUFDSCxZQUFZLEVBQUVFLElBQUksQ0FBQztBQUMvQztBQUZBRSxPQUFBLENBQUFILFVBQUEsR0FBQUEsVUFBQTtBQUdBOzs7Ozs7OztBQVFBLFNBQWdCSSxrQkFBa0JBLENBQUNILElBQVk7RUFDM0MsT0FBT0MsZ0JBQWdCLENBQUNKLFdBQUEsQ0FBQU8sV0FBVyxFQUFFSixJQUFJLENBQUM7QUFDOUM7QUFGQUUsT0FBQSxDQUFBQyxrQkFBQSxHQUFBQSxrQkFBQTtBQUlBLFNBQVNGLGdCQUFnQkEsQ0FBQ0ksTUFBYyxFQUFFQyxHQUFXO0VBQ2pELElBQUlDLEdBQUcsR0FBRyxFQUFFO0VBQ1osSUFBSUMsT0FBTyxHQUFHLENBQUM7RUFDZixJQUFJQyxLQUFLO0VBRVQsT0FBTyxDQUFDQSxLQUFLLEdBQUdKLE1BQU0sQ0FBQ0ssSUFBSSxDQUFDSixHQUFHLENBQUMsTUFBTSxJQUFJLEVBQUU7SUFDeEMsSUFBTUssQ0FBQyxHQUFHRixLQUFLLENBQUNHLEtBQUs7SUFDckJMLEdBQUcsSUFBSUQsR0FBRyxDQUFDTyxTQUFTLENBQUNMLE9BQU8sRUFBRUcsQ0FBQyxDQUFDO0lBQ2hDLElBQU1HLElBQUksR0FBR1IsR0FBRyxDQUFDUyxVQUFVLENBQUNKLENBQUMsQ0FBQztJQUM5QixJQUFJSyxJQUFJLEdBQUd0QixnQkFBQSxDQUFBdUIsT0FBUSxDQUFDQyxHQUFHLENBQUNKLElBQUksQ0FBQztJQUU3QixJQUFJLE9BQU9FLElBQUksS0FBSyxRQUFRLEVBQUU7TUFDMUI7TUFDQSxJQUFJTCxDQUFDLEdBQUcsQ0FBQyxHQUFHTCxHQUFHLENBQUNhLE1BQU0sRUFBRTtRQUNwQixJQUFNQyxRQUFRLEdBQUdkLEdBQUcsQ0FBQ1MsVUFBVSxDQUFDSixDQUFDLEdBQUcsQ0FBQyxDQUFDO1FBQ3RDLElBQU1VLEtBQUssR0FDUCxPQUFPTCxJQUFJLENBQUNNLENBQUMsS0FBSyxRQUFRLEdBQ3BCTixJQUFJLENBQUNNLENBQUMsS0FBS0YsUUFBUSxHQUNmSixJQUFJLENBQUNPLENBQUMsR0FDTkMsU0FBUyxHQUNiUixJQUFJLENBQUNNLENBQUMsQ0FBQ0osR0FBRyxDQUFDRSxRQUFRLENBQUM7UUFFOUIsSUFBSUMsS0FBSyxLQUFLRyxTQUFTLEVBQUU7VUFDckJqQixHQUFHLElBQUljLEtBQUs7VUFDWmIsT0FBTyxHQUFHSCxNQUFNLENBQUNvQixTQUFTLElBQUksQ0FBQztVQUMvQjs7O01BSVJULElBQUksR0FBR0EsSUFBSSxDQUFDVSxDQUFDOztJQUdqQjtJQUNBLElBQUlWLElBQUksS0FBS1EsU0FBUyxFQUFFO01BQ3BCakIsR0FBRyxJQUFJUyxJQUFJO01BQ1hSLE9BQU8sR0FBR0csQ0FBQyxHQUFHLENBQUM7S0FDbEIsTUFBTTtNQUNILElBQU1nQixFQUFFLEdBQUcsSUFBQTlCLFdBQUEsQ0FBQStCLFlBQVksRUFBQ3RCLEdBQUcsRUFBRUssQ0FBQyxDQUFDO01BQy9CSixHQUFHLElBQUksTUFBQXNCLE1BQUEsQ0FBTUYsRUFBRSxDQUFDRyxRQUFRLENBQUMsRUFBRSxDQUFDLE1BQUc7TUFDL0I7TUFDQXRCLE9BQU8sR0FBR0gsTUFBTSxDQUFDb0IsU0FBUyxJQUFJTSxNQUFNLENBQUNKLEVBQUUsS0FBS2IsSUFBSSxDQUFDOzs7RUFJekQsT0FBT1AsR0FBRyxHQUFHRCxHQUFHLENBQUMwQixNQUFNLENBQUN4QixPQUFPLENBQUM7QUFDcEMifQ==

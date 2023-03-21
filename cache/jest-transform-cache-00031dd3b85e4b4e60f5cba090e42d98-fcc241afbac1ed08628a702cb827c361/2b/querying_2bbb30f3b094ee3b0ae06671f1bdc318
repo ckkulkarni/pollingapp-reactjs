@@ -1,0 +1,135 @@
+5968d401c76a0eabe8a9d6d64d3d28ca
+"use strict";
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+exports.findAll = exports.existsOne = exports.findOne = exports.findOneChild = exports.find = exports.filter = void 0;
+var domhandler_1 = require("domhandler");
+/**
+ * Search a node and its children for nodes passing a test function.
+ *
+ * @category Querying
+ * @param test Function to test nodes on.
+ * @param node Node to search. Will be included in the result set if it matches.
+ * @param recurse Also consider child nodes.
+ * @param limit Maximum number of nodes to return.
+ * @returns All nodes passing `test`.
+ */
+function filter(test, node, recurse, limit) {
+  if (recurse === void 0) {
+    recurse = true;
+  }
+  if (limit === void 0) {
+    limit = Infinity;
+  }
+  if (!Array.isArray(node)) node = [node];
+  return find(test, node, recurse, limit);
+}
+exports.filter = filter;
+/**
+ * Search an array of node and its children for nodes passing a test function.
+ *
+ * @category Querying
+ * @param test Function to test nodes on.
+ * @param nodes Array of nodes to search.
+ * @param recurse Also consider child nodes.
+ * @param limit Maximum number of nodes to return.
+ * @returns All nodes passing `test`.
+ */
+function find(test, nodes, recurse, limit) {
+  var result = [];
+  for (var _i = 0, nodes_1 = nodes; _i < nodes_1.length; _i++) {
+    var elem = nodes_1[_i];
+    if (test(elem)) {
+      result.push(elem);
+      if (--limit <= 0) break;
+    }
+    if (recurse && (0, domhandler_1.hasChildren)(elem) && elem.children.length > 0) {
+      var children = find(test, elem.children, recurse, limit);
+      result.push.apply(result, children);
+      limit -= children.length;
+      if (limit <= 0) break;
+    }
+  }
+  return result;
+}
+exports.find = find;
+/**
+ * Finds the first element inside of an array that matches a test function.
+ *
+ * @category Querying
+ * @param test Function to test nodes on.
+ * @param nodes Array of nodes to search.
+ * @returns The first node in the array that passes `test`.
+ * @deprecated Use `Array.prototype.find` directly.
+ */
+function findOneChild(test, nodes) {
+  return nodes.find(test);
+}
+exports.findOneChild = findOneChild;
+/**
+ * Finds one element in a tree that passes a test.
+ *
+ * @category Querying
+ * @param test Function to test nodes on.
+ * @param nodes Array of nodes to search.
+ * @param recurse Also consider child nodes.
+ * @returns The first child node that passes `test`.
+ */
+function findOne(test, nodes, recurse) {
+  if (recurse === void 0) {
+    recurse = true;
+  }
+  var elem = null;
+  for (var i = 0; i < nodes.length && !elem; i++) {
+    var checked = nodes[i];
+    if (!(0, domhandler_1.isTag)(checked)) {
+      continue;
+    } else if (test(checked)) {
+      elem = checked;
+    } else if (recurse && checked.children.length > 0) {
+      elem = findOne(test, checked.children, true);
+    }
+  }
+  return elem;
+}
+exports.findOne = findOne;
+/**
+ * @category Querying
+ * @param test Function to test nodes on.
+ * @param nodes Array of nodes to search.
+ * @returns Whether a tree of nodes contains at least one node passing the test.
+ */
+function existsOne(test, nodes) {
+  return nodes.some(function (checked) {
+    return (0, domhandler_1.isTag)(checked) && (test(checked) || checked.children.length > 0 && existsOne(test, checked.children));
+  });
+}
+exports.existsOne = existsOne;
+/**
+ * Search and array of nodes and its children for elements passing a test function.
+ *
+ * Same as `find`, but limited to elements and with less options, leading to reduced complexity.
+ *
+ * @category Querying
+ * @param test Function to test nodes on.
+ * @param nodes Array of nodes to search.
+ * @returns All nodes passing `test`.
+ */
+function findAll(test, nodes) {
+  var _a;
+  var result = [];
+  var stack = nodes.filter(domhandler_1.isTag);
+  var elem;
+  while (elem = stack.shift()) {
+    var children = (_a = elem.children) === null || _a === void 0 ? void 0 : _a.filter(domhandler_1.isTag);
+    if (children && children.length > 0) {
+      stack.unshift.apply(stack, children);
+    }
+    if (test(elem)) result.push(elem);
+  }
+  return result;
+}
+exports.findAll = findAll;
+//# sourceMappingURL=data:application/json;charset=utf-8;base64,eyJ2ZXJzaW9uIjozLCJuYW1lcyI6WyJkb21oYW5kbGVyXzEiLCJyZXF1aXJlIiwiZmlsdGVyIiwidGVzdCIsIm5vZGUiLCJyZWN1cnNlIiwibGltaXQiLCJJbmZpbml0eSIsIkFycmF5IiwiaXNBcnJheSIsImZpbmQiLCJleHBvcnRzIiwibm9kZXMiLCJyZXN1bHQiLCJfaSIsIm5vZGVzXzEiLCJsZW5ndGgiLCJlbGVtIiwicHVzaCIsImhhc0NoaWxkcmVuIiwiY2hpbGRyZW4iLCJhcHBseSIsImZpbmRPbmVDaGlsZCIsImZpbmRPbmUiLCJpIiwiY2hlY2tlZCIsImlzVGFnIiwiZXhpc3RzT25lIiwic29tZSIsImZpbmRBbGwiLCJzdGFjayIsInNoaWZ0IiwiX2EiLCJ1bnNoaWZ0Il0sInNvdXJjZXMiOlsiaHR0cHM6Ly9yYXcuZ2l0aHVidXNlcmNvbnRlbnQuY29tL2ZiNTUvZG9tdXRpbHMvZjdlMzU3YjVjMjEwYjY3MzFjMmE2MGUwYjdiM2NmYWExZjk2YjcwNi9zcmMvcXVlcnlpbmcudHMiXSwic291cmNlc0NvbnRlbnQiOltudWxsXSwibWFwcGluZ3MiOiI7Ozs7OztBQUFBLElBQUFBLFlBQUEsR0FBQUMsT0FBQTtBQUVBOzs7Ozs7Ozs7O0FBVUEsU0FBZ0JDLE1BQU1BLENBQ2xCQyxJQUFnQyxFQUNoQ0MsSUFBeUIsRUFDekJDLE9BQWMsRUFDZEMsS0FBZ0I7RUFEaEIsSUFBQUQsT0FBQTtJQUFBQSxPQUFBLE9BQWM7RUFBQTtFQUNkLElBQUFDLEtBQUE7SUFBQUEsS0FBQSxHQUFBQyxRQUFnQjtFQUFBO0VBRWhCLElBQUksQ0FBQ0MsS0FBSyxDQUFDQyxPQUFPLENBQUNMLElBQUksQ0FBQyxFQUFFQSxJQUFJLEdBQUcsQ0FBQ0EsSUFBSSxDQUFDO0VBQ3ZDLE9BQU9NLElBQUksQ0FBQ1AsSUFBSSxFQUFFQyxJQUFJLEVBQUVDLE9BQU8sRUFBRUMsS0FBSyxDQUFDO0FBQzNDO0FBUkFLLE9BQUEsQ0FBQVQsTUFBQSxHQUFBQSxNQUFBO0FBVUE7Ozs7Ozs7Ozs7QUFVQSxTQUFnQlEsSUFBSUEs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

@@ -1,0 +1,78 @@
+660fc1d9cd746ff96f3b7b6aa7952845
+"use strict";
+
+var __createBinding = void 0 && (void 0).__createBinding || (Object.create ? function (o, m, k, k2) {
+  if (k2 === undefined) k2 = k;
+  var desc = Object.getOwnPropertyDescriptor(m, k);
+  if (!desc || ("get" in desc ? !m.__esModule : desc.writable || desc.configurable)) {
+    desc = {
+      enumerable: true,
+      get: function () {
+        return m[k];
+      }
+    };
+  }
+  Object.defineProperty(o, k2, desc);
+} : function (o, m, k, k2) {
+  if (k2 === undefined) k2 = k;
+  o[k2] = m[k];
+});
+var __setModuleDefault = void 0 && (void 0).__setModuleDefault || (Object.create ? function (o, v) {
+  Object.defineProperty(o, "default", {
+    enumerable: true,
+    value: v
+  });
+} : function (o, v) {
+  o["default"] = v;
+});
+var __importStar = void 0 && (void 0).__importStar || function (mod) {
+  if (mod && mod.__esModule) return mod;
+  var result = {};
+  if (mod != null) for (var k in mod) if (k !== "default" && Object.prototype.hasOwnProperty.call(mod, k)) __createBinding(result, mod, k);
+  __setModuleDefault(result, mod);
+  return result;
+};
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+exports.Cheerio = void 0;
+var Attributes = __importStar(require("./api/attributes.js"));
+var Traversing = __importStar(require("./api/traversing.js"));
+var Manipulation = __importStar(require("./api/manipulation.js"));
+var Css = __importStar(require("./api/css.js"));
+var Forms = __importStar(require("./api/forms.js"));
+var Cheerio = /** @class */function () {
+  /**
+   * Instance of cheerio. Methods are specified in the modules. Usage of this
+   * constructor is not recommended. Please use `$.load` instead.
+   *
+   * @private
+   * @param elements - The new selection.
+   * @param root - Sets the root node.
+   * @param options - Options for the instance.
+   */
+  function Cheerio(elements, root, options) {
+    this.length = 0;
+    this.options = options;
+    this._root = root;
+    if (elements) {
+      for (var idx = 0; idx < elements.length; idx++) {
+        this[idx] = elements[idx];
+      }
+      this.length = elements.length;
+    }
+  }
+  return Cheerio;
+}();
+exports.Cheerio = Cheerio;
+/** Set a signature of the object. */
+Cheerio.prototype.cheerio = '[cheerio object]';
+/*
+ * Make cheerio an array-like object
+ */
+Cheerio.prototype.splice = Array.prototype.splice;
+// Support for (const element of $(...)) iteration:
+Cheerio.prototype[Symbol.iterator] = Array.prototype[Symbol.iterator];
+// Plug in the API
+Object.assign(Cheerio.prototype, Attributes, Traversing, Manipulation, Css, Forms);
+//# sourceMappingURL=data:application/json;charset=utf-8;base64,eyJ2ZXJzaW9uIjozLCJuYW1lcyI6WyJBdHRyaWJ1dGVzIiwiX19pbXBvcnRTdGFyIiwicmVxdWlyZSIsIlRyYXZlcnNpbmciLCJNYW5pcHVsYXRpb24iLCJDc3MiLCJGb3JtcyIsIkNoZWVyaW8iLCJlbGVtZW50cyIsInJvb3QiLCJvcHRpb25zIiwibGVuZ3RoIiwiX3Jvb3QiLCJpZHgiLCJleHBvcnRzIiwicHJvdG90eXBlIiwiY2hlZXJpbyIsInNwbGljZSIsIkFycmF5IiwiU3ltYm9sIiwiaXRlcmF0b3IiLCJPYmplY3QiLCJhc3NpZ24iXSwic291cmNlcyI6WyJodHRwczovL3Jhdy5naXRodWJ1c2VyY29udGVudC5jb20vY2hlZXJpb2pzL2NoZWVyaW8vZDFjYmM2NmQ1MzM5MmNlOGJmNmNkMDA2OGY2NzU4MzYzNzJkMmJmMy9zcmMvY2hlZXJpby50cyJdLCJzb3VyY2VzQ29udGVudCI6W251bGxdLCJtYXBwaW5ncyI6Ijs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7OztBQUlBLElBQUFBLFVBQUEsR0FBQUMsWUFBQSxDQUFBQyxPQUFBO0FBQ0EsSUFBQUMsVUFBQSxHQUFBRixZQUFBLENBQUFDLE9BQUE7QUFDQSxJQUFBRSxZQUFBLEdBQUFILFlBQUEsQ0FBQUMsT0FBQTtBQUNBLElBQUFHLEdBQUEsR0FBQUosWUFBQSxDQUFBQyxPQUFBO0FBQ0EsSUFBQUksS0FBQSxHQUFBTCxZQUFBLENBQUFDLE9BQUE7QUFRQSxJQUFBSyxPQUFBO0VBWUU7Ozs7Ozs7OztFQVNBLFNBQUFBLFFBQ0VDLFFBQWtDLEVBQ2xDQyxJQUE4QixFQUM5QkMsT0FBd0I7SUF2QjFCLEtBQUFDLE1BQU0sR0FBRyxDQUFDO0lBeUJSLElBQUksQ0FBQ0QsT0FBTyxHQUFHQSxPQUFPO0lBQ3RCLElBQUksQ0FBQ0UsS0FBSyxHQUFHSCxJQUFJO0lBRWpCLElBQUlELFFBQVEsRUFBRTtNQUNaLEtBQUssSUFBSUssR0FBRyxHQUFHLENBQUMsRUFBRUEsR0FBRyxHQUFHTCxRQUFRLENBQUNHLE1BQU0sRUFBRUUsR0FBRyxFQUFFLEVBQUU7UUFDOUMsSUFBSSxDQUFDQSxHQUFHLENBQUMsR0FBR0wsUUFBUSxDQUFDSyxHQUFHLENBQUM7O01BRTNCLElBQUksQ0FBQ0YsTUFBTSxHQUFHSCxRQUFRLENBQUNHLE1BQU07O0VBRWpDO0VBd0NGLE9BQUFKLE9BQUM7QUFBRCxDQUFDLEVBM0VEO0FBQXNCTyxPQUFBLENBQUFQLE9BQUEsR0FBQUEsT0FBQTtBQXlGdEI7QUFDQUEsT0FBTyxDQUFDUSxTQUFTLENBQUNDLE9BQU8sR0FBRyxrQkFBa0I7QUFFOUM7OztBQUdBVCxPQUFPLENBQUNRLFNBQVMsQ0FBQ0UsTUFBTSxHQUFHQyxLQUFLLENBQUNILFNBQVMsQ0FBQ0UsTUFBTTtBQUVqRDtBQUNBVixPQUFPLENBQUNRLFNBQVMsQ0FBQ0ksTUFBTSxDQUFDQyxRQUFRLENBQUMsR0FBR0YsS0FBSyxDQUFDSCxTQUFTLENBQUNJLE1BQU0sQ0FBQ0MsUUFBUSxDQUFDO0FBRXJFO0FBQ0FDLE1BQU0sQ0FBQ0MsTUFBTSxDQUNYZixPQUFPLENBQUNRLFNBQVMsRUFDakJmLFVBQVUsRUFDVkcsVUFBVSxFQUNWQyxZQUFZLEVBQ1pDLEdBQUcsRUFDSEMsS0FBSyxDQUNOIn0=

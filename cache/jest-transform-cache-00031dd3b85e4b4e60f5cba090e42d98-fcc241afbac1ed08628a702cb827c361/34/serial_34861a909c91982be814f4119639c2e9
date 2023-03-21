@@ -1,0 +1,20 @@
+5d13059a4c23b411e65a502c744e2561
+"use strict";
+
+var serialOrdered = require('./serialOrdered.js');
+
+// Public API
+module.exports = serial;
+
+/**
+ * Runs iterator over provided array elements in series
+ *
+ * @param   {array|object} list - array or object (named list) to iterate over
+ * @param   {function} iterator - iterator to run
+ * @param   {function} callback - invoked when all elements processed
+ * @returns {function} - jobs terminator
+ */
+function serial(list, iterator, callback) {
+  return serialOrdered(list, iterator, null, callback);
+}
+//# sourceMappingURL=data:application/json;charset=utf-8;base64,eyJ2ZXJzaW9uIjozLCJuYW1lcyI6WyJzZXJpYWxPcmRlcmVkIiwicmVxdWlyZSIsIm1vZHVsZSIsImV4cG9ydHMiLCJzZXJpYWwiLCJsaXN0IiwiaXRlcmF0b3IiLCJjYWxsYmFjayJdLCJzb3VyY2VzIjpbInNlcmlhbC5qcyJdLCJzb3VyY2VzQ29udGVudCI6WyJ2YXIgc2VyaWFsT3JkZXJlZCA9IHJlcXVpcmUoJy4vc2VyaWFsT3JkZXJlZC5qcycpO1xuXG4vLyBQdWJsaWMgQVBJXG5tb2R1bGUuZXhwb3J0cyA9IHNlcmlhbDtcblxuLyoqXG4gKiBSdW5zIGl0ZXJhdG9yIG92ZXIgcHJvdmlkZWQgYXJyYXkgZWxlbWVudHMgaW4gc2VyaWVzXG4gKlxuICogQHBhcmFtICAge2FycmF5fG9iamVjdH0gbGlzdCAtIGFycmF5IG9yIG9iamVjdCAobmFtZWQgbGlzdCkgdG8gaXRlcmF0ZSBvdmVyXG4gKiBAcGFyYW0gICB7ZnVuY3Rpb259IGl0ZXJhdG9yIC0gaXRlcmF0b3IgdG8gcnVuXG4gKiBAcGFyYW0gICB7ZnVuY3Rpb259IGNhbGxiYWNrIC0gaW52b2tlZCB3aGVuIGFsbCBlbGVtZW50cyBwcm9jZXNzZWRcbiAqIEByZXR1cm5zIHtmdW5jdGlvbn0gLSBqb2JzIHRlcm1pbmF0b3JcbiAqL1xuZnVuY3Rpb24gc2VyaWFsKGxpc3QsIGl0ZXJhdG9yLCBjYWxsYmFjaylcbntcbiAgcmV0dXJuIHNlcmlhbE9yZGVyZWQobGlzdCwgaXRlcmF0b3IsIG51bGwsIGNhbGxiYWNrKTtcbn1cbiJdLCJtYXBwaW5ncyI6Ijs7QUFBQSxJQUFJQSxhQUFhLEdBQUdDLE9BQU8sQ0FBQyxvQkFBb0IsQ0FBQzs7QUFFakQ7QUFDQUMsTUFBTSxDQUFDQyxPQUFPLEdBQUdDLE1BQU07O0FBRXZCO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQSxTQUFTQSxNQUFNQSxDQUFDQyxJQUFJLEVBQUVDLFFBQVEsRUFBRUMsUUFBUSxFQUN4QztFQUNFLE9BQU9QLGFBQWEsQ0FBQ0ssSUFBSSxFQUFFQyxRQUFRLEVBQUUsSUFBSSxFQUFFQyxRQUFRLENBQUM7QUFDdEQifQ==

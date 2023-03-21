@@ -1,0 +1,52 @@
+f2c12731b0c23211f2bc150c63f62161
+"use strict";
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+exports.all = exports.VERSION = exports.HttpStatusCode = exports.CanceledError = exports.CancelToken = exports.Cancel = exports.AxiosHeaders = exports.AxiosError = exports.Axios = void 0;
+Object.defineProperty(exports, "default", {
+  enumerable: true,
+  get: function () {
+    return _axios.default;
+  }
+});
+exports.toFormData = exports.spread = exports.mergeConfig = exports.isCancel = exports.isAxiosError = exports.formToJSON = void 0;
+var _axios = _interopRequireDefault(require("./lib/axios.js"));
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+// This module is intended to unwrap Axios default export as named.
+// Keep top-level export same with static properties
+// so that it can keep same with es module or cjs
+const {
+  Axios,
+  AxiosError,
+  CanceledError,
+  isCancel,
+  CancelToken,
+  VERSION,
+  all,
+  Cancel,
+  isAxiosError,
+  spread,
+  toFormData,
+  AxiosHeaders,
+  HttpStatusCode,
+  formToJSON,
+  mergeConfig
+} = _axios.default;
+exports.mergeConfig = mergeConfig;
+exports.formToJSON = formToJSON;
+exports.HttpStatusCode = HttpStatusCode;
+exports.AxiosHeaders = AxiosHeaders;
+exports.toFormData = toFormData;
+exports.spread = spread;
+exports.isAxiosError = isAxiosError;
+exports.Cancel = Cancel;
+exports.all = all;
+exports.VERSION = VERSION;
+exports.CancelToken = CancelToken;
+exports.isCancel = isCancel;
+exports.CanceledError = CanceledError;
+exports.AxiosError = AxiosError;
+exports.Axios = Axios;
+//# sourceMappingURL=data:application/json;charset=utf-8;base64,eyJ2ZXJzaW9uIjozLCJuYW1lcyI6WyJfYXhpb3MiLCJfaW50ZXJvcFJlcXVpcmVEZWZhdWx0IiwicmVxdWlyZSIsIm9iaiIsIl9fZXNNb2R1bGUiLCJkZWZhdWx0IiwiQXhpb3MiLCJBeGlvc0Vycm9yIiwiQ2FuY2VsZWRFcnJvciIsImlzQ2FuY2VsIiwiQ2FuY2VsVG9rZW4iLCJWRVJTSU9OIiwiYWxsIiwiQ2FuY2VsIiwiaXNBeGlvc0Vycm9yIiwic3ByZWFkIiwidG9Gb3JtRGF0YSIsIkF4aW9zSGVhZGVycyIsIkh0dHBTdGF0dXNDb2RlIiwiZm9ybVRvSlNPTiIsIm1lcmdlQ29uZmlnIiwiYXhpb3MiLCJleHBvcnRzIl0sInNvdXJjZXMiOlsiaW5kZXguanMiXSwic291cmNlc0NvbnRlbnQiOlsiaW1wb3J0IGF4aW9zIGZyb20gJy4vbGliL2F4aW9zLmpzJztcblxuLy8gVGhpcyBtb2R1bGUgaXMgaW50ZW5kZWQgdG8gdW53cmFwIEF4aW9zIGRlZmF1bHQgZXhwb3J0IGFzIG5hbWVkLlxuLy8gS2VlcCB0b3AtbGV2ZWwgZXhwb3J0IHNhbWUgd2l0aCBzdGF0aWMgcHJvcGVydGllc1xuLy8gc28gdGhhdCBpdCBjYW4ga2VlcCBzYW1lIHdpdGggZXMgbW9kdWxlIG9yIGNqc1xuY29uc3Qge1xuICBBeGlvcyxcbiAgQXhpb3NFcnJvcixcbiAgQ2FuY2VsZWRFcnJvcixcbiAgaXNDYW5jZWwsXG4gIENhbmNlbFRva2VuLFxuICBWRVJTSU9OLFxuICBhbGwsXG4gIENhbmNlbCxcbiAgaXNBeGlvc0Vycm9yLFxuICBzcHJlYWQsXG4gIHRvRm9ybURhdGEsXG4gIEF4aW9zSGVhZGVycyxcbiAgSHR0cFN0YXR1c0NvZGUsXG4gIGZvcm1Ub0pTT04sXG4gIG1lcmdlQ29uZmlnXG59ID0gYXhpb3M7XG5cbmV4cG9ydCB7XG4gIGF4aW9zIGFzIGRlZmF1bHQsXG4gIEF4aW9zLFxuICBBeGlvc0Vycm9yLFxuICBDYW5jZWxlZEVycm9yLFxuICBpc0NhbmNlbCxcbiAgQ2FuY2VsVG9rZW4sXG4gIFZFUlNJT04sXG4gIGFsbCxcbiAgQ2FuY2VsLFxuICBpc0F4aW9zRXJyb3IsXG4gIHNwcmVhZCxcbiAgdG9Gb3JtRGF0YSxcbiAgQXhpb3NIZWFkZXJzLFxuICBIdHRwU3RhdHVzQ29kZSxcbiAgZm9ybVRvSlNPTixcbiAgbWVyZ2VDb25maWdcbn1cbiJdLCJtYXBwaW5ncyI6Ijs7Ozs7Ozs7Ozs7OztBQUFBLElBQUFBLE1BQUEsR0FBQUMsc0JBQUEsQ0FBQUMsT0FBQTtBQUFtQyxTQUFBRCx1QkFBQUUsR0FBQSxXQUFBQSxHQUFBLElBQUFBLEdBQUEsQ0FBQUMsVUFBQSxHQUFBRCxHQUFBLEtBQUFFLE9BQUEsRUFBQUYsR0FBQTtBQUVuQztBQUNBO0FBQ0E7QUFDQSxNQUFNO0VBQ0pHLEtBQUs7RUFDTEMsVUFBVTtFQUNWQyxhQUFhO0VBQ2JDLFFBQVE7RUFDUkMsV0FBVztFQUNYQyxPQUFPO0VBQ1BDLEdBQUc7RUFDSEMsTUFBTTtFQUNOQyxZQUFZO0VBQ1pDLE1BQU07RUFDTkMsVUFBVTtFQUNWQyxZQUFZO0VBQ1pDLGNBQWM7RUFDZEMsVUFBVTtFQUNWQztBQUNGLENBQUMsR0FBR0MsY0FBSztBQUFDQyxPQUFBLENBQUFGLFdBQUEsR0FBQUEsV0FBQTtBQUFBRSxPQUFBLENBQUFILFVBQUEsR0FBQUEsVUFBQTtBQUFBRyxPQUFBLENBQUFKLGNBQUEsR0FBQUEsY0FBQTtBQUFBSSxPQUFBLENBQUFMLFlBQUEsR0FBQUEsWUFBQTtBQUFBSyxPQUFBLENBQUFOLFVBQUEsR0FBQUEsVUFBQTtBQUFBTSxPQUFBLENBQUFQLE1BQUEsR0FBQUEsTUFBQTtBQUFBTyxPQUFBLENBQUFSLFlBQUEsR0FBQUEsWUFBQTtBQUFBUSxPQUFBLENBQUFULE1BQUEsR0FBQUEsTUFBQTtBQUFBUyxPQUFBLENBQUFWLEdBQUEsR0FBQUEsR0FBQTtBQUFBVSxPQUFBLENBQUFYLE9BQUEsR0FBQUEsT0FBQTtBQUFBVyxPQUFBLENBQUFaLFdBQUEsR0FBQUEsV0FBQTtBQUFBWSxPQUFBLENBQUFiLFFBQUEsR0FBQUEsUUFBQTtBQUFBYSxPQUFBLENBQUFkLGFBQUEsR0FBQUEsYUFBQTtBQUFBYyxPQUFBLENBQUFmLFVBQUEsR0FBQUEsVUFBQTtBQUFBZSxPQUFBLENBQUFoQixLQUFBLEdBQUFBLEtBQUEifQ==

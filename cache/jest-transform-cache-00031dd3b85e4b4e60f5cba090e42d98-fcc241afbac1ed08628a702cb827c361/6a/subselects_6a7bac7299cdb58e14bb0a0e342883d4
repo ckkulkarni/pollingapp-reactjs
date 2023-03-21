@@ -1,0 +1,111 @@
+4b46f9ba8540b343fb878ba02ca88b2b
+"use strict";
+
+var __spreadArray = void 0 && (void 0).__spreadArray || function (to, from, pack) {
+  if (pack || arguments.length === 2) for (var i = 0, l = from.length, ar; i < l; i++) {
+    if (ar || !(i in from)) {
+      if (!ar) ar = Array.prototype.slice.call(from, 0, i);
+      ar[i] = from[i];
+    }
+  }
+  return to.concat(ar || Array.prototype.slice.call(from));
+};
+var __importDefault = void 0 && (void 0).__importDefault || function (mod) {
+  return mod && mod.__esModule ? mod : {
+    "default": mod
+  };
+};
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+exports.subselects = exports.getNextSiblings = exports.ensureIsTag = exports.PLACEHOLDER_ELEMENT = void 0;
+var boolbase_1 = __importDefault(require("boolbase"));
+var sort_js_1 = require("../sort.js");
+/** Used as a placeholder for :has. Will be replaced with the actual element. */
+exports.PLACEHOLDER_ELEMENT = {};
+function ensureIsTag(next, adapter) {
+  if (next === boolbase_1.default.falseFunc) return boolbase_1.default.falseFunc;
+  return function (elem) {
+    return adapter.isTag(elem) && next(elem);
+  };
+}
+exports.ensureIsTag = ensureIsTag;
+function getNextSiblings(elem, adapter) {
+  var siblings = adapter.getSiblings(elem);
+  if (siblings.length <= 1) return [];
+  var elemIndex = siblings.indexOf(elem);
+  if (elemIndex < 0 || elemIndex === siblings.length - 1) return [];
+  return siblings.slice(elemIndex + 1).filter(adapter.isTag);
+}
+exports.getNextSiblings = getNextSiblings;
+function copyOptions(options) {
+  // Not copied: context, rootFunc
+  return {
+    xmlMode: !!options.xmlMode,
+    lowerCaseAttributeNames: !!options.lowerCaseAttributeNames,
+    lowerCaseTags: !!options.lowerCaseTags,
+    quirksMode: !!options.quirksMode,
+    cacheResults: !!options.cacheResults,
+    pseudos: options.pseudos,
+    adapter: options.adapter,
+    equals: options.equals
+  };
+}
+var is = function (next, token, options, context, compileToken) {
+  var func = compileToken(token, copyOptions(options), context);
+  return func === boolbase_1.default.trueFunc ? next : func === boolbase_1.default.falseFunc ? boolbase_1.default.falseFunc : function (elem) {
+    return func(elem) && next(elem);
+  };
+};
+/*
+ * :not, :has, :is, :matches and :where have to compile selectors
+ * doing this in src/pseudos.ts would lead to circular dependencies,
+ * so we add them here
+ */
+exports.subselects = {
+  is: is,
+  /**
+   * `:matches` and `:where` are aliases for `:is`.
+   */
+  matches: is,
+  where: is,
+  not: function (next, token, options, context, compileToken) {
+    var func = compileToken(token, copyOptions(options), context);
+    return func === boolbase_1.default.falseFunc ? next : func === boolbase_1.default.trueFunc ? boolbase_1.default.falseFunc : function (elem) {
+      return !func(elem) && next(elem);
+    };
+  },
+  has: function (next, subselect, options, _context, compileToken) {
+    var adapter = options.adapter;
+    var opts = copyOptions(options);
+    opts.relativeSelector = true;
+    var context = subselect.some(function (s) {
+      return s.some(sort_js_1.isTraversal);
+    }) ?
+    // Used as a placeholder. Will be replaced with the actual element.
+    [exports.PLACEHOLDER_ELEMENT] : undefined;
+    var compiled = compileToken(subselect, opts, context);
+    if (compiled === boolbase_1.default.falseFunc) return boolbase_1.default.falseFunc;
+    var hasElement = ensureIsTag(compiled, adapter);
+    // If `compiled` is `trueFunc`, we can skip this.
+    if (context && compiled !== boolbase_1.default.trueFunc) {
+      /*
+       * `shouldTestNextSiblings` will only be true if the query starts with
+       * a traversal (sibling or adjacent). That means we will always have a context.
+       */
+      var _a = compiled.shouldTestNextSiblings,
+        shouldTestNextSiblings_1 = _a === void 0 ? false : _a;
+      return function (elem) {
+        if (!next(elem)) return false;
+        context[0] = elem;
+        var childs = adapter.getChildren(elem);
+        var nextElements = shouldTestNextSiblings_1 ? __spreadArray(__spreadArray([], childs, true), getNextSiblings(elem, adapter), true) : childs;
+        return adapter.existsOne(hasElement, nextElements);
+      };
+    }
+    return function (elem) {
+      return next(elem) && adapter.existsOne(hasElement, adapter.getChildren(elem));
+    };
+  }
+};
+//# sourceMappingURL=data:application/json;charset=utf-8;base64,eyJ2ZXJzaW9uIjozLCJuYW1lcyI6WyJib29sYmFzZV8xIiwiX19pbXBvcnREZWZhdWx0IiwicmVxdWlyZSIsInNvcnRfanNfMSIsImV4cG9ydHMiLCJQTEFDRUhPTERFUl9FTEVNRU5UIiwiZW5zdXJlSXNUYWciLCJuZXh0IiwiYWRhcHRlciIsImRlZmF1bHQiLCJmYWxzZUZ1bmMiLCJlbGVtIiwiaXNUYWciLCJnZXROZXh0U2libGluZ3MiLCJzaWJsaW5ncyIsImdldFNpYmxpbmdzIiwibGVuZ3RoIiwiZWxlbUluZGV4IiwiaW5kZXhPZiIsInNsaWNlIiwiZmlsdGVyIiwiY29weU9wdGlvbnMiLCJvcHRpb25zIiwieG1sTW9kZSIsImxvd2VyQ2FzZUF0dHJpYnV0ZU5hbWVzIiwibG93ZXJDYXNlVGFncyIsInF1aXJrc01vZGUiLCJjYWNoZVJlc3VsdHMiLCJwc2V1ZG9zIiwiZXF1YWxzIiwiaXMiLCJ0b2tlbiIsImNvbnRleHQiLCJjb21waWxlVG9rZW4iLCJmdW5jIiwidHJ1ZUZ1bmMiLCJzdWJzZWxlY3RzIiwibWF0Y2hlcyIsIndoZXJlIiwibm90IiwiaGFzIiwic3Vic2VsZWN0IiwiX2NvbnRleHQiLCJvcHRzIiwicmVsYXRpdmVTZWxlY3RvciIsInNvbWUiLCJzIiwiaXNUcmF2ZXJzYWwiLCJ1bmRlZmluZWQiLCJjb21waWxlZCIsImhhc0VsZW1lbnQiLCJfYSIsInNob3VsZFRlc3ROZXh0U2libGluZ3MiLCJzaG91bGRUZXN0TmV4dFNpYmxpbmdzXzEiLCJjaGlsZHMiLCJnZXRDaGlsZHJlbiIsIm5leHRFbGVtZW50cyIsIl9fc3ByZWFkQXJyYXkiLCJleGlzdHNPbmUiXSwic291cmNlcyI6WyJodHRwczovL3Jhdy5naXRodWJ1c2VyY29udGVudC5jb20vZmI1NS9jc3Mtc2VsZWN0LzBmMDcyNWE5ZGZlZGRkMmZkYjU0ZWRhOTY1NmNkYmFiNWJiZjZiZTYvc3JjL3BzZXVkby1zZWxlY3RvcnMvc3Vic2VsZWN0cy50cyJdLCJzb3VyY2VzQ29udGVudCI6W251bGxdLCJtYXBwaW5ncyI6Ijs7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

@@ -1,0 +1,15 @@
+f5eeca52ffb77e9e3b717b39467f82ad
+"use strict";
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+exports["default"] = void 0;
+var floor = Math.floor;
+var finite = isFinite;
+var _default = Number.isInteger || /* istanbul ignore next */
+function (x) {
+  return typeof x === 'number' && finite(x) && floor(x) === x;
+};
+exports["default"] = _default;
+//# sourceMappingURL=data:application/json;charset=utf-8;base64,eyJ2ZXJzaW9uIjozLCJuYW1lcyI6WyJmbG9vciIsIk1hdGgiLCJmaW5pdGUiLCJpc0Zpbml0ZSIsIk51bWJlciIsImlzSW50ZWdlciIsIngiXSwic291cmNlcyI6WyIuLi8uLi9zcmMvaGVscGVycy9pc0ludGVnZXIuanMiXSwic291cmNlc0NvbnRlbnQiOlsiY29uc3QgeyBmbG9vciB9ID0gTWF0aDtcbmNvbnN0IGZpbml0ZSA9IGlzRmluaXRlO1xuXG5leHBvcnQgZGVmYXVsdCBOdW1iZXIuaXNJbnRlZ2VyIHx8IC8qIGlzdGFuYnVsIGlnbm9yZSBuZXh0ICovICgoeCkgPT4gKHR5cGVvZiB4ID09PSAnbnVtYmVyJyAmJiBmaW5pdGUoeCkgJiYgZmxvb3IoeCkgPT09IHgpKTtcbiJdLCJtYXBwaW5ncyI6Ijs7Ozs7O0lBQVFBLEssR0FBVUMsSSxDQUFWRCxLO0FBQ1IsSUFBTUUsTUFBTSxHQUFHQyxRQUFmO2VBRWVDLE1BQU0sQ0FBQ0MsU0FBUCxJQUFvQjtBQUE0QixVQUFDQyxDQUFEO0VBQUEsT0FBUSxPQUFPQSxDQUFQLEtBQWEsUUFBYixJQUF5QkosTUFBTSxDQUFDSSxDQUFELENBQS9CLElBQXNDTixLQUFLLENBQUNNLENBQUQsQ0FBTCxLQUFhQSxDQUEzRDtBQUFBLEMifQ==

@@ -1,0 +1,379 @@
+be9aee83cc50ded6c88aac27ed560c8f
+"use strict";
+
+module.exports = common;
+var commonRe = /\/|\./;
+
+/**
+ * Provides common type definitions.
+ * Can also be used to provide additional google types or your own custom types.
+ * @param {string} name Short name as in `google/protobuf/[name].proto` or full file name
+ * @param {Object.<string,*>} json JSON definition within `google.protobuf` if a short name, otherwise the file's root definition
+ * @returns {undefined}
+ * @property {INamespace} google/protobuf/any.proto Any
+ * @property {INamespace} google/protobuf/duration.proto Duration
+ * @property {INamespace} google/protobuf/empty.proto Empty
+ * @property {INamespace} google/protobuf/field_mask.proto FieldMask
+ * @property {INamespace} google/protobuf/struct.proto Struct, Value, NullValue and ListValue
+ * @property {INamespace} google/protobuf/timestamp.proto Timestamp
+ * @property {INamespace} google/protobuf/wrappers.proto Wrappers
+ * @example
+ * // manually provides descriptor.proto (assumes google/protobuf/ namespace and .proto extension)
+ * protobuf.common("descriptor", descriptorJson);
+ *
+ * // manually provides a custom definition (uses my.foo namespace)
+ * protobuf.common("my/foo/bar.proto", myFooBarJson);
+ */
+function common(name, json) {
+  if (!commonRe.test(name)) {
+    name = "google/protobuf/" + name + ".proto";
+    json = {
+      nested: {
+        google: {
+          nested: {
+            protobuf: {
+              nested: json
+            }
+          }
+        }
+      }
+    };
+  }
+  common[name] = json;
+}
+
+// Not provided because of limited use (feel free to discuss or to provide yourself):
+//
+// google/protobuf/descriptor.proto
+// google/protobuf/source_context.proto
+// google/protobuf/type.proto
+//
+// Stripped and pre-parsed versions of these non-bundled files are instead available as part of
+// the repository or package within the google/protobuf directory.
+
+common("any", {
+  /**
+   * Properties of a google.protobuf.Any message.
+   * @interface IAny
+   * @type {Object}
+   * @property {string} [typeUrl]
+   * @property {Uint8Array} [bytes]
+   * @memberof common
+   */
+  Any: {
+    fields: {
+      type_url: {
+        type: "string",
+        id: 1
+      },
+      value: {
+        type: "bytes",
+        id: 2
+      }
+    }
+  }
+});
+var timeType;
+common("duration", {
+  /**
+   * Properties of a google.protobuf.Duration message.
+   * @interface IDuration
+   * @type {Object}
+   * @property {number|Long} [seconds]
+   * @property {number} [nanos]
+   * @memberof common
+   */
+  Duration: timeType = {
+    fields: {
+      seconds: {
+        type: "int64",
+        id: 1
+      },
+      nanos: {
+        type: "int32",
+        id: 2
+      }
+    }
+  }
+});
+common("timestamp", {
+  /**
+   * Properties of a google.protobuf.Timestamp message.
+   * @interface ITimestamp
+   * @type {Object}
+   * @property {number|Long} [seconds]
+   * @property {number} [nanos]
+   * @memberof common
+   */
+  Timestamp: timeType
+});
+common("empty", {
+  /**
+   * Properties of a google.protobuf.Empty message.
+   * @interface IEmpty
+   * @memberof common
+   */
+  Empty: {
+    fields: {}
+  }
+});
+common("struct", {
+  /**
+   * Properties of a google.protobuf.Struct message.
+   * @interface IStruct
+   * @type {Object}
+   * @property {Object.<string,IValue>} [fields]
+   * @memberof common
+   */
+  Struct: {
+    fields: {
+      fields: {
+        keyType: "string",
+        type: "Value",
+        id: 1
+      }
+    }
+  },
+  /**
+   * Properties of a google.protobuf.Value message.
+   * @interface IValue
+   * @type {Object}
+   * @property {string} [kind]
+   * @property {0} [nullValue]
+   * @property {number} [numberValue]
+   * @property {string} [stringValue]
+   * @property {boolean} [boolValue]
+   * @property {IStruct} [structValue]
+   * @property {IListValue} [listValue]
+   * @memberof common
+   */
+  Value: {
+    oneofs: {
+      kind: {
+        oneof: ["nullValue", "numberValue", "stringValue", "boolValue", "structValue", "listValue"]
+      }
+    },
+    fields: {
+      nullValue: {
+        type: "NullValue",
+        id: 1
+      },
+      numberValue: {
+        type: "double",
+        id: 2
+      },
+      stringValue: {
+        type: "string",
+        id: 3
+      },
+      boolValue: {
+        type: "bool",
+        id: 4
+      },
+      structValue: {
+        type: "Struct",
+        id: 5
+      },
+      listValue: {
+        type: "ListValue",
+        id: 6
+      }
+    }
+  },
+  NullValue: {
+    values: {
+      NULL_VALUE: 0
+    }
+  },
+  /**
+   * Properties of a google.protobuf.ListValue message.
+   * @interface IListValue
+   * @type {Object}
+   * @property {Array.<IValue>} [values]
+   * @memberof common
+   */
+  ListValue: {
+    fields: {
+      values: {
+        rule: "repeated",
+        type: "Value",
+        id: 1
+      }
+    }
+  }
+});
+common("wrappers", {
+  /**
+   * Properties of a google.protobuf.DoubleValue message.
+   * @interface IDoubleValue
+   * @type {Object}
+   * @property {number} [value]
+   * @memberof common
+   */
+  DoubleValue: {
+    fields: {
+      value: {
+        type: "double",
+        id: 1
+      }
+    }
+  },
+  /**
+   * Properties of a google.protobuf.FloatValue message.
+   * @interface IFloatValue
+   * @type {Object}
+   * @property {number} [value]
+   * @memberof common
+   */
+  FloatValue: {
+    fields: {
+      value: {
+        type: "float",
+        id: 1
+      }
+    }
+  },
+  /**
+   * Properties of a google.protobuf.Int64Value message.
+   * @interface IInt64Value
+   * @type {Object}
+   * @property {number|Long} [value]
+   * @memberof common
+   */
+  Int64Value: {
+    fields: {
+      value: {
+        type: "int64",
+        id: 1
+      }
+    }
+  },
+  /**
+   * Properties of a google.protobuf.UInt64Value message.
+   * @interface IUInt64Value
+   * @type {Object}
+   * @property {number|Long} [value]
+   * @memberof common
+   */
+  UInt64Value: {
+    fields: {
+      value: {
+        type: "uint64",
+        id: 1
+      }
+    }
+  },
+  /**
+   * Properties of a google.protobuf.Int32Value message.
+   * @interface IInt32Value
+   * @type {Object}
+   * @property {number} [value]
+   * @memberof common
+   */
+  Int32Value: {
+    fields: {
+      value: {
+        type: "int32",
+        id: 1
+      }
+    }
+  },
+  /**
+   * Properties of a google.protobuf.UInt32Value message.
+   * @interface IUInt32Value
+   * @type {Object}
+   * @property {number} [value]
+   * @memberof common
+   */
+  UInt32Value: {
+    fields: {
+      value: {
+        type: "uint32",
+        id: 1
+      }
+    }
+  },
+  /**
+   * Properties of a google.protobuf.BoolValue message.
+   * @interface IBoolValue
+   * @type {Object}
+   * @property {boolean} [value]
+   * @memberof common
+   */
+  BoolValue: {
+    fields: {
+      value: {
+        type: "bool",
+        id: 1
+      }
+    }
+  },
+  /**
+   * Properties of a google.protobuf.StringValue message.
+   * @interface IStringValue
+   * @type {Object}
+   * @property {string} [value]
+   * @memberof common
+   */
+  StringValue: {
+    fields: {
+      value: {
+        type: "string",
+        id: 1
+      }
+    }
+  },
+  /**
+   * Properties of a google.protobuf.BytesValue message.
+   * @interface IBytesValue
+   * @type {Object}
+   * @property {Uint8Array} [value]
+   * @memberof common
+   */
+  BytesValue: {
+    fields: {
+      value: {
+        type: "bytes",
+        id: 1
+      }
+    }
+  }
+});
+common("field_mask", {
+  /**
+   * Properties of a google.protobuf.FieldMask message.
+   * @interface IDoubleValue
+   * @type {Object}
+   * @property {number} [value]
+   * @memberof common
+   */
+  FieldMask: {
+    fields: {
+      paths: {
+        rule: "repeated",
+        type: "string",
+        id: 1
+      }
+    }
+  }
+});
+
+/**
+ * Gets the root definition of the specified common proto file.
+ *
+ * Bundled definitions are:
+ * - google/protobuf/any.proto
+ * - google/protobuf/duration.proto
+ * - google/protobuf/empty.proto
+ * - google/protobuf/field_mask.proto
+ * - google/protobuf/struct.proto
+ * - google/protobuf/timestamp.proto
+ * - google/protobuf/wrappers.proto
+ *
+ * @param {string} file Proto file name
+ * @returns {INamespace|null} Root definition or `null` if not defined
+ */
+common.get = function get(file) {
+  return common[file] || null;
+};
+//# sourceMappingURL=data:application/json;charset=utf-8;base64,eyJ2ZXJzaW9uIjozLCJuYW1lcyI6WyJtb2R1bGUiLCJleHBvcnRzIiwiY29tbW9uIiwiY29tbW9uUmUiLCJuYW1lIiwianNvbiIsInRlc3QiLCJuZXN0ZWQiLCJnb29nbGUiLCJwcm90b2J1ZiIsIkFueSIsImZpZWxkcyIsInR5cGVfdXJsIiwidHlwZSIsImlkIiwidmFsdWUiLCJ0aW1lVHlwZSIsIkR1cmF0aW9uIiwic2Vjb25kcyIsIm5hbm9zIiwiVGltZXN0YW1wIiwiRW1wdHkiLCJTdHJ1Y3QiLCJrZXlUeXBlIiwiVmFsdWUiLCJvbmVvZnMiLCJraW5kIiwib25lb2YiLCJudWxsVmFsdWUiLCJudW1iZXJWYWx1ZSIsInN0cmluZ1ZhbHVlIiwiYm9vbFZhbHVlIiwic3RydWN0VmFsdWUiLCJsaXN0VmFsdWUiLCJOdWxsVmFsdWUiLCJ2YWx1ZXMiLCJOVUxMX1ZBTFVFIiwiTGlzdFZhbHVlIiwicnVsZSIsIkRvdWJsZVZhbHVlIiwiRmxvYXRWYWx1ZSIsIkludDY0VmFsdWUiLCJVSW50NjRWYWx1ZSIsIkludDMyVmFsdWUiLCJVSW50MzJWYWx1ZSIsIkJvb2xWYWx1ZSIsIlN0cmluZ1ZhbHVlIiwiQnl0ZXNWYWx1ZSIsIkZpZWxkTWFzayIsInBhdGhzIiwiZ2V0IiwiZmlsZSJdLCJzb3VyY2VzIjpbImNvbW1vbi5qcyJdLCJzb3VyY2VzQ29udGVudCI6WyJcInVzZSBzdHJpY3RcIjtcbm1vZHVsZS5leHBvcnRzID0gY29tbW9uO1xuXG52YXIgY29tbW9uUmUgPSAvXFwvfFxcLi87XG5cbi8qKlxuICogUHJvdmlkZXMgY29tbW9uIHR5cGUgZGVmaW5pdGlvbnMuXG4gKiBDYW4gYWxzbyBiZSB1c2VkIHRvIHByb3ZpZGUgYWRkaXRpb25hbCBnb29nbGUgdHlwZXMgb3IgeW91ciBvd24gY3VzdG9tIHR5cGVzLlxuICogQHBhcmFtIHtzdHJpbmd9IG5hbWUgU2hvcnQgbmFtZSBhcyBpbiBgZ29vZ2xlL3Byb3RvYnVmL1tuYW1lXS5wcm90b2Agb3IgZnVsbCBmaWxlIG5hbWVcbiAqIEBwYXJhbSB7T2JqZWN0LjxzdHJpbmcsKj59IGpzb24gSlNPTiBkZWZpbml0aW9uIHdpdGhpbiBgZ29vZ2xlLnByb3RvYnVmYCBpZiBhIHNob3J0IG5hbWUsIG90aGVyd2lzZSB0aGUgZmlsZSdzIHJvb3QgZGVmaW5pdGlvblxuICogQHJldHVybnMge3VuZGVmaW5lZH1cbiAqIEBwcm9wZXJ0eSB7SU5hbWVzcGFjZX0gZ29vZ2xlL3Byb3RvYnVmL2FueS5wcm90byBBbnlcbiAqIEBwcm9wZXJ0eSB7SU5hbWVzcGFjZX0gZ29vZ2xlL3Byb3RvYnVmL2R1cmF0aW9uLnByb3RvIER1cmF0aW9uXG4gKiBAcHJvcGVydHkge0lOYW1lc3BhY2V9IGdvb2dsZS9wcm90b2J1Zi9lbXB0eS5wcm90byBFbXB0eVxuICogQHByb3BlcnR5IHtJTmFtZXNwYWNlfSBnb29nbGUvcHJvdG9idWYvZmllbGRfbWFzay5wcm90byBGaWVsZE1hc2tcbiAqIEBwcm9wZXJ0eSB7SU5hbWVzcGFjZX0gZ29vZ2xlL3Byb3RvYnVmL3N0cnVjdC5wcm90byBTdHJ1Y3QsIFZhbHVlLCBOdWxsVmFsdWUgYW5kIExpc3RWYWx1ZVxuICogQHByb3BlcnR5IHtJTmFtZXNwYWNlfSBnb29nbGUvcHJvdG9idWYvdGltZXN0YW1wLnByb3RvIFRpbWVzdGFtcFxuICogQHByb3BlcnR5IHtJTmFtZXNwYWNlfSBnb29nbGUvcHJvdG9idWYvd3JhcHBlcnMucHJvdG8gV3JhcHBlcnNcbiAqIEBleGFtcGxlXG4gKiAvLyBtYW51YWxseSBwcm92aWRlcyBkZXNjcmlwdG9yLnByb3RvIChhc3N1bWVzIGdvb2dsZS9wcm90b2J1Zi8gbmFtZXNwYWNlIGFuZCAucHJvdG8gZXh0ZW5zaW9uKVxuICogcHJvdG9idWYuY29tbW9uKFwiZGVzY3JpcHRvclwiLCBkZXNjcmlwdG9ySnNvbik7XG4gKlxuICogLy8gbWFudWFsbHkgcHJvdmlkZXMgYSBjdXN0b20gZGVmaW5pdGlvbiAodXNlcyBteS5mb28gbmFtZXNwYWNlKVxuICogcHJvdG9idWYuY29tbW9uKFwibXkvZm9vL2Jhci5wcm90b1wiLCBteUZvb0Jhckpzb24pO1xuICovXG5mdW5jdGlvbiBjb21tb24obmFtZSwganNvbikge1xuICAgIGlmICghY29tbW9uUmUudGVzdChuYW1lKSkge1xuICAgICAgICBuYW1lID0gXCJnb29nbGUvcHJvdG9idWYvXCIgKyBuYW1lICsgXCIucHJvdG9cIjtcbiAgICAgICAganNvbiA9IHsgbmVzdGVkOiB7IGdvb2dsZTogeyBuZXN0ZWQ6IHsgcHJvdG9idWY6IHsgbmVzdGVkOiBqc29uIH0gfSB9IH0gfTtcbiAgICB9XG4gICAgY29tbW9uW25hbWVdID0ganNvbjtcbn1cblxuLy8gTm90IHByb3ZpZGVkIGJlY2F1c2Ugb2YgbGltaXRlZCB1c2UgKGZlZWwgZnJlZSB0byBkaXNjdXNzIG9yIHRvIHByb3ZpZGUgeW91cnNlbGYpOlxuLy9cbi8vIGdvb2dsZS9wcm90b2J1Zi9kZXNjcmlwdG9yLnByb3RvXG4vLyBnb29nbGUvcHJvdG9idWYvc291cmNlX2NvbnRleHQucHJvdG9cbi8vIGdvb2dsZS9wcm90b2J1Zi90eXBlLnByb3RvXG4vL1xuLy8gU3RyaXBwZWQgYW5kIHByZS1wYXJzZWQgdmVyc2lvbnMgb2YgdGhlc2Ugbm9uLWJ1bmRsZWQgZmlsZXMgYXJlIGluc3RlYWQgYXZhaWxhYmxlIGFzIHBhcnQgb2Zcbi8vIHRoZSByZXBvc2l0b3J5IG9yIHBhY2thZ2Ugd2l0aGluIHRoZSBnb29nbGUvcHJvdG9idWYgZGlyZWN0b3J5LlxuXG5jb21tb24oXCJhbnlcIiwge1xuXG4gICAgLyoqXG4gICAgICogUHJvcGVydGllcyBvZiBhIGdvb2dsZS5wcm90b2J1Zi5BbnkgbWVzc2FnZS5cbiAgICAgKiBAaW50ZXJmYWNlIElBbnlcbiAgICAgKiBAdHlwZSB7T2JqZWN0fVxuICAgICAqIEBwcm9wZXJ0eSB7c3RyaW5nfSBbdHlwZVVybF1cbiAgICAgKiBAcHJvcGVydHkge1VpbnQ4QXJyYXl9IFtieXRlc11cbiAgICAgKiBAbWVtYmVyb2YgY29tbW9uXG4gICAgICovXG4gICAgQW55OiB7XG4gICAgICAgIGZpZWxkczoge1xuICAgICAgICAgICAgdHlwZV91cmw6IHtcbiAgICAgICAgICAgICAgICB0eXBlOiBcInN0cmluZ1wiLFxuICAgICAgICAgICAgICAgIGlkOiAxXG4gICAgICAgICAgICB9LFxuICAgICAgICAgICAgdmFsdWU6IHtcbiAgICAgICAgICAgICAgICB0eXBlOiBcImJ5dGVzXCIsXG4gICAgICAgICAgICAgICAgaWQ6IDJcbiAgICAgICAgICAgIH1cbiAgICAgICAgfVxuICAgIH1cbn0pO1xuXG52YXIgdGltZVR5cGU7XG5cbmNvbW1vbihcImR1cmF0aW9uXCIsIHtcblxuICAgIC8qKlxuICAgICAqIFByb3BlcnRpZXMgb2YgYSBnb29nbGUucHJvdG9idWYuRHVyYXRpb24gbWVzc2FnZS5cbiAgICAgKiBAaW50ZXJmYWNlIElEdXJhdGlvblxuICAgICAqIEB0eXBlIHtPYmplY3R9XG4gICAgICogQHByb3BlcnR5IHtudW1iZXJ8TG9uZ30gW3NlY29uZHNdXG4gICAgICogQHByb3BlcnR5IHtudW1iZXJ9IFtuYW5vc11cbiAgICAgKiBAbWVtYmVyb2YgY29tbW9uXG4gICAgICovXG4gICAgRHVyYXRpb246IHRpbWVUeXBlID0ge1xuICAgICAgICBmaWVsZHM6IHtcbiAgICAgICAgICAgIHNlY29uZHM6IHtcbiAgICAgICAgICAgICAgICB0eXBlOiBcImludDY0XCIsXG4gICAgICAgICAgICAgICAgaWQ6IDFcbiAgICAgICAgICAgIH0sXG4gICAgICAgICAgICBuYW5vczoge1xuICAgICAgICAgICAgICAgIHR5cGU6IFwiaW50MzJcIixcbiAgICAgICAgICAgICAgICBpZDogMlxuICAgICAgICAgICAgfVxuICAgICAgICB9XG4gICAgfVxufSk7XG5cbmNvbW1vbihcInRpbWVzdGFtcFwiLCB7XG5cbiAgICAvKipcbiAgICAgKiBQcm9wZXJ0aWVzIG9mIGEgZ29vZ2xlLnByb3RvYnVmLlRpbWVzdGFtcCBtZXNzYWdlLlxuICAgICAqIEBpbnRlcmZhY2UgSVRpbWVzdGFtcFxuICAgICAqIEB0eXBlIHtPYmplY3R9XG4gICAgICogQHByb3BlcnR5IHtudW1iZXJ8TG9uZ30gW3NlY29uZHNdXG4gICAgICogQHByb3BlcnR5IHtudW1iZXJ9IFtuYW5vc11cbiAgICAgKiBAbWVtYmVyb2YgY29tbW9uXG4gICAgICovXG4gICAgVGltZXN0YW1wOiB0aW1lVHlwZVxufSk7XG5cbmNvbW1vbihcImVtcHR5XCIsIHtcblxuICAgIC8qKlxuICAgICAqIFByb3BlcnRpZXMgb2YgYSBnb29nbGUucHJvdG9idWYuRW1wdHkgbWVzc2FnZS5cbiAgICAgKiBAaW50ZXJmYWNlIElFbXB0eVxuICAgICAqIEBtZW1iZXJvZiBjb21tb25cbiAgICAgKi9cbiAgICBFbXB0eToge1xuICAgICAgICBmaWVsZHM6IHt9XG4gICAgfVxufSk7XG5cbmNvbW1vbihcInN0cnVjdFwiLCB7XG5cbiAgICAvKipcbiAgICAgKiBQcm9wZXJ0aWVzIG9mIGEgZ29vZ2xlLnByb3RvYnVmLlN0cnVjdCBtZXNzYWdlLlxuICAgICAqIEBpbnRlcmZhY2UgSVN0cnVjdFxuICAgICAqIEB0eXBlIHtPYmplY3R9XG4gICAgICogQHByb3BlcnR5IHtPYmplY3QuPHN0cmluZyxJVmFsdWU+fSBbZmllbGRzXVxuICAgICAqIEBtZW1iZXJvZiBjb21tb25cbiAgICAgKi9cbiAgICBTdHJ1Y3Q6IHtcbiAgICAgICAgZmllbGRzOiB7XG4gICAgICAgICAgICBmaWVsZHM6IHtcbiAgICAgICAgICAgICAgICBrZXlUeXBlOiBcInN0cmluZ1wiLFxuICAgICAgICAgICAgICAgIHR5cGU6IFwiVmFsdWVcIixcbiAgICAgICAgICAgICAgICBpZDogMVxuICAgICAgICAgICAgfVxuICAgICAgICB9XG4gICAgfSxcblxuICAgIC8qKlxuICAgICAqIFByb3BlcnRpZXMgb2YgYSBnb29nbGUucHJvdG9idWYuVmFsdWUgbWVzc2FnZS5cbiAgICAgKiBAaW50ZXJmYWNlIElWYWx1ZVxuICAgICAqIEB0eXBlIHtPYmplY3R9XG4gICAgICogQHByb3BlcnR5IHtzdHJpbmd9IFtraW5kXVxuICAgICAqIEBwcm9wZXJ0eSB7MH0gW251bGxWYWx1ZV1cbiAgICAgKiBAcHJvcGVydHkge251bWJlcn0gW251bWJlclZhbHVlXVxuICAgICAqIEBwcm9wZXJ0eSB7c3RyaW5nfSBbc3RyaW5nVmFsdWVdXG4gICAgICogQHByb3BlcnR5IHtib29sZWFufSBbYm9vbFZhbHVlXVxuICAgICAqIEBwcm9wZXJ0eSB7SVN0cnVjdH0gW3N0cnVjdFZhbHVlXVxuICAgICAqIEBwcm9wZXJ0eSB7SUxpc3RWYWx1ZX0gW2xpc3RWYWx1ZV1cbiAgICAgKiBAbWVtYmVyb2YgY29tbW9uXG4gICAgICovXG4gICAgVmFsdWU6IHtcbiAgICAgICAgb25lb2ZzOiB7XG4gICAgICAgICAgICBraW5kOiB7XG4gICAgICAgICAgICAgICAgb25lb2Y6IFtcbiAgICAgICAgICAgICAgICAgICAgXCJudWxsVmFsdWVcIixcbiAgICAgICAgICAgICAgICAgICAgXCJudW1iZXJWYWx1ZVwiLFxuICAgICAgICAgICAgICAgICAgICBcInN0cmluZ1ZhbHVlXCIsXG4gICAgICAgICAgICAgICAgICAgIFwiYm9vbFZhbHVlXCIsXG4gICAgICAgICAgICAgICAgICAgIFwic3RydWN0VmFsdWVcIixcbiAgICAgICAgICAgICAgICAgICAgXCJsaXN0VmFsdWVcIlxuICAgICAgICAgICAgICAgIF1cbiAgICAgICAgICAgIH1cbiAgICAgICAgfSxcbiAgICAgICAgZmllbGRzOiB7XG4gICAgICAgICAgICBudWxsVmFsdWU6IHtcbiAgICAgICAgICAgICAgICB0eXBlOiBcIk51bGxWYWx1ZVwiLFxuICAgICAgICAgICAgICAgIGlkOiAxXG4gICAgICAgICAgICB9LFxuICAgICAgICAgICAgbnVtYmVyVmFsdWU6IHtcbiAgICAgICAgICAgICAgICB0eXBlOiBcImRvdWJsZVwiLFxuICAgICAgICAgICAgICAgIGlkOiAyXG4gICAgICAgICAgICB9LFxuICAgICAgICAgICAgc3RyaW5nVmFsdWU6IHtcbiAgICAgICAgICAgICAgICB0eXBlOiBcInN0cmluZ1wiLFxuICAgICAgICAgICAgICAgIGlkOiAzXG4gICAgICAgICAgICB9LFxuICAgICAgICAgICAgYm9vbFZhbHVlOiB7XG4gICAgICAgICAgICAgICAgdHlwZTogXCJib29sXCIsXG4gICAgICAgICAgICAgICAgaWQ6IDRcbiAgICAgICAgICAgIH0sXG4gICAgICAgICAgICBzdHJ1Y3RWYWx1ZToge1xuICAgICAgICAgICAgICAgIHR5cGU6IFwiU3RydWN0XCIsXG4gICAgICAgICAgICAgICAgaWQ6IDVcbiAgICAgICAgICAgIH0sXG4gICAgICAgICAgICBsaXN0VmFsdWU6IHtcbiAgICAgICAgICAgICAgICB0eXBlOiBcIkxpc3RWYWx1ZVwiLFxuICAgICAgICAgICAgICAgIGlkOiA2XG4gICAgICAgICAgICB9XG4gICAgICAgIH1cbiAgICB9LFxuXG4gICAgTnVsbFZhbHVlOiB7XG4gICAgICAgIHZhbHVlczoge1xuICAgICAgICAgICAgTlVMTF9WQUxVRTogMFxuICAgICAgICB9XG4gICAgfSxcblxuICAgIC8qKlxuICAgICAqIFByb3BlcnRpZXMgb2YgYSBnb29nbGUucHJvdG9idWYuTGlzdFZhbHVlIG1lc3NhZ2UuXG4gICAgICogQGludGVyZmFjZSBJTGlzdFZhbHVlXG4gICAgICogQHR5cGUge09iamVjdH1cbiAgICAgKiBAcHJvcGVydHkge0FycmF5LjxJVmFsdWU+fSBbdmFsdWVzXVxuICAgICAqIEBtZW1iZXJvZiBjb21tb25cbiAgICAgKi9cbiAgICBMaXN0VmFsdWU6IHtcbiAgICAgICAgZmllbGRzOiB7XG4gICAgICAgICAgICB2YWx1ZXM6IHtcbiAgICAgICAgICAgICAgICBydWxlOiBcInJlcGVhdGVkXCIsXG4gICAgICAgICAgICAgICAgdHlwZTogXCJWYWx1ZVwiLFxuICAgICAgICAgICAgICAgIGlkOiAxXG4gICAgICAgICAgICB9XG4gICAgICAgIH1cbiAgICB9XG59KTtcblxuY29tbW9uKFwid3JhcHBlcnNcIiwge1xuXG4gICAgLyoqXG4gICAgICogUHJvcGVydGllcyBvZiBhIGdvb2dsZS5wcm90b2J1Zi5Eb3VibGVWYWx1ZSBtZXNzYWdlLlxuICAgICAqIEBpbnRlcmZhY2UgSURvdWJsZVZhbHVlXG4gICAgICogQHR5cGUge09iamVjdH1cbiAgICAgKiBAcHJvcGVydHkge251bWJlcn0gW3ZhbHVlXVxuICAgICAqIEBtZW1iZXJvZiBjb21tb25cbiAgICAgKi9cbiAgICBEb3VibGVWYWx1ZToge1xuICAgICAgICBmaWVsZHM6IHtcbiAgICAgICAgICAgIHZhbHVlOiB7XG4gICAgICAgICAgICAgICAgdHlwZTogXCJkb3VibGVcIixcbiAgICAgICAgICAgICAgICBpZDogMVxuICAgICAgICAgICAgfVxuICAgICAgICB9XG4gICAgfSxcblxuICAgIC8qKlxuICAgICAqIFByb3BlcnRpZXMgb2YgYSBnb29nbGUucHJvdG9idWYuRmxvYXRWYWx1ZSBtZXNzYWdlLlxuICAgICAqIEBpbnRlcmZhY2UgSUZsb2F0VmFsdWVcbiAgICAgKiBAdHlwZSB7T2JqZWN0fVxuICAgICAqIEBwcm9wZXJ0eSB7bnVtYmVyfSBbdmFsdWVdXG4gICAgICogQG1lbWJlcm9mIGNvbW1vblxuICAgICAqL1xuICAgIEZsb2F0VmFsdWU6IHtcbiAgICAgICAgZmllbGRzOiB7XG4gICAgICAgICAgICB2YWx1ZToge1xuICAgICAgICAgICAgICAgIHR5cGU6IFwiZmxvYXRcIixcbiAgICAgICAgICAgICAgICBpZDogMVxuICAgICAgICAgICAgfVxuICAgICAgICB9XG4gICAgfSxcblxuICAgIC8qKlxuICAgICAqIFByb3BlcnRpZXMgb2YgYSBnb29nbGUucHJvdG9idWYuSW50NjRWYWx1ZSBtZXNzYWdlLlxuICAgICAqIEBpbnRlcmZhY2UgSUludDY0VmFsdWVcbiAgICAgKiBAdHlwZSB7T2JqZWN0fVxuICAgICAqIEBwcm9wZXJ0eSB7bnVtYmVyfExvbmd9IFt2YWx1ZV1cbiAgICAgKiBAbWVtYmVyb2YgY29tbW9uXG4gICAgICovXG4gICAgSW50NjRWYWx1ZToge1xuICAgICAgICBmaWVsZHM6IHtcbiAgICAgICAgICAgIHZhbHVlOiB7XG4gICAgICAgICAgICAgICAgdHlwZTogXCJpbnQ2NFwiLFxuICAgICAgICAgICAgICAgIGlkOiAxXG4gICAgICAgICAgICB9XG4gICAgICAgIH1cbiAgICB9LFxuXG4gICAgLyoqXG4gICAgICogUHJvcGVydGllcyBvZiBhIGdvb2dsZS5wcm90b2J1Zi5VSW50NjRWYWx1ZSBtZXNzYWdlLlxuICAgICAqIEBpbnRlcmZhY2UgSVVJbnQ2NFZhbHVlXG4gICAgICogQHR5cGUge09iamVjdH1cbiAgICAgKiBAcHJvcGVydHkge251bWJlcnxMb25nfSBbdmFsdWVdXG4gICAgICogQG1lbWJlcm9mIGNvbW1vblxuICAgICAqL1xuICAgIFVJbnQ2NFZhbHVlOiB7XG4gICAgICAgIGZpZWxkczoge1xuICAgICAgICAgICAgdmFsdWU6IHtcbiAgICAgICAgICAgICAgICB0eXBlOiBcInVpbnQ2NFwiLFxuICAgICAgICAgICAgICAgIGlkOiAxXG4gICAgICAgICAgICB9XG4gICAgICAgIH1cbiAgICB9LFxuXG4gICAgLyoqXG4gICAgICogUHJvcGVydGllcyBvZiBhIGdvb2dsZS5wcm90b2J1Zi5JbnQzMlZhbHVlIG1lc3NhZ2UuXG4gICAgICogQGludGVyZmFjZSBJSW50MzJWYWx1ZVxuICAgICAqIEB0eXBlIHtPYmplY3R9XG4gICAgICogQHByb3BlcnR5IHtudW1iZXJ9IFt2YWx1ZV1cbiAgICAgKiBAbWVtYmVyb2YgY29tbW9uXG4gICAgICovXG4gICAgSW50MzJWYWx1ZToge1xuICAgICAgICBmaWVsZHM6IHtcbiAgICAgICAgICAgIHZhbHVlOiB7XG4gICAgICAgICAgICAgICAgdHlwZTogXCJpbnQzMlwiLFxuICAgICAgICAgICAgICAgIGlkOiAxXG4gICAgICAgICAgICB9XG4gICAgICAgIH1cbiAgICB9LFxuXG4gICAgLyoqXG4gICAgICogUHJvcGVydGllcyBvZiBhIGdvb2dsZS5wcm90b2J1Zi5VSW50MzJWYWx1ZSBtZXNzYWdlLlxuICAgICAqIEBpbnRlcmZhY2UgSVVJbnQzMlZhbHVlXG4gICAgICogQHR5cGUge09iamVjdH1cbiAgICAgKiBAcHJvcGVydHkge251bWJlcn0gW3ZhbHVlXVxuICAgICAqIEBtZW1iZXJvZiBjb21tb25cbiAgICAgKi9cbiAgICBVSW50MzJWYWx1ZToge1xuICAgICAgICBmaWVsZHM6IHtcbiAgICAgICAgICAgIHZhbHVlOiB7XG4gICAgICAgICAgICAgICAgdHlwZTogXCJ1aW50MzJcIixcbiAgICAgICAgICAgICAgICBpZDogMVxuICAgICAgICAgICAgfVxuICAgICAgICB9XG4gICAgfSxcblxuICAgIC8qKlxuICAgICAqIFByb3BlcnRpZXMgb2YgYSBnb29nbGUucHJvdG9idWYuQm9vbFZhbHVlIG1lc3NhZ2UuXG4gICAgICogQGludGVyZmFjZSBJQm9vbFZhbHVlXG4gICAgICogQHR5cGUge09iamVjdH1cbiAgICAgKiBAcHJvcGVydHkge2Jvb2xlYW59IFt2YWx1ZV1cbiAgICAgKiBAbWVtYmVyb2YgY29tbW9uXG4gICAgICovXG4gICAgQm9vbFZhbHVlOiB7XG4gICAgICAgIGZpZWxkczoge1xuICAgICAgICAgICAgdmFsdWU6IHtcbiAgICAgICAgICAgICAgICB0eXBlOiBcImJvb2xcIixcbiAgICAgICAgICAgICAgICBpZDogMVxuICAgICAgICAgICAgfVxuICAgICAgICB9XG4gICAgfSxcblxuICAgIC8qKlxuICAgICAqIFByb3BlcnRpZXMgb2YgYSBnb29nbGUucHJvdG9idWYuU3RyaW5nVmFsdWUgbWVzc2FnZS5cbiAgICAgKiBAaW50ZXJmYWNlIElTdHJpbmdWYWx1ZVxuICAgICAqIEB0eXBlIHtPYmplY3R9XG4gICAgICogQHByb3BlcnR5IHtzdHJpbmd9IFt2YWx1ZV1cbiAgICAgKiBAbWVtYmVyb2YgY29tbW9uXG4gICAgICovXG4gICAgU3RyaW5nVmFsdWU6IHtcbiAgICAgICAgZmllbGRzOiB7XG4gICAgICAgICAgICB2YWx1ZToge1xuICAgICAgICAgICAgICAgIHR5cGU6IFwic3RyaW5nXCIsXG4gICAgICAgICAgICAgICAgaWQ6IDFcbiAgICAgICAgICAgIH1cbiAgICAgICAgfVxuICAgIH0sXG5cbiAgICAvKipcbiAgICAgKiBQcm9wZXJ0aWVzIG9mIGEgZ29vZ2xlLnByb3RvYnVmLkJ5dGVzVmFsdWUgbWVzc2FnZS5cbiAgICAgKiBAaW50ZXJmYWNlIElCeXRlc1ZhbHVlXG4gICAgICogQHR5cGUge09iamVjdH1cbiAgICAgKiBAcHJvcGVydHkge1VpbnQ4QXJyYXl9IFt2YWx1ZV1cbiAgICAgKiBAbWVtYmVyb2YgY29tbW9uXG4gICAgICovXG4gICAgQnl0ZXNWYWx1ZToge1xuICAgICAgICBmaWVsZHM6IHtcbiAgICAgICAgICAgIHZhbHVlOiB7XG4gICAgICAgICAgICAgICAgdHlwZTogXCJieXRlc1wiLFxuICAgICAgICAgICAgICAgIGlkOiAxXG4gICAgICAgICAgICB9XG4gICAgICAgIH1cbiAgICB9XG59KTtcblxuY29tbW9uKFwiZmllbGRfbWFza1wiLCB7XG5cbiAgICAvKipcbiAgICAgKiBQcm9wZXJ0aWVzIG9mIGEgZ29vZ2xlLnByb3RvYnVmLkZpZWxkTWFzayBtZXNzYWdlLlxuICAgICAqIEBpbnRlcmZhY2UgSURvdWJsZVZhbHVlXG4gICAgICogQHR5cGUge09iamVjdH1cbiAgICAgKiBAcHJvcGVydHkge251bWJlcn0gW3ZhbHVlXVxuICAgICAqIEBtZW1iZXJvZiBjb21tb25cbiAgICAgKi9cbiAgICBGaWVsZE1hc2s6IHtcbiAgICAgICAgZmllbGRzOiB7XG4gICAgICAgICAgICBwYXRoczoge1xuICAgICAgICAgICAgICAgIHJ1bGU6IFwicmVwZWF0ZWRcIixcbiAgICAgICAgICAgICAgICB0eXBlOiBcInN0cmluZ1wiLFxuICAgICAgICAgICAgICAgIGlkOiAxXG4gICAgICAgICAgICB9XG4gICAgICAgIH1cbiAgICB9XG59KTtcblxuLyoqXG4gKiBHZXRzIHRoZSByb290IGRlZmluaXRpb24gb2YgdGhlIHNwZWNpZmllZCBjb21tb24gcHJvdG8gZmlsZS5cbiAqXG4gKiBCdW5kbGVkIGRlZmluaXRpb25zIGFyZTpcbiAqIC0gZ29vZ2xlL3Byb3RvYnVmL2FueS5wcm90b1xuICogLSBnb29nbGUvcHJvdG9idWYvZHVyYXRpb24ucHJvdG9cbiAqIC0gZ29vZ2xlL3Byb3RvYnVmL2VtcHR5LnByb3RvXG4gKiAtIGdvb2dsZS9wcm90b2J1Zi9maWVsZF9tYXNrLnByb3RvXG4gKiAtIGdvb2dsZS9wcm90b2J1Zi9zdHJ1Y3QucHJvdG9cbiAqIC0gZ29vZ2xlL3Byb3RvYnVmL3RpbWVzdGFtcC5wcm90b1xuICogLSBnb29nbGUvcHJvdG9idWYvd3JhcHBlcnMucHJvdG9cbiAqXG4gKiBAcGFyYW0ge3N0cmluZ30gZmlsZSBQcm90byBmaWxlIG5hbWVcbiAqIEByZXR1cm5zIHtJTmFtZXNwYWNlfG51bGx9IFJvb3QgZGVmaW5pdGlvbiBvciBgbnVsbGAgaWYgbm90IGRlZmluZWRcbiAqL1xuY29tbW9uLmdldCA9IGZ1bmN0aW9uIGdldChmaWxlKSB7XG4gICAgcmV0dXJuIGNvbW1vbltmaWxlXSB8fCBudWxsO1xufTtcbiJdLCJtYXBwaW5ncyI6IkFBQUEsWUFBWTs7QUFDWkEsTUFBTSxDQUFDQyxPQUFPLEdBQUdDLE1BQU07QUFFdkIsSUFBSUMsUUFBUSxHQUFHLE9BQU87O0FBRXRCO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQSxTQUFTRCxNQUFNQSxDQUFDRSxJQUFJLEVBQUVDLElBQUksRUFBRTtFQUN4QixJQUFJLENBQUNGLFFBQVEsQ0FBQ0csSUFBSSxDQUFDRixJQUFJLENBQUMsRUFBRTtJQUN0QkEsSUFBSSxHQUFHLGtCQUFrQixHQUFHQSxJQUFJLEdBQUcsUUFBUTtJQUMzQ0MsSUFBSSxHQUFHO01BQUVFLE1BQU0sRUFBRTtRQUFFQyxNQUFNLEVBQUU7VUFBRUQsTUFBTSxFQUFFO1lBQUVFLFFBQVEsRUFB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

@@ -1,0 +1,124 @@
+721a344a4e73832a6c0b257b636557b5
+"use strict";
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+exports.prevElementSibling = exports.nextElementSibling = exports.getName = exports.hasAttrib = exports.getAttributeValue = exports.getSiblings = exports.getParent = exports.getChildren = void 0;
+var domhandler_1 = require("domhandler");
+/**
+ * Get a node's children.
+ *
+ * @category Traversal
+ * @param elem Node to get the children of.
+ * @returns `elem`'s children, or an empty array.
+ */
+function getChildren(elem) {
+  return (0, domhandler_1.hasChildren)(elem) ? elem.children : [];
+}
+exports.getChildren = getChildren;
+/**
+ * Get a node's parent.
+ *
+ * @category Traversal
+ * @param elem Node to get the parent of.
+ * @returns `elem`'s parent node.
+ */
+function getParent(elem) {
+  return elem.parent || null;
+}
+exports.getParent = getParent;
+/**
+ * Gets an elements siblings, including the element itself.
+ *
+ * Attempts to get the children through the element's parent first. If we don't
+ * have a parent (the element is a root node), we walk the element's `prev` &
+ * `next` to get all remaining nodes.
+ *
+ * @category Traversal
+ * @param elem Element to get the siblings of.
+ * @returns `elem`'s siblings.
+ */
+function getSiblings(elem) {
+  var _a, _b;
+  var parent = getParent(elem);
+  if (parent != null) return getChildren(parent);
+  var siblings = [elem];
+  var prev = elem.prev,
+    next = elem.next;
+  while (prev != null) {
+    siblings.unshift(prev);
+    _a = prev, prev = _a.prev;
+  }
+  while (next != null) {
+    siblings.push(next);
+    _b = next, next = _b.next;
+  }
+  return siblings;
+}
+exports.getSiblings = getSiblings;
+/**
+ * Gets an attribute from an element.
+ *
+ * @category Traversal
+ * @param elem Element to check.
+ * @param name Attribute name to retrieve.
+ * @returns The element's attribute value, or `undefined`.
+ */
+function getAttributeValue(elem, name) {
+  var _a;
+  return (_a = elem.attribs) === null || _a === void 0 ? void 0 : _a[name];
+}
+exports.getAttributeValue = getAttributeValue;
+/**
+ * Checks whether an element has an attribute.
+ *
+ * @category Traversal
+ * @param elem Element to check.
+ * @param name Attribute name to look for.
+ * @returns Returns whether `elem` has the attribute `name`.
+ */
+function hasAttrib(elem, name) {
+  return elem.attribs != null && Object.prototype.hasOwnProperty.call(elem.attribs, name) && elem.attribs[name] != null;
+}
+exports.hasAttrib = hasAttrib;
+/**
+ * Get the tag name of an element.
+ *
+ * @category Traversal
+ * @param elem The element to get the name for.
+ * @returns The tag name of `elem`.
+ */
+function getName(elem) {
+  return elem.name;
+}
+exports.getName = getName;
+/**
+ * Returns the next element sibling of a node.
+ *
+ * @category Traversal
+ * @param elem The element to get the next sibling of.
+ * @returns `elem`'s next sibling that is a tag.
+ */
+function nextElementSibling(elem) {
+  var _a;
+  var next = elem.next;
+  while (next !== null && !(0, domhandler_1.isTag)(next)) _a = next, next = _a.next;
+  return next;
+}
+exports.nextElementSibling = nextElementSibling;
+/**
+ * Returns the previous element sibling of a node.
+ *
+ * @category Traversal
+ * @param elem The element to get the previous sibling of.
+ * @returns `elem`'s previous sibling that is a tag.
+ */
+function prevElementSibling(elem) {
+  var _a;
+  var prev = elem.prev;
+  while (prev !== null && !(0, domhandler_1.isTag)(prev)) _a = prev, prev = _a.prev;
+  return prev;
+}
+exports.prevElementSibling = prevElementSibling;
+//# sourceMappingURL=data:application/json;charset=utf-8;base64,eyJ2ZXJzaW9uIjozLCJuYW1lcyI6WyJkb21oYW5kbGVyXzEiLCJyZXF1aXJlIiwiZ2V0Q2hpbGRyZW4iLCJlbGVtIiwiaGFzQ2hpbGRyZW4iLCJjaGlsZHJlbiIsImV4cG9ydHMiLCJnZXRQYXJlbnQiLCJwYXJlbnQiLCJnZXRTaWJsaW5ncyIsInNpYmxpbmdzIiwicHJldiIsIm5leHQiLCJ1bnNoaWZ0IiwiX2EiLCJwdXNoIiwiX2IiLCJnZXRBdHRyaWJ1dGVWYWx1ZSIsIm5hbWUiLCJhdHRyaWJzIiwiaGFzQXR0cmliIiwiT2JqZWN0IiwicHJvdG90eXBlIiwiaGFzT3duUHJvcGVydHkiLCJjYWxsIiwiZ2V0TmFtZSIsIm5leHRFbGVtZW50U2libGluZyIsImlzVGFnIiwicHJldkVsZW1lbnRTaWJsaW5nIl0sInNvdXJjZXMiOlsiaHR0cHM6Ly9yYXcuZ2l0aHVidXNlcmNvbnRlbnQuY29tL2ZiNTUvZG9tdXRpbHMvZjdlMzU3YjVjMjEwYjY3MzFjMmE2MGUwYjdiM2NmYWExZjk2YjcwNi9zcmMvdHJhdmVyc2FsLnRzIl0sInNvdXJjZXNDb250ZW50IjpbbnVsbF0sIm1hcHBpbmdzIjoiOzs7Ozs7QUFBQSxJQUFBQSxZQUFBLEdBQUFDLE9BQUE7QUFTQTs7Ozs7OztBQU9BLFNBQWdCQyxXQUFXQSxDQUFDQyxJQUFhO0VBQ3JDLE9BQU8sSUFBQUgsWUFBQSxDQUFBSSxXQUFXLEVBQUNELElBQUksQ0FBQyxHQUFHQSxJQUFJLENBQUNFLFFBQVEsR0FBRyxFQUFFO0FBQ2pEO0FBRkFDLE9BQUEsQ0FBQUosV0FBQSxHQUFBQSxXQUFBO0FBS0E7Ozs7Ozs7QUFPQSxTQUFnQkssU0FBU0EsQ0FBQ0osSUFBYTtFQUNuQyxPQUFPQSxJQUFJLENBQUNLLE1BQU0sSUFBSSxJQUFJO0FBQzlCO0FBRkFGLE9BQUEsQ0FBQUMsU0FBQSxHQUFBQSxTQUFBO0FBSUE7Ozs7Ozs7Ozs7O0FBV0EsU0FBZ0JFLFdBQVdBLENBQUNOLElBQWE7O0VBQ3JDLElBQU1LLE1BQU0sR0FBR0QsU0FBUyxDQUFDSixJQUFJLENBQUM7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

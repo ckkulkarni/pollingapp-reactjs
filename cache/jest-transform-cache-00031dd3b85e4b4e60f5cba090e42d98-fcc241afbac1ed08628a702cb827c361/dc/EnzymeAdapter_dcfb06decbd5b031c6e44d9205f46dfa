@@ -1,0 +1,114 @@
+867082f46db49c997e5ad367a30d0412
+'use strict';
+
+var _createClass = function () {
+  function defineProperties(target, props) {
+    for (var i = 0; i < props.length; i++) {
+      var descriptor = props[i];
+      descriptor.enumerable = descriptor.enumerable || false;
+      descriptor.configurable = true;
+      if ("value" in descriptor) descriptor.writable = true;
+      Object.defineProperty(target, descriptor.key, descriptor);
+    }
+  }
+  return function (Constructor, protoProps, staticProps) {
+    if (protoProps) defineProperties(Constructor.prototype, protoProps);
+    if (staticProps) defineProperties(Constructor, staticProps);
+    return Constructor;
+  };
+}();
+function _classCallCheck(instance, Constructor) {
+  if (!(instance instanceof Constructor)) {
+    throw new TypeError("Cannot call a class as a function");
+  }
+}
+function unimplementedError(methodName, classname) {
+  return new Error(String(methodName) + ' is a required method of ' + String(classname) + ', but was not implemented.');
+}
+var EnzymeAdapter = function () {
+  function EnzymeAdapter() {
+    _classCallCheck(this, EnzymeAdapter);
+    this.options = {};
+  }
+
+  // Provided a bag of options, return an `EnzymeRenderer`. Some options can be implementation
+  // specific, like `attach` etc. for React, but not part of this interface explicitly.
+  // eslint-disable-next-line class-methods-use-this, no-unused-vars
+
+  _createClass(EnzymeAdapter, [{
+    key: 'createRenderer',
+    value: function () {
+      function createRenderer(options) {
+        throw unimplementedError('createRenderer', 'EnzymeAdapter');
+      }
+      return createRenderer;
+    }()
+
+    // converts an RSTNode to the corresponding JSX Pragma Element. This will be needed
+    // in order to implement the `Wrapper.mount()` and `Wrapper.shallow()` methods, but should
+    // be pretty straightforward for people to implement.
+    // eslint-disable-next-line class-methods-use-this, no-unused-vars
+  }, {
+    key: 'nodeToElement',
+    value: function () {
+      function nodeToElement(node) {
+        throw unimplementedError('nodeToElement', 'EnzymeAdapter');
+      }
+      return nodeToElement;
+    }()
+
+    // eslint-disable-next-line class-methods-use-this
+  }, {
+    key: 'matchesElementType',
+    value: function () {
+      function matchesElementType(node, matchingType) {
+        if (!node) {
+          return node;
+        }
+        var type = node.type;
+        return type === matchingType;
+      }
+      return matchesElementType;
+    }()
+
+    // eslint-disable-next-line class-methods-use-this, no-unused-vars
+  }, {
+    key: 'isValidElement',
+    value: function () {
+      function isValidElement(element) {
+        throw unimplementedError('isValidElement', 'EnzymeAdapter');
+      }
+      return isValidElement;
+    }()
+
+    // eslint-disable-next-line class-methods-use-this, no-unused-vars
+  }, {
+    key: 'createElement',
+    value: function () {
+      function createElement(type, props) {
+        throw unimplementedError('createElement', 'EnzymeAdapter');
+      }
+      return createElement;
+    }()
+
+    // eslint-disable-next-line class-methods-use-this
+  }, {
+    key: 'invokeSetStateCallback',
+    value: function () {
+      function invokeSetStateCallback(instance, callback) {
+        callback.call(instance);
+      }
+      return invokeSetStateCallback;
+    }()
+  }]);
+  return EnzymeAdapter;
+}();
+EnzymeAdapter.MODES = {
+  STRING: 'string',
+  MOUNT: 'mount',
+  SHALLOW: 'shallow'
+};
+module.exports = EnzymeAdapter;
+
+//# sourceMappingURL=EnzymeAdapter.js.map
+//# sourceMappingURL=data:application/json;charset=utf-8;base64,eyJ2ZXJzaW9uIjozLCJuYW1lcyI6WyJ1bmltcGxlbWVudGVkRXJyb3IiLCJtZXRob2ROYW1lIiwiY2xhc3NuYW1lIiwiRXJyb3IiLCJTdHJpbmciLCJFbnp5bWVBZGFwdGVyIiwiX2NsYXNzQ2FsbENoZWNrIiwib3B0aW9ucyIsIm5vZGUiLCJtYXRjaGluZ1R5cGUiLCJ0eXBlIiwiZWxlbWVudCIsInByb3BzIiwiaW5zdGFuY2UiLCJjYWxsYmFjayIsImNhbGwiLCJNT0RFUyIsIlNUUklORyIsIk1PVU5UIiwiU0hBTExPVyIsIm1vZHVsZSIsImV4cG9ydHMiXSwic291cmNlcyI6WyIuLi9zcmMvRW56eW1lQWRhcHRlci5qcyJdLCJzb3VyY2VzQ29udGVudCI6WyJmdW5jdGlvbiB1bmltcGxlbWVudGVkRXJyb3IobWV0aG9kTmFtZSwgY2xhc3NuYW1lKSB7XG4gIHJldHVybiBuZXcgRXJyb3IoYCR7bWV0aG9kTmFtZX0gaXMgYSByZXF1aXJlZCBtZXRob2Qgb2YgJHtjbGFzc25hbWV9LCBidXQgd2FzIG5vdCBpbXBsZW1lbnRlZC5gKTtcbn1cblxuY2xhc3MgRW56eW1lQWRhcHRlciB7XG4gIGNvbnN0cnVjdG9yKCkge1xuICAgIHRoaXMub3B0aW9ucyA9IHt9O1xuICB9XG5cbiAgLy8gUHJvdmlkZWQgYSBiYWcgb2Ygb3B0aW9ucywgcmV0dXJuIGFuIGBFbnp5bWVSZW5kZXJlcmAuIFNvbWUgb3B0aW9ucyBjYW4gYmUgaW1wbGVtZW50YXRpb25cbiAgLy8gc3BlY2lmaWMsIGxpa2UgYGF0dGFjaGAgZXRjLiBmb3IgUmVhY3QsIGJ1dCBub3QgcGFydCBvZiB0aGlzIGludGVyZmFjZSBleHBsaWNpdGx5LlxuICAvLyBlc2xpbnQtZGlzYWJsZS1uZXh0LWxpbmUgY2xhc3MtbWV0aG9kcy11c2UtdGhpcywgbm8tdW51c2VkLXZhcnNcbiAgY3JlYXRlUmVuZGVyZXIob3B0aW9ucykge1xuICAgIHRocm93IHVuaW1wbGVtZW50ZWRFcnJvcignY3JlYXRlUmVuZGVyZXInLCAnRW56eW1lQWRhcHRlcicpO1xuICB9XG5cbiAgLy8gY29udmVydHMgYW4gUlNUTm9kZSB0byB0aGUgY29ycmVzcG9uZGluZyBKU1ggUHJhZ21hIEVsZW1lbnQuIFRoaXMgd2lsbCBiZSBuZWVkZWRcbiAgLy8gaW4gb3JkZXIgdG8gaW1wbGVtZW50IHRoZSBgV3JhcHBlci5tb3VudCgpYCBhbmQgYFdyYXBwZXIuc2hhbGxvdygpYCBtZXRob2RzLCBidXQgc2hvdWxkXG4gIC8vIGJlIHByZXR0eSBzdHJhaWdodGZvcndhcmQgZm9yIHBlb3BsZSB0byBpbXBsZW1lbnQuXG4gIC8vIGVzbGludC1kaXNhYmxlLW5leHQtbGluZSBjbGFzcy1tZXRob2RzLXVzZS10aGlzLCBuby11bnVzZWQtdmFyc1xuICBub2RlVG9FbGVtZW50KG5vZGUpIHtcbiAgICB0aHJvdyB1bmltcGxlbWVudGVkRXJyb3IoJ25vZGVUb0VsZW1lbnQnLCAnRW56eW1lQWRhcHRlcicpO1xuICB9XG5cbiAgLy8gZXNsaW50LWRpc2FibGUtbmV4dC1saW5lIGNsYXNzLW1ldGhvZHMtdXNlLXRoaXNcbiAgbWF0Y2hlc0VsZW1lbnRUeXBlKG5vZGUsIG1hdGNoaW5nVHlwZSkge1xuICAgIGlmICghbm9kZSkge1xuICAgICAgcmV0dXJuIG5vZGU7XG4gICAgfVxuICAgIGNvbnN0IHsgdHlwZSB9ID0gbm9kZTtcbiAgICByZXR1cm4gdHlwZSA9PT0gbWF0Y2hpbmdUeXBlO1xuICB9XG5cbiAgLy8gZXNsaW50LWRpc2FibGUtbmV4dC1saW5lIGNsYXNzLW1ldGhvZHMtdXNlLXRoaXMsIG5vLXVudXNlZC12YXJzXG4gIGlzVmFsaWRFbGVtZW50KGVsZW1lbnQpIHtcbiAgICB0aHJvdyB1bmltcGxlbWVudGVkRXJyb3IoJ2lzVmFsaWRFbGVtZW50JywgJ0VuenltZUFkYXB0ZXInKTtcbiAgfVxuXG4gIC8vIGVzbGludC1kaXNhYmxlLW5leHQtbGluZSBjbGFzcy1tZXRob2RzLXVzZS10aGlzLCBuby11bnVzZWQtdmFyc1xuICBjcmVhdGVFbGVtZW50KHR5cGUsIHByb3BzLCAuLi5jaGlsZHJlbikge1xuICAgIHRocm93IHVuaW1wbGVtZW50ZWRFcnJvcignY3JlYXRlRWxlbWVudCcsICdFbnp5bWVBZGFwdGVyJyk7XG4gIH1cblxuICAvLyBlc2xpbnQtZGlzYWJsZS1uZXh0LWxpbmUgY2xhc3MtbWV0aG9kcy11c2UtdGhpc1xuICBpbnZva2VTZXRTdGF0ZUNhbGxiYWNrKGluc3RhbmNlLCBjYWxsYmFjaykge1xuICAgIGNhbGxiYWNrLmNhbGwoaW5zdGFuY2UpO1xuICB9XG59XG5cbkVuenltZUFkYXB0ZXIuTU9ERVMgPSB7XG4gIFNUUklORzogJ3N0cmluZycsXG4gIE1PVU5UOiAnbW91bnQnLFxuICBTSEFMTE9XOiAnc2hhbGxvdycsXG59O1xuXG5tb2R1bGUuZXhwb3J0cyA9IEVuenltZUFkYXB0ZXI7XG4iXSwibWFwcGluZ3MiOiI7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7O0FBQUEsU0FBU0Esa0JBQVRBLENBQTRCQyxVQUE1QixFQUF3Q0MsU0FBeEMsRUFBbUQ7RUFDakQsT0FBTyxJQUFJQyxLQUFKLENBQUFDLE1BQUEsQ0FBYUgsVUFBYixrQ0FBQUcsTUFBQSxDQUFtREYsU0FBbkQsaUNBQVA7QUFDRDtJQUVLRyxhO0VBQ0osU0FBQUEsY0FBQSxFQUFjO0lBQUFDLGVBQUEsT0FBQUQsYUFBQTtJQUNaLEtBQUtFLE9BQUwsR0FBZSxFQUFmO0VBQ0Q7O0VBRUQ7RUFDQTtFQUNBOzs7Ozs4QkFDZUEsTyxFQUFTO1FBQ3RCLE1BQU1QLGtCQUFBLENBQW1CLGdCQUFuQixFQUFxQyxlQUFyQyxDQUFOO01BQ0Q7Ozs7SUFFRDtJQUNBO0lBQ0E7SUFDQTs7Ozs2QkFDY1EsSSxFQUFNO1FBQ2xCLE1BQU1SLGtCQUFBLENBQW1CLGVBQW5CLEVBQW9DLGVBQXBDLENBQU47TUFDRDs7OztJQUVEOzs7O2tDQUNtQlEsSSxFQUFNQyxZLEVBQWM7UUFDckMsSUFBSSxDQUFDRCxJQUFMLEVBQVc7VUFDVCxPQUFPQSxJQUFQO1FBQ0Q7UUFIb0MsSUFJN0JFLElBSjZCLEdBSXBCRixJQUpvQixDQUk3QkUsSUFKNkI7UUFLckMsT0FBT0EsSUFBQSxLQUFTRCxZQUFoQjtNQUNEOzs7O0lBRUQ7Ozs7OEJBQ2VFLE8sRUFBUztRQUN0QixNQUFNWCxrQkFBQSxDQUFtQixnQkFBbkIsRUFBcUMsZUFBckMsQ0FBTjtNQUNEOzs7O0lBRUQ7Ozs7NkJBQ2NVLEksRUFBTUUsSyxFQUFvQjtRQUN0QyxNQUFNWixrQkFBQSxDQUFtQixlQUFuQixFQUFvQyxlQUFwQyxDQUFOO01BQ0Q7Ozs7SUFFRDs7OztzQ0FDdUJhLFEsRUFBVUMsUSxFQUFVO1FBQ3pDQSxRQUFBLENBQVNDLElBQVQsQ0FBY0YsUUFBZDtNQUNEOzs7Ozs7QUFHSFIsYUFBQSxDQUFjVyxLQUFkLEdBQXNCO0VBQ3BCQyxNQUFBLEVBQVEsUUFEWTtFQUVwQkMsS0FBQSxFQUFPLE9BRmE7RUFHcEJDLE9BQUEsRUFBUztBQUhXLENBQXRCO0FBTUFDLE1BQUEsQ0FBT0MsT0FBUCxHQUFpQmhCLGFBQWpCIn0=
